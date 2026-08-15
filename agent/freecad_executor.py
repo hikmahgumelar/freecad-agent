@@ -10,61 +10,48 @@ class FreeCADExecutor:
 
     def execute(self, job):
         action = job.get("action")
-
         if action == "ping":
             return self._send({"action": "ping"})
-
         if action == "create_sphere":
-            parameters = job.get("parameters", {})
-            return self._send({
-                "action": "create_sphere",
-                "radius": parameters.get("radius", 10),
-            })
-
+            p = job.get("parameters", {})
+            return self._send({"action": "create_sphere", "radius": p.get("radius", 10)})
         if action == "open_model":
-            parameters = job.get("parameters", {})
-            path = parameters.get("path")
+            p = job.get("parameters", {})
+            path = p.get("path")
             if not path:
                 raise RuntimeError("open_model requires parameters.path")
             return self._send({"action": "open_model", "path": path})
-
         if action == "inspect_model":
             return self._send({"action": "inspect_model"})
-
         if action == "inspect_features":
-            parameters = job.get("parameters", {})
-            return self._send({
-                "action": "inspect_features",
-                "objects": parameters.get(
-                    "objects",
-                    ["Sketch", "Sketch001", "Pad", "Sketch002"],
-                ),
-            })
-
+            p = job.get("parameters", {})
+            return self._send({"action": "inspect_features", "objects": p.get("objects", ["Sketch", "Sketch001", "Pad", "Sketch002"])})
         if action == "inspect_geometry":
-            parameters = job.get("parameters", {})
+            p = job.get("parameters", {})
+            return self._send({"action": "inspect_geometry", "body": p.get("body", "Body"), "tolerance": p.get("tolerance", 0.01)})
+        if action == "create_case_rails":
+            p = job.get("parameters", {})
             return self._send({
-                "action": "inspect_geometry",
-                "body": parameters.get("body", "Body"),
-                "tolerance": parameters.get("tolerance", 0.01),
+                "action": "create_case_rails",
+                "body": p.get("body", "Body"),
+                "rail_width": p.get("rail_width", 2.0),
+                "rail_height": p.get("rail_height", 2.0),
+                "inset": p.get("inset", 2.0),
+                "clearance": p.get("clearance", 0.2),
+                "output_path": p.get("output_path", "/home/hikmah/projectx/freecad-agent/cad/output/case-v1-with-rails-v1.FCStd"),
             })
-
         if action == "create_slider_cover":
-            parameters = job.get("parameters", {})
+            p = job.get("parameters", {})
             return self._send({
                 "action": "create_slider_cover",
-                "output_path": parameters.get(
-                    "output_path",
-                    "/home/hikmah/projectx/freecad-agent/cad/output/tutup-case-slider-v1.FCStd",
-                ),
-                "width": parameters.get("width", 84),
-                "depth": parameters.get("depth", 63),
-                "thickness": parameters.get("thickness", 2),
-                "rail_width": parameters.get("rail_width", 2),
-                "rail_height": parameters.get("rail_height", 2),
-                "clearance": parameters.get("clearance", 0.5),
+                "output_path": p.get("output_path", "/home/hikmah/projectx/freecad-agent/cad/output/case-v1-slider-v2.FCStd"),
+                "thickness": p.get("thickness", 2.0),
+                "rail_width": p.get("rail_width", 2.0),
+                "rail_height": p.get("rail_height", 2.0),
+                "clearance": p.get("clearance", 0.5),
+                "rail_inset": p.get("rail_inset", 2.5),
+                "body": p.get("body", "Body"),
             })
-
         raise RuntimeError(f"Unsupported action: {action}")
 
     def _send(self, command):
@@ -72,10 +59,8 @@ class FreeCADExecutor:
         with socket.create_connection((self.host, self.port), timeout=self.timeout) as sock:
             sock.sendall(payload)
             response = sock.recv(65536)
-
         if not response:
             raise RuntimeError("FreeCAD returned empty response")
-
         result = json.loads(response.decode("utf-8"))
         if not result.get("ok"):
             raise RuntimeError(result.get("error", "Unknown FreeCAD error"))
