@@ -1,9 +1,8 @@
-import json
 import signal
-import sys
 import time
 
 from .config import load_config
+from .freecad_executor import FreeCADExecutor
 from .github import GitHubClient
 from .jobs import Job, JobQueue
 
@@ -21,8 +20,11 @@ class Watchdog:
             repository=config.github_repo,
         )
 
-        self.queue = JobQueue(
-            self.github
+        self.queue = JobQueue(self.github)
+
+        self.freecad = FreeCADExecutor(
+            host=config.freecad_host,
+            port=config.freecad_port,
         )
 
     def stop(self, *_):
@@ -35,24 +37,12 @@ class Watchdog:
             f"action={job.action}"
         )
 
-        # SAFETY BOUNDARY:
-        #
-        # V0.1 does not execute arbitrary
-        # shell commands or FreeCAD operations.
-        #
-        # We only prove that the job reaches
-        # the notebook and can be acknowledged.
-
         if not job.action:
             raise ValueError(
                 "Job is missing 'action'"
             )
 
-        result = {
-            "executor": "freecad-agent-v0.1",
-            "message": "Job received successfully",
-            "action": job.action,
-        }
+        result = self.freecad.execute(job.data)
 
         return result
 
@@ -63,7 +53,6 @@ class Watchdog:
         )
 
         try:
-            # Claim the job.
             job = self.queue.update(
                 job,
                 "running",
@@ -107,19 +96,21 @@ class Watchdog:
 
     def run(self):
         print("================================")
-        print(" freecad-agent-watchdog v0.1")
+        print(" freecad-agent-watchdog v0.2")
         print("================================")
         print(
             f"Polling interval: "
             f"{self.poll_interval}s"
         )
+        print(
+            "FreeCAD endpoint: "
+            f"{self.freecad.host}:{self.freecad.port}"
+        )
         print()
 
         while self.running:
             try:
-                jobs = (
-                    self.queue.list_pending_jobs()
-                )
+                jobs = self.queue.list_pending_jobs()
 
                 if jobs:
                     print(
@@ -134,13 +125,9 @@ class Watchdog:
                     self.process_job(job)
 
             except Exception as exc:
-                print(
-                    f"[ERROR] {exc}"
-                )
+                print(f"[ERROR] {exc}")
 
-            for _ in range(
-                self.poll_interval * 10
-            ):
+            for _ in range(self.poll_interval * 10):
                 if not self.running:
                     break
 
@@ -152,15 +139,8 @@ class Watchdog:
 def main():
     watchdog = Watchdog()
 
-    signal.signal(
-        signal.SIGINT,
-        watchdog.stop,
-    )
-
-    signal.signal(
-        signal.SIGTERM,
-        watchdog.stop,
-    )
+    signal.signal(signal.SIGINT, watchdog.stop)
+    signal.signal(signal.SIGTERM, watchdog.stop)
 
     watchdog.run()
 
