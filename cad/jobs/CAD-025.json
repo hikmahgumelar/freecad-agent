@@ -1,0 +1,10 @@
+{
+  "id": "CAD-025",
+  "status": "pending",
+  "action": "inspect_geometry",
+  "parameters": {
+    "body": "Body",
+    "tolerance": 0.01
+  },
+  "created_by": "ChatGPT"
+}
