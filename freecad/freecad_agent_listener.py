@@ -3,6 +3,7 @@ import os
 import socket
 
 import FreeCAD as App
+import FreeCADGui as Gui
 import Part
 from PySide import QtCore
 
@@ -18,10 +19,7 @@ def execute_command(command):
     action = command.get("action")
 
     if action == "ping":
-        return {
-            "ok": True,
-            "message": "FreeCAD agent is alive",
-        }
+        return {"ok": True, "message": "FreeCAD agent is alive"}
 
     if action == "create_sphere":
         radius = float(command.get("radius", 10))
@@ -33,12 +31,8 @@ def execute_command(command):
         sphere.Label = "Created by freecad-agent"
         sphere.Radius = radius
         doc.recompute()
-
-        try:
-            Gui.activeDocument().activeView().viewAxonometric()
-            Gui.activeDocument().activeView().fitAll()
-        except Exception:
-            pass
+        Gui.activeDocument().activeView().viewAxonometric()
+        Gui.activeDocument().activeView().fitAll()
 
         return {
             "ok": True,
@@ -57,11 +51,8 @@ def execute_command(command):
             raise RuntimeError(f"CAD file not found: {path}")
 
         doc = App.openDocument(path)
-        try:
-            Gui.activeDocument().activeView().viewAxonometric()
-            Gui.activeDocument().activeView().fitAll()
-        except Exception:
-            pass
+        Gui.activeDocument().activeView().viewAxonometric()
+        Gui.activeDocument().activeView().fitAll()
 
         return {
             "ok": True,
@@ -76,13 +67,10 @@ def execute_command(command):
         if doc is None:
             raise RuntimeError("No active FreeCAD document")
 
-        objects = []
-        for obj in doc.Objects:
-            objects.append({
-                "name": obj.Name,
-                "label": obj.Label,
-                "type": obj.TypeId,
-            })
+        objects = [
+            {"name": obj.Name, "label": obj.Label, "type": obj.TypeId}
+            for obj in doc.Objects
+        ]
 
         return {
             "ok": True,
@@ -92,15 +80,11 @@ def execute_command(command):
             "objects": objects,
         }
 
-    return {
-        "ok": False,
-        "error": f"Unsupported action: {action}",
-    }
+    return {"ok": False, "error": f"Unsupported action: {action}"}
 
 
 def _poll_server():
-    global _server_socket, _server_timer
-
+    global _server_socket
     if _server_socket is None:
         return
 
@@ -121,15 +105,14 @@ def _poll_server():
 
             command = json.loads(data.decode("utf-8"))
             print("[freecad-agent] command:", command)
-
             result = execute_command(command)
-            response = json.dumps(result).encode("utf-8")
-            connection.sendall(response)
+            connection.sendall(json.dumps(result).encode("utf-8"))
 
         except Exception as exc:
-            response = {"ok": False, "error": str(exc)}
             try:
-                connection.sendall(json.dumps(response).encode("utf-8"))
+                connection.sendall(
+                    json.dumps({"ok": False, "error": str(exc)}).encode("utf-8")
+                )
             except Exception:
                 pass
         finally:
@@ -166,10 +149,8 @@ def stop_server():
         _server_timer = None
 
     if _server_socket is not None:
-        try:
-            _server_socket.close()
-        finally:
-            _server_socket = None
+        _server_socket.close()
+        _server_socket = None
 
     print("[freecad-agent] stopped")
 
