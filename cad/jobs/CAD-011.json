@@ -1,9 +1,11 @@
 {
-  "id": "CAD-011",
-  "status": "pending",
   "action": "open_model",
+  "created_by": "ChatGPT",
+  "id": "CAD-011",
   "parameters": {
     "path": "/home/hikmah/projectx/freecad-agent/cad/source/tutup-case-v1.FCStd"
   },
-  "created_by": "ChatGPT"
+  "started_at": null,
+  "status": "running",
+  "updated_at": "2026-08-15T08:48:48.502104+00:00"
 }
