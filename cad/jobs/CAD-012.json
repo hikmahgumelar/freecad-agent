@@ -1,8 +1,77 @@
 {
   "action": "inspect_model",
+  "completed_at": null,
   "id": "CAD-012",
   "parameters": {},
+  "result": {
+    "action": "inspect_model",
+    "document": "tutup_case_v1",
+    "label": "tutup-case-v1",
+    "objects": [
+      {
+        "label": "Body",
+        "name": "Body",
+        "type": "PartDesign::Body"
+      },
+      {
+        "label": "Origin",
+        "name": "Origin",
+        "type": "App::Origin"
+      },
+      {
+        "label": "X-axis",
+        "name": "X_Axis",
+        "type": "App::Line"
+      },
+      {
+        "label": "Y-axis",
+        "name": "Y_Axis",
+        "type": "App::Line"
+      },
+      {
+        "label": "Z-axis",
+        "name": "Z_Axis",
+        "type": "App::Line"
+      },
+      {
+        "label": "XY-plane",
+        "name": "XY_Plane",
+        "type": "App::Plane"
+      },
+      {
+        "label": "XZ-plane",
+        "name": "XZ_Plane",
+        "type": "App::Plane"
+      },
+      {
+        "label": "YZ-plane",
+        "name": "YZ_Plane",
+        "type": "App::Plane"
+      },
+      {
+        "label": "Sketch",
+        "name": "Sketch",
+        "type": "Sketcher::SketchObject"
+      },
+      {
+        "label": "Sketch001",
+        "name": "Sketch001",
+        "type": "Sketcher::SketchObject"
+      },
+      {
+        "label": "Pad",
+        "name": "Pad",
+        "type": "PartDesign::Pad"
+      },
+      {
+        "label": "Sketch002",
+        "name": "Sketch002",
+        "type": "Sketcher::SketchObject"
+      }
+    ],
+    "ok": true
+  },
   "started_at": null,
-  "status": "running",
-  "updated_at": "2026-08-15T08:50:23.602061+00:00"
+  "status": "completed",
+  "updated_at": "2026-08-15T08:50:25.035846+00:00"
 }
