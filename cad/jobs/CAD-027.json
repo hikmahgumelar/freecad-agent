@@ -5,14 +5,14 @@
   "id": "CAD-027",
   "parameters": {
     "body": "Body",
-    "rail_width": 2.0,
-    "rail_height": 2.0,
-    "inset": 2.0,
     "clearance": 0.2,
-    "output_path": "/home/hikmah/projectx/freecad-agent/cad/output/case-v1-with-rails-v1.FCStd"
+    "inset": 2.0,
+    "output_path": "/home/hikmah/projectx/freecad-agent/cad/output/case-v1-with-rails-v1.FCStd",
+    "rail_height": 2.0,
+    "rail_width": 2.0
   },
   "result": null,
   "started_at": null,
-  "status": "pending",
-  "updated_at": null
+  "status": "running",
+  "updated_at": "2026-08-15T10:37:34.489713+00:00"
 }
