@@ -16,7 +16,7 @@ try:
 except Exception:
     pass
 
-path = "/home/hikmah/projectx/freecad-agent/freecad/freecad_agent_listener.py"
+path = "$PWD/freecad-agent/freecad/freecad_agent_listener.py"
 
 spec = importlib.util.spec_from_file_location(
     "freecad_agent_listener_latest",
@@ -45,7 +45,7 @@ For CAD jobs that modify an existing model, open the source `.FCStd` file from `
 Example:
 
 ```text
-/home/hikmah/projectx/freecad-agent/cad/source/case-V1.FCStd
+$PWD/freecad-agent/cad/source/case-V1.FCStd
 ```
 
 Do not open a previously generated output file when the job is intended to modify the source model.
