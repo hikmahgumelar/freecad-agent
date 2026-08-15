@@ -92,7 +92,7 @@ def _create_slider_cover(command):
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     doc_name = "tutup_case_slider_v1"
-    existing = App.getDocument(doc_name)
+    existing = App.listDocuments().get(doc_name)
     if existing is not None:
         App.closeDocument(doc_name)
     doc = App.newDocument(doc_name)
