@@ -1,9 +1,10 @@
 {
   "action": "inspect_model",
   "created_by": "ChatGPT",
+  "error": "Unsupported action: inspect_model",
   "id": "CAD-008",
   "parameters": {},
   "started_at": null,
-  "status": "running",
-  "updated_at": "2026-08-15T08:21:59.416978+00:00"
+  "status": "failed",
+  "updated_at": "2026-08-15T08:22:00.674594+00:00"
 }
