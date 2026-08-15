@@ -55,7 +55,7 @@ Do not open a previously generated output file when the job is intended to modif
 From a separate terminal:
 
 ```bash
-cd /home/hikmah/projectx/freecad-agent
+cd $PWD/freecad-agent
 ./freecad-agent-watchdog
 ```
 
