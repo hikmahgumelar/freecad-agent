@@ -1,15 +1,17 @@
 {
-  "id": "CAD-016",
-  "status": "pending",
   "action": "create_slider_cover",
+  "created_by": "ChatGPT",
+  "id": "CAD-016",
   "parameters": {
-    "width": 84,
-    "depth": 63,
-    "thickness": 2,
-    "rail_width": 2,
-    "rail_height": 2,
     "clearance": 0.5,
-    "output_path": "/home/hikmah/projectx/freecad-agent/cad/output/tutup-case-slider-v1.FCStd"
+    "depth": 63,
+    "output_path": "/home/hikmah/projectx/freecad-agent/cad/output/tutup-case-slider-v1.FCStd",
+    "rail_height": 2,
+    "rail_width": 2,
+    "thickness": 2,
+    "width": 84
   },
-  "created_by": "ChatGPT"
+  "started_at": null,
+  "status": "running",
+  "updated_at": "2026-08-15T09:01:05.402190+00:00"
 }
