@@ -1,12 +1,57 @@
 {
   "action": "inspect_geometry",
+  "completed_at": null,
   "created_by": "ChatGPT",
   "id": "CAD-025",
   "parameters": {
     "body": "Body",
     "tolerance": 0.01
   },
+  "result": {
+    "action": "inspect_geometry",
+    "body": "Body",
+    "bounding_box": {
+      "x_length": 100.0,
+      "xmax": 50.0,
+      "xmin": -50.0,
+      "y_length": 70.0,
+      "ymax": 35.0,
+      "ymin": -35.0,
+      "z_length": 11.5,
+      "zmax": 11.5,
+      "zmin": 0.0
+    },
+    "document": "case_V1",
+    "edges": 63,
+    "faces": 23,
+    "ok": true,
+    "shells": 1,
+    "solids": 1,
+    "tip": "Pocket002",
+    "tip_label": "Pocket002",
+    "tip_type": "PartDesign::Pocket",
+    "top_faces": [
+      {
+        "area": 648.0,
+        "bounds": {
+          "xmax": 49.0,
+          "xmin": -49.0,
+          "ymax": 34.0,
+          "ymin": -34.0,
+          "zmax": 11.5,
+          "zmin": 11.5
+        },
+        "center": {
+          "x": -2.807082412879408e-15,
+          "y": -1.578983857244667e-15,
+          "z": 11.5
+        },
+        "index": 19,
+        "wires": 2
+      }
+    ]
+  },
   "started_at": null,
-  "status": "running",
-  "updated_at": "2026-08-15T10:13:48.971015+00:00"
+  "status": "completed",
+  "updated_at": "2026-08-15T10:13:50.685105+00:00"
 }
