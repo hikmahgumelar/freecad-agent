@@ -1,0 +1,18 @@
+{
+  "action": "create_case_rails",
+  "completed_at": null,
+  "created_by": "ChatGPT",
+  "id": "CAD-027",
+  "parameters": {
+    "body": "Body",
+    "rail_width": 2.0,
+    "rail_height": 2.0,
+    "inset": 2.0,
+    "clearance": 0.2,
+    "output_path": "/home/hikmah/projectx/freecad-agent/cad/output/case-v1-with-rails-v1.FCStd"
+  },
+  "result": null,
+  "started_at": null,
+  "status": "pending",
+  "updated_at": null
+}
