@@ -15,6 +15,48 @@ _server_socket = None
 _server_timer = None
 
 
+def _value_to_json(value):
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+    if isinstance(value, (list, tuple)):
+        return [_value_to_json(item) for item in value]
+    try:
+        return str(value)
+    except Exception:
+        return repr(value)
+
+
+def _inspect_feature(obj):
+    result = {
+        "name": obj.Name,
+        "label": obj.Label,
+        "type": obj.TypeId,
+        "properties": {},
+    }
+
+    for prop_name in obj.PropertiesList:
+        try:
+            result["properties"][prop_name] = _value_to_json(
+                getattr(obj, prop_name)
+            )
+        except Exception as exc:
+            result["properties"][prop_name] = f"<unavailable: {exc}>"
+
+    if hasattr(obj, "GeometryCount"):
+        try:
+            result["geometry_count"] = int(obj.GeometryCount)
+        except Exception:
+            pass
+
+    if hasattr(obj, "ConstraintCount"):
+        try:
+            result["constraint_count"] = int(obj.ConstraintCount)
+        except Exception:
+            pass
+
+    return result
+
+
 def execute_command(command):
     action = command.get("action")
 
@@ -78,6 +120,33 @@ def execute_command(command):
             "document": doc.Name,
             "label": doc.Label,
             "objects": objects,
+        }
+
+    if action == "inspect_features":
+        doc = App.ActiveDocument
+        if doc is None:
+            raise RuntimeError("No active FreeCAD document")
+
+        names = command.get(
+            "objects",
+            ["Sketch", "Sketch001", "Pad", "Sketch002"],
+        )
+        features = []
+        for name in names:
+            obj = doc.getObject(name)
+            if obj is None:
+                features.append({
+                    "name": name,
+                    "error": "Object not found",
+                })
+                continue
+            features.append(_inspect_feature(obj))
+
+        return {
+            "ok": True,
+            "action": "inspect_features",
+            "document": doc.Name,
+            "features": features,
         }
 
     return {"ok": False, "error": f"Unsupported action: {action}"}
