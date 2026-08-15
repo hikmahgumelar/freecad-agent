@@ -80,3 +80,4 @@ Generated / modified CAD output
 ```
 
 For existing CAD models, preserve the source model and its feature history whenever possible. Generated geometry should be added to the active source document rather than flattening the source into a new reference-only model unless the job explicitly requires that behavior.
+<img width="1914" height="1051" alt="image" src="https://github.com/user-attachments/assets/2b3b2da6-701d-4007-a8f3-6c471347a659" />
