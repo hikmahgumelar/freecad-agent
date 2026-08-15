@@ -1,11 +1,17 @@
 {
   "action": "create_sphere",
+  "completed_at": null,
   "created_by": "ChatGPT",
   "id": "CAD-002",
   "parameters": {
     "radius": 10
   },
+  "result": {
+    "action": "create_sphere",
+    "executor": "freecad-agent-v0.1",
+    "message": "Job received successfully"
+  },
   "started_at": null,
-  "status": "running",
-  "updated_at": "2026-08-15T07:38:41.378598+00:00"
+  "status": "completed",
+  "updated_at": "2026-08-15T07:38:42.581730+00:00"
 }
