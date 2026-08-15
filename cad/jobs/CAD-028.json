@@ -18,8 +18,14 @@
     "thickness": 1.6,
     "top_clearance": 0.2
   },
-  "result": null,
+  "result": {
+    "action": "create_slider_cover",
+    "document": "case_v1_slider_v2",
+    "ok": true,
+    "output_path": "/home/hikmah/projectx/freecad-agent/cad/output/case-v1-with-slider-v1.FCStd",
+    "source_tip": "Pocket002"
+  },
   "started_at": null,
-  "status": "running",
-  "updated_at": "2026-08-15T11:48:53.447397+00:00"
+  "status": "completed",
+  "updated_at": "2026-08-15T11:48:55.051272+00:00"
 }
