@@ -57,6 +57,17 @@ def _inspect_feature(obj):
     return result
 
 
+def _fit_view(doc):
+    """Best-effort GUI update; CAD operation must not fail if GUI lookup is unavailable."""
+    try:
+        gui_doc = Gui.getDocument(doc.Name)
+        if gui_doc is not None:
+            gui_doc.activeView().viewAxonometric()
+            gui_doc.activeView().fitAll()
+    except Exception as exc:
+        print(f"[freecad-agent] GUI update skipped: {exc}")
+
+
 def _create_slider_cover(command):
     source_doc = App.ActiveDocument
     if source_doc is None:
@@ -81,7 +92,8 @@ def _create_slider_cover(command):
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     doc_name = "tutup_case_slider_v1"
-    if App.getDocument(doc_name):
+    existing = App.getDocument(doc_name)
+    if existing is not None:
         App.closeDocument(doc_name)
     doc = App.newDocument(doc_name)
 
@@ -118,7 +130,6 @@ def _create_slider_cover(command):
     slider.Label = "Slider cover 84x63x2 mm"
     slider.Shape = plate.fuse(rail_left).fuse(rail_right)
 
-    # Keep the guide geometry explicit for later mechanical refinement.
     guide1 = doc.addObject("Part::Feature", "GuideRailLeft")
     guide1.Label = "Slider guide rail left"
     guide1.Shape = rail_left
@@ -128,8 +139,7 @@ def _create_slider_cover(command):
     guide2.Shape = rail_right
 
     doc.recompute()
-    Gui.activeDocument().activeView().viewAxonometric()
-    Gui.activeDocument().activeView().fitAll()
+    _fit_view(doc)
     doc.saveAs(output_path)
 
     return {
@@ -165,8 +175,7 @@ def execute_command(command):
         sphere.Label = "Created by freecad-agent"
         sphere.Radius = radius
         doc.recompute()
-        Gui.activeDocument().activeView().viewAxonometric()
-        Gui.activeDocument().activeView().fitAll()
+        _fit_view(doc)
 
         return {
             "ok": True,
@@ -185,8 +194,7 @@ def execute_command(command):
             raise RuntimeError(f"CAD file not found: {path}")
 
         doc = App.openDocument(path)
-        Gui.activeDocument().activeView().viewAxonometric()
-        Gui.activeDocument().activeView().fitAll()
+        _fit_view(doc)
 
         return {
             "ok": True,
