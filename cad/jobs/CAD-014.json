@@ -1,5 +1,6 @@
 {
   "action": "inspect_features",
+  "completed_at": null,
   "created_by": "ChatGPT",
   "id": "CAD-014",
   "parameters": {
@@ -10,7 +11,235 @@
       "Sketch002"
     ]
   },
+  "result": {
+    "action": "inspect_features",
+    "document": "tutup_case_v1",
+    "features": [
+      {
+        "constraint_count": 8,
+        "geometry_count": 4,
+        "label": "Sketch",
+        "name": "Sketch",
+        "properties": {
+          "ArcFitTolerance": 1e-06,
+          "AttacherEngine": "Engine Plane",
+          "AttacherType": "Attacher::AttachEnginePlane",
+          "AttachmentOffset": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+          "AttachmentSupport": [
+            [
+              "<GeoFeature object>",
+              [
+                ""
+              ]
+            ]
+          ],
+          "Constraints": [
+            "<Constraint 'Coincident'>",
+            "<Constraint 'Coincident'>",
+            "<Constraint 'Coincident'>",
+            "<Constraint 'Coincident'>",
+            "<Constraint 'Vertical' (0)>",
+            "<Constraint 'Vertical' (2)>",
+            "<Constraint 'Horizontal' (1)>",
+            "<Constraint 'Horizontal' (3)>"
+          ],
+          "Exports": [],
+          "ExpressionEngine": [],
+          "ExternalGeo": [
+            "<Line segment (0,0,0) (1,0,0) >",
+            "<Line segment (0,0,0) (0,1,0) >"
+          ],
+          "ExternalGeometry": [],
+          "FullyConstrained": false,
+          "Geometry": [
+            "<Line segment (-22.6036,18.0474,0) (-22.6036,-24.9111,0) >",
+            "<Line segment (-22.6036,-24.9111,0) (26.1538,-24.9111,0) >",
+            "<Line segment (26.1538,-24.9111,0) (26.1538,18.0474,0) >",
+            "<Line segment (26.1538,18.0474,0) (-22.6036,18.0474,0) >"
+          ],
+          "InternalShape": "<Shape object at 0x558133753fd0>",
+          "Label": "Sketch",
+          "Label2": "",
+          "MakeInternals": false,
+          "MapMode": "FlatFace",
+          "MapPathParameter": 0.0,
+          "MapReversed": false,
+          "Placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+          "Shape": "<Wire object at 0x558133753fd0>",
+          "ShapeMaterial": "<Material at 0x558134f55470>",
+          "Visibility": false
+        },
+        "type": "Sketcher::SketchObject"
+      },
+      {
+        "constraint_count": 12,
+        "geometry_count": 5,
+        "label": "Sketch001",
+        "name": "Sketch001",
+        "properties": {
+          "ArcFitTolerance": 1e-06,
+          "AttacherEngine": "Engine Plane",
+          "AttacherType": "Attacher::AttachEnginePlane",
+          "AttachmentOffset": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+          "AttachmentSupport": [
+            [
+              "<GeoFeature object>",
+              [
+                ""
+              ]
+            ]
+          ],
+          "Constraints": [
+            "<Constraint 'Coincident'>",
+            "<Constraint 'Coincident'>",
+            "<Constraint 'Coincident'>",
+            "<Constraint 'Coincident'>",
+            "<Constraint 'Horizontal' (0)>",
+            "<Constraint 'Horizontal' (2)>",
+            "<Constraint 'Vertical' (1)>",
+            "<Constraint 'Vertical' (3)>",
+            "<Constraint 'Symmetric'>",
+            "<Constraint 'Distance'>",
+            "<Constraint 'Distance'>",
+            "<Constraint 'Coincident'>"
+          ],
+          "Exports": [],
+          "ExpressionEngine": [],
+          "ExternalGeo": [
+            "<Line segment (0,0,0) (1,0,0) >",
+            "<Line segment (0,0,0) (0,1,0) >"
+          ],
+          "ExternalGeometry": [],
+          "FullyConstrained": true,
+          "Geometry": [
+            "<Line segment (-47,-31.5,0) (47,-31.5,0) >",
+            "<Line segment (47,-31.5,0) (47,31.5,0) >",
+            "<Line segment (47,31.5,0) (-47,31.5,0) >",
+            "<Line segment (-47,31.5,0) (-47,-31.5,0) >",
+            "<Point (0,0,0) >"
+          ],
+          "InternalShape": "<Shape object at 0x558133753fd0>",
+          "Label": "Sketch001",
+          "Label2": "",
+          "MakeInternals": false,
+          "MapMode": "FlatFace",
+          "MapPathParameter": 0.0,
+          "MapReversed": false,
+          "Placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+          "Shape": "<Wire object at 0x558133753fd0>",
+          "ShapeMaterial": "<Material at 0x558134f55470>",
+          "Visibility": false
+        },
+        "type": "Sketcher::SketchObject"
+      },
+      {
+        "label": "Pad",
+        "name": "Pad",
+        "properties": {
+          "AddSubShape": "<Solid object at 0x558133753fd0>",
+          "AllowMultiFace": true,
+          "AlongSketchNormal": true,
+          "BaseFeature": null,
+          "Direction": "Vector (0.0, 0.0, 1.0)",
+          "ExpressionEngine": [],
+          "Label": "Pad",
+          "Label2": "",
+          "Length": "1.0 mm",
+          "Length2": "10.0 mm",
+          "Midplane": false,
+          "Offset": "0.0 mm",
+          "Placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+          "Profile": [
+            "<Sketcher::SketchObject>",
+            [
+              ""
+            ]
+          ],
+          "ReferenceAxis": [
+            "<Sketcher::SketchObject>",
+            [
+              "N_Axis"
+            ]
+          ],
+          "Refine": true,
+          "Reversed": false,
+          "Shape": "<Solid object at 0x558133753fd0>",
+          "ShapeMaterial": "<Material at 0x558134f55470>",
+          "Suppressed": false,
+          "SuppressedShape": "<Shape object at 0x558133753fd0>",
+          "TaperAngle": "0.0 deg",
+          "TaperAngle2": "0.0 deg",
+          "Type": "Length",
+          "UpToFace": null,
+          "UpToShape": [],
+          "UseCustomVector": false,
+          "Visibility": true,
+          "_Body": "<body object>"
+        },
+        "type": "PartDesign::Pad"
+      },
+      {
+        "constraint_count": 10,
+        "geometry_count": 4,
+        "label": "Sketch002",
+        "name": "Sketch002",
+        "properties": {
+          "ArcFitTolerance": 1e-06,
+          "AttacherEngine": "Engine Plane",
+          "AttacherType": "Attacher::AttachEnginePlane",
+          "AttachmentOffset": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+          "AttachmentSupport": [
+            [
+              "<GeoFeature object>",
+              [
+                ""
+              ]
+            ]
+          ],
+          "Constraints": [
+            "<Constraint 'Coincident'>",
+            "<Constraint 'Coincident'>",
+            "<Constraint 'Coincident'>",
+            "<Constraint 'Coincident'>",
+            "<Constraint 'Horizontal' (0)>",
+            "<Constraint 'Horizontal' (2)>",
+            "<Constraint 'Vertical' (1)>",
+            "<Constraint 'Vertical' (3)>",
+            "<Constraint 'Distance'>",
+            "<Constraint 'Distance'>"
+          ],
+          "Exports": [],
+          "ExpressionEngine": [],
+          "ExternalGeo": [
+            "<Line segment (0,0,0) (1,0,0) >",
+            "<Line segment (0,0,0) (0,1,0) >"
+          ],
+          "ExternalGeometry": [],
+          "FullyConstrained": false,
+          "Geometry": [
+            "<Line segment (44.733,29.998,0) (-39.267,29.998,0) >",
+            "<Line segment (-39.267,29.998,0) (-39.267,27.998,0) >",
+            "<Line segment (-39.267,27.998,0) (44.733,27.998,0) >",
+            "<Line segment (44.733,27.998,0) (44.733,29.998,0) >"
+          ],
+          "InternalShape": "<Shape object at 0x558133753fd0>",
+          "Label": "Sketch002",
+          "Label2": "",
+          "MakeInternals": false,
+          "MapMode": "FlatFace",
+          "MapPathParameter": 0.0,
+          "MapReversed": false,
+          "Placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+          "Shape": "<Wire object at 0x558133753fd0>",
+          "ShapeMaterial": "<Material at 0x558134f55470>",
+          "Visibility": true
+        },
+        "type": "Sketcher::SketchObject"
+      }
+    ],
+    "ok": true
+  },
   "started_at": null,
-  "status": "running",
-  "updated_at": "2026-08-15T08:55:07.429321+00:00"
+  "status": "completed",
+  "updated_at": "2026-08-15T08:55:08.579742+00:00"
 }
