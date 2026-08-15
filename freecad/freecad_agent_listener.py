@@ -3,10 +3,14 @@ import socket
 
 import FreeCAD as App
 import Part
+from PySide import QtCore
 
 
 HOST = "127.0.0.1"
 PORT = 8765
+
+_server_socket = None
+_server_timer = None
 
 
 def execute_command(command):
@@ -44,18 +48,23 @@ def execute_command(command):
     }
 
 
-def start_server():
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind((HOST, PORT))
-    server.listen(5)
+def _poll_server():
+    global _server_socket, _server_timer
 
-    print(f"[freecad-agent] listening on {HOST}:{PORT}")
+    if _server_socket is None:
+        return
 
     while True:
-        connection, address = server.accept()
+        try:
+            connection, address = _server_socket.accept()
+        except BlockingIOError:
+            break
+        except OSError as exc:
+            print(f"[freecad-agent] accept error: {exc}")
+            break
 
         try:
+            connection.settimeout(0.5)
             data = connection.recv(65536)
             if not data:
                 continue
@@ -77,5 +86,43 @@ def start_server():
             connection.close()
 
 
+def start_server():
+    global _server_socket, _server_timer
+
+    if _server_socket is not None:
+        print(f"[freecad-agent] already listening on {HOST}:{PORT}")
+        return
+
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server.bind((HOST, PORT))
+    server.listen(5)
+    server.setblocking(False)
+
+    _server_socket = server
+    _server_timer = QtCore.QTimer()
+    _server_timer.timeout.connect(_poll_server)
+    _server_timer.start(50)
+
+    print(f"[freecad-agent] listening on {HOST}:{PORT}")
+
+
+def stop_server():
+    global _server_socket, _server_timer
+
+    if _server_timer is not None:
+        _server_timer.stop()
+        _server_timer.deleteLater()
+        _server_timer = None
+
+    if _server_socket is not None:
+        try:
+            _server_socket.close()
+        finally:
+            _server_socket = None
+
+    print("[freecad-agent] stopped")
+
+
 if __name__ == "__main__":
-    start_server()
+    print("Run start_server() from the FreeCAD Python console.")
