@@ -1,0 +1,15 @@
+{
+  "id": "CAD-026",
+  "action": "create_slider_cover",
+  "created_by": "ChatGPT",
+  "status": "pending",
+  "parameters": {
+    "body": "Body",
+    "output_path": "/home/hikmah/projectx/freecad-agent/cad/output/case-v1-slider-v2.FCStd",
+    "thickness": 2.0,
+    "rail_width": 2.0,
+    "rail_height": 2.0,
+    "clearance": 0.5,
+    "rail_inset": 2.5
+  }
+}
