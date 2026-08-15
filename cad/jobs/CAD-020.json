@@ -1,6 +1,7 @@
 {
   "action": "create_slider_cover",
   "created_by": "ChatGPT",
+  "error": "Unknown document 'tutup_case_slider_v1'",
   "id": "CAD-020",
   "parameters": {
     "clearance": 0.5,
@@ -12,6 +13,6 @@
     "width": 84
   },
   "started_at": null,
-  "status": "running",
-  "updated_at": "2026-08-15T09:16:37.293271+00:00"
+  "status": "failed",
+  "updated_at": "2026-08-15T09:16:38.829117+00:00"
 }
