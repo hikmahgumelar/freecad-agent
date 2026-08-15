@@ -1,4 +1,5 @@
 import json
+import os
 import socket
 
 import FreeCAD as App
@@ -24,7 +25,6 @@ def execute_command(command):
 
     if action == "create_sphere":
         radius = float(command.get("radius", 10))
-
         doc = App.ActiveDocument
         if doc is None:
             doc = App.newDocument("AgentTest")
@@ -34,12 +34,62 @@ def execute_command(command):
         sphere.Radius = radius
         doc.recompute()
 
+        try:
+            Gui.activeDocument().activeView().viewAxonometric()
+            Gui.activeDocument().activeView().fitAll()
+        except Exception:
+            pass
+
         return {
             "ok": True,
             "action": "create_sphere",
             "object": sphere.Name,
             "radius": radius,
             "document": doc.Name,
+        }
+
+    if action == "open_model":
+        path = command.get("path")
+        if not path:
+            raise RuntimeError("open_model requires path")
+        path = os.path.abspath(path)
+        if not os.path.isfile(path):
+            raise RuntimeError(f"CAD file not found: {path}")
+
+        doc = App.openDocument(path)
+        try:
+            Gui.activeDocument().activeView().viewAxonometric()
+            Gui.activeDocument().activeView().fitAll()
+        except Exception:
+            pass
+
+        return {
+            "ok": True,
+            "action": "open_model",
+            "path": path,
+            "document": doc.Name,
+            "label": doc.Label,
+        }
+
+    if action == "inspect_model":
+        doc = App.ActiveDocument
+        if doc is None:
+            raise RuntimeError("No active FreeCAD document")
+
+        objects = []
+        for obj in doc.Objects:
+            objects.append({
+                "name": obj.Name,
+                "label": obj.Label,
+                "type": obj.TypeId,
+            })
+
+        return {
+            "ok": True,
+            "action": "inspect_model",
+            "document": doc.Name,
+            "label": doc.Label,
+            "objects": objects,
         }
 
     return {
