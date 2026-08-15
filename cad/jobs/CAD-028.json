@@ -1,25 +1,25 @@
 {
-  "id": "CAD-028",
   "action": "create_slider_cover",
-  "status": "pending",
-  "created_by": "ChatGPT",
-  "created_at": "2026-08-15T18:05:00+07:00",
-  "started_at": null,
   "completed_at": null,
-  "updated_at": null,
+  "created_at": "2026-08-15T18:05:00+07:00",
+  "created_by": "ChatGPT",
   "error": null,
+  "id": "CAD-028",
   "parameters": {
+    "antenna_offset": 10.0,
     "body": "Body",
-    "rail_width": 1.6,
+    "clearance": 0.2,
+    "end_clearance": 4.0,
+    "output_path": "/home/hikmah/projectx/freecad-agent/cad/output/case-v1-with-slider-v1.FCStd",
     "rail_height": 1.8,
     "rail_inset": 2.0,
-    "clearance": 0.2,
-    "top_clearance": 0.2,
-    "thickness": 1.6,
-    "antenna_offset": 10.0,
-    "end_clearance": 4.0,
+    "rail_width": 1.6,
     "skirt_width": 1.6,
-    "output_path": "/home/hikmah/projectx/freecad-agent/cad/output/case-v1-with-slider-v1.FCStd"
+    "thickness": 1.6,
+    "top_clearance": 0.2
   },
-  "result": null
+  "result": null,
+  "started_at": null,
+  "status": "running",
+  "updated_at": "2026-08-15T11:48:53.447397+00:00"
 }
