@@ -55,6 +55,22 @@ class FreeCADExecutor:
                 "objects": objects,
             })
 
+        if action == "create_slider_cover":
+            parameters = job.get("parameters", {})
+            return self._send({
+                "action": "create_slider_cover",
+                "output_path": parameters.get(
+                    "output_path",
+                    "/home/hikmah/projectx/freecad-agent/cad/output/tutup-case-slider-v1.FCStd",
+                ),
+                "width": parameters.get("width", 84),
+                "depth": parameters.get("depth", 63),
+                "thickness": parameters.get("thickness", 2),
+                "rail_width": parameters.get("rail_width", 2),
+                "rail_height": parameters.get("rail_height", 2),
+                "clearance": parameters.get("clearance", 0.5),
+            })
+
         raise RuntimeError(f"Unsupported action: {action}")
 
     def _send(self, command):
