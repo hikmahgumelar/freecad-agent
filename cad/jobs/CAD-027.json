@@ -12,8 +12,34 @@
     "rail_height": 2.0,
     "rail_width": 2.0
   },
-  "result": null,
+  "result": {
+    "action": "create_case_rails",
+    "case_dimensions": {
+      "x": 100.0,
+      "y": 70.0,
+      "z": 11.5
+    },
+    "clearance": 0.2,
+    "document": "case_V1",
+    "inner_bounds": {
+      "xmax": 47.0,
+      "xmin": -47.0,
+      "ymax": 32.0,
+      "ymin": -32.0
+    },
+    "inset": 2.0,
+    "objects": [
+      "SliderCaseRailLeft",
+      "SliderCaseRailRight"
+    ],
+    "ok": true,
+    "output_path": "/home/hikmah/projectx/freecad-agent/cad/output/case-v1-with-rails-v1.FCStd",
+    "rail_height": 2.0,
+    "rail_width": 2.0,
+    "source_body": "Body",
+    "source_tip": "Pocket002"
+  },
   "started_at": null,
-  "status": "running",
-  "updated_at": "2026-08-15T10:50:22.402293+00:00"
+  "status": "completed",
+  "updated_at": "2026-08-15T10:50:24.167134+00:00"
 }
