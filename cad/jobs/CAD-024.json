@@ -1,16 +1,18 @@
 {
-  "id": "CAD-024",
-  "status": "pending",
   "action": "create_slider_cover",
-  "parameters": {
-    "output_path": "/home/hikmah/projectx/freecad-agent/cad/output/case-v1-slider-v1.FCStd",
-    "width": 84,
-    "depth": 63,
-    "thickness": 2,
-    "rail_width": 2,
-    "rail_height": 2,
-    "clearance": 0.5
-  },
   "created_by": "ChatGPT",
-  "source_model": "/home/hikmah/projectx/freecad-agent/cad/source/case-V1.FCStd"
+  "id": "CAD-024",
+  "parameters": {
+    "clearance": 0.5,
+    "depth": 63,
+    "output_path": "/home/hikmah/projectx/freecad-agent/cad/output/case-v1-slider-v1.FCStd",
+    "rail_height": 2,
+    "rail_width": 2,
+    "thickness": 2,
+    "width": 84
+  },
+  "source_model": "/home/hikmah/projectx/freecad-agent/cad/source/case-V1.FCStd",
+  "started_at": null,
+  "status": "running",
+  "updated_at": "2026-08-15T09:49:26.518611+00:00"
 }
