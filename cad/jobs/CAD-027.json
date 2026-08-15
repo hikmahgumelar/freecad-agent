@@ -2,6 +2,7 @@
   "action": "create_case_rails",
   "completed_at": null,
   "created_by": "ChatGPT",
+  "error": "Unsupported action: create_case_rails",
   "id": "CAD-027",
   "parameters": {
     "body": "Body",
@@ -13,6 +14,6 @@
   },
   "result": null,
   "started_at": null,
-  "status": "running",
-  "updated_at": "2026-08-15T10:37:34.489713+00:00"
+  "status": "failed",
+  "updated_at": "2026-08-15T10:37:35.910926+00:00"
 }
