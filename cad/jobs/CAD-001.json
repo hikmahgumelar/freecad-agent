@@ -1,8 +1,14 @@
 {
   "action": "test_connection",
+  "completed_at": null,
   "created_by": "manual-test",
   "id": "CAD-001",
+  "result": {
+    "action": "test_connection",
+    "executor": "freecad-agent-v0.1",
+    "message": "Job received successfully"
+  },
   "started_at": null,
-  "status": "running",
-  "updated_at": "2026-08-15T07:14:08.426144+00:00"
+  "status": "completed",
+  "updated_at": "2026-08-15T07:14:09.644513+00:00"
 }
