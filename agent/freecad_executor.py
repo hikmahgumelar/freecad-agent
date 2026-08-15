@@ -44,6 +44,17 @@ class FreeCADExecutor:
                 "action": "inspect_model",
             })
 
+        if action == "inspect_features":
+            parameters = job.get("parameters", {})
+            objects = parameters.get(
+                "objects",
+                ["Sketch", "Sketch001", "Pad", "Sketch002"],
+            )
+            return self._send({
+                "action": "inspect_features",
+                "objects": objects,
+            })
+
         raise RuntimeError(f"Unsupported action: {action}")
 
     def _send(self, command):
