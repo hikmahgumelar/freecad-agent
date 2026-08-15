@@ -34,23 +34,27 @@ class FreeCADExecutor:
             return self._send({
                 "action": "create_case_rails",
                 "body": p.get("body", "Body"),
-                "rail_width": p.get("rail_width", 2.0),
-                "rail_height": p.get("rail_height", 2.0),
+                "rail_width": p.get("rail_width", 1.6),
+                "rail_height": p.get("rail_height", 1.8),
                 "inset": p.get("inset", 2.0),
                 "clearance": p.get("clearance", 0.2),
-                "output_path": p.get("output_path", "/home/hikmah/projectx/freecad-agent/cad/output/case-v1-with-rails-v1.FCStd"),
+                "output_path": p.get("output_path", "/home/hikmah/projectx/freecad-agent/cad/output/case-v1-with-rails-v2.FCStd"),
             })
         if action == "create_slider_cover":
             p = job.get("parameters", {})
             return self._send({
                 "action": "create_slider_cover",
-                "output_path": p.get("output_path", "/home/hikmah/projectx/freecad-agent/cad/output/case-v1-slider-v2.FCStd"),
-                "thickness": p.get("thickness", 2.0),
-                "rail_width": p.get("rail_width", 2.0),
-                "rail_height": p.get("rail_height", 2.0),
-                "clearance": p.get("clearance", 0.5),
-                "rail_inset": p.get("rail_inset", 2.5),
                 "body": p.get("body", "Body"),
+                "rail_width": p.get("rail_width", 1.6),
+                "rail_height": p.get("rail_height", 1.8),
+                "rail_inset": p.get("rail_inset", 2.0),
+                "clearance": p.get("clearance", 0.2),
+                "top_clearance": p.get("top_clearance", 0.2),
+                "thickness": p.get("thickness", 1.6),
+                "antenna_offset": p.get("antenna_offset", 10.0),
+                "end_clearance": p.get("end_clearance", 4.0),
+                "skirt_width": p.get("skirt_width", 1.6),
+                "output_path": p.get("output_path", "/home/hikmah/projectx/freecad-agent/cad/output/case-v1-with-slider-v1.FCStd"),
             })
         raise RuntimeError(f"Unsupported action: {action}")
 
