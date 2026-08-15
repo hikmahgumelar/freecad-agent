@@ -1,11 +1,12 @@
 {
   "action": "open_model",
   "created_by": "ChatGPT",
+  "error": "Unsupported action: open_model",
   "id": "CAD-009",
   "parameters": {
     "path": "/home/hikmah/projectx/freecad-agent/cad/source/tutup-case-v1.FCStd"
   },
   "started_at": null,
-  "status": "running",
-  "updated_at": "2026-08-15T08:22:55.862857+00:00"
+  "status": "failed",
+  "updated_at": "2026-08-15T08:22:57.044925+00:00"
 }
