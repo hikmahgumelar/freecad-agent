@@ -1,0 +1,9 @@
+{
+  "id": "CAD-023",
+  "status": "pending",
+  "action": "inspect_features",
+  "parameters": {
+    "objects": ["Pad", "Pad001", "Pocket", "Pocket001", "Sketch001", "Sketch003", "Sketch004"]
+  },
+  "created_by": "ChatGPT"
+}
