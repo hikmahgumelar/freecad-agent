@@ -1,9 +1,19 @@
 {
-  "id": "CAD-023",
-  "status": "pending",
   "action": "inspect_features",
+  "created_by": "ChatGPT",
+  "id": "CAD-023",
   "parameters": {
-    "objects": ["Pad", "Pad001", "Pocket", "Pocket001", "Sketch001", "Sketch003", "Sketch004"]
+    "objects": [
+      "Pad",
+      "Pad001",
+      "Pocket",
+      "Pocket001",
+      "Sketch001",
+      "Sketch003",
+      "Sketch004"
+    ]
   },
-  "created_by": "ChatGPT"
+  "started_at": null,
+  "status": "running",
+  "updated_at": "2026-08-15T09:48:06.791012+00:00"
 }
