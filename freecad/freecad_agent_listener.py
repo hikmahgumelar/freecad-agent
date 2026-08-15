@@ -57,6 +57,98 @@ def _inspect_feature(obj):
     return result
 
 
+def _create_slider_cover(command):
+    source_doc = App.ActiveDocument
+    if source_doc is None:
+        raise RuntimeError("No active FreeCAD document")
+
+    output_path = os.path.abspath(command.get(
+        "output_path",
+        "/home/hikmah/projectx/freecad-agent/cad/output/tutup-case-slider-v1.FCStd",
+    ))
+    width = float(command.get("width", 84))
+    depth = float(command.get("depth", 63))
+    thickness = float(command.get("thickness", 2))
+    rail_width = float(command.get("rail_width", 2))
+    rail_height = float(command.get("rail_height", 2))
+    clearance = float(command.get("clearance", 0.5))
+
+    if min(width, depth, thickness, rail_width, rail_height) <= 0:
+        raise RuntimeError("Slider dimensions must be positive")
+    if rail_width >= depth / 2:
+        raise RuntimeError("rail_width is too large for slider depth")
+
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
+    doc_name = "tutup_case_slider_v1"
+    if App.getDocument(doc_name):
+        App.closeDocument(doc_name)
+    doc = App.newDocument(doc_name)
+
+    # Preserve the existing case geometry as a reference/base in the new file.
+    source_obj = source_doc.getObject("Pad")
+    if source_obj is not None and hasattr(source_obj, "Shape") and not source_obj.Shape.isNull():
+        base = doc.addObject("Part::Feature", "CaseBase")
+        base.Label = "Existing case base (reference)"
+        base.Shape = source_obj.Shape.copy()
+
+    # Slider plate: 84 x 63 x 2 mm, centered on the existing model origin.
+    x0 = -width / 2.0
+    y0 = -depth / 2.0
+    z0 = 3.0
+    plate = Part.makeBox(width, depth, thickness, App.Vector(x0, y0, z0))
+
+    # Two underside guide rails. The 0.5 mm clearance keeps the prototype
+    # from sitting directly on the reference base.
+    rail_z = z0 - rail_height - clearance
+    rail_left = Part.makeBox(
+        width,
+        rail_width,
+        rail_height,
+        App.Vector(x0, y0 + rail_width, rail_z),
+    )
+    rail_right = Part.makeBox(
+        width,
+        rail_width,
+        rail_height,
+        App.Vector(x0, y0 + depth - 2 * rail_width, rail_z),
+    )
+
+    slider = doc.addObject("Part::Feature", "SliderCover")
+    slider.Label = "Slider cover 84x63x2 mm"
+    slider.Shape = plate.fuse(rail_left).fuse(rail_right)
+
+    # Keep the guide geometry explicit for later mechanical refinement.
+    guide1 = doc.addObject("Part::Feature", "GuideRailLeft")
+    guide1.Label = "Slider guide rail left"
+    guide1.Shape = rail_left
+
+    guide2 = doc.addObject("Part::Feature", "GuideRailRight")
+    guide2.Label = "Slider guide rail right"
+    guide2.Shape = rail_right
+
+    doc.recompute()
+    Gui.activeDocument().activeView().viewAxonometric()
+    Gui.activeDocument().activeView().fitAll()
+    doc.saveAs(output_path)
+
+    return {
+        "ok": True,
+        "action": "create_slider_cover",
+        "output_path": output_path,
+        "document": doc.Name,
+        "dimensions": {
+            "width": width,
+            "depth": depth,
+            "thickness": thickness,
+            "rail_width": rail_width,
+            "rail_height": rail_height,
+            "clearance": clearance,
+        },
+        "objects": ["CaseBase", "SliderCover", "GuideRailLeft", "GuideRailRight"],
+    }
+
+
 def execute_command(command):
     action = command.get("action")
 
@@ -148,6 +240,9 @@ def execute_command(command):
             "document": doc.Name,
             "features": features,
         }
+
+    if action == "create_slider_cover":
+        return _create_slider_cover(command)
 
     return {"ok": False, "error": f"Unsupported action: {action}"}
 
