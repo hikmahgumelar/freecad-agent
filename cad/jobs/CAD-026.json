@@ -1,5 +1,6 @@
 {
   "action": "create_slider_cover",
+  "completed_at": null,
   "created_by": "ChatGPT",
   "id": "CAD-026",
   "parameters": {
@@ -11,7 +12,27 @@
     "rail_width": 2.0,
     "thickness": 2.0
   },
+  "result": {
+    "action": "create_slider_cover",
+    "dimensions": {
+      "clearance": 0.5,
+      "depth": 63.0,
+      "rail_height": 2.0,
+      "rail_width": 2.0,
+      "thickness": 2.0,
+      "width": 84.0
+    },
+    "document": "tutup_case_slider_v1",
+    "objects": [
+      "CaseBase",
+      "SliderCover",
+      "GuideRailLeft",
+      "GuideRailRight"
+    ],
+    "ok": true,
+    "output_path": "/home/hikmah/projectx/freecad-agent/cad/output/case-v1-slider-v2.FCStd"
+  },
   "started_at": null,
-  "status": "running",
-  "updated_at": "2026-08-15T10:26:42.553707+00:00"
+  "status": "completed",
+  "updated_at": "2026-08-15T10:26:44.621389+00:00"
 }
