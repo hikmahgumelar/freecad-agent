@@ -1,0 +1,15 @@
+{
+  "id": "CAD-015",
+  "status": "pending",
+  "action": "create_slider_cover",
+  "parameters": {
+    "output_path": "/home/hikmah/projectx/freecad-agent/cad/output/tutup-case-slider-v1.FCStd",
+    "width": 84,
+    "depth": 63,
+    "thickness": 2,
+    "rail_width": 2,
+    "rail_height": 2,
+    "clearance": 0.5
+  },
+  "created_by": "ChatGPT"
+}
