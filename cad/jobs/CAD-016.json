@@ -1,6 +1,7 @@
 {
   "action": "create_slider_cover",
   "created_by": "ChatGPT",
+  "error": "Unsupported action: create_slider_cover",
   "id": "CAD-016",
   "parameters": {
     "clearance": 0.5,
@@ -12,6 +13,6 @@
     "width": 84
   },
   "started_at": null,
-  "status": "running",
-  "updated_at": "2026-08-15T09:01:05.402190+00:00"
+  "status": "failed",
+  "updated_at": "2026-08-15T09:01:06.778903+00:00"
 }
