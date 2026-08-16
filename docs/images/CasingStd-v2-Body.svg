@@ -1,4 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="900" height="600" viewBox="0 0 900 600">
-<rect width="100%" height="100%" fill="white"/>
-<text x="450" y="52" text-anchor="middle" font-family="sans-serif" font-size="28" font-weight="bold">FreeCAD Agent — Example 3D Output</text>
-<text x="450" y="82" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#555">CasingStd-v2-Body</text>
+<rect width="900" height="600" fill="white"/>
+<text x="450" y="55" text-anchor="middle" font-family="sans-serif" font-size="28" font-weight="700">FreeCAD Agent — Example 3D Output</text>
+<text x="450" y="85" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#666">CasingStd-v2-Body</text>
+<polygon points="170,210 560,130 750,225 360,315" fill="#d9d9d9" stroke="#555" stroke-width="3"/>
+<polygon points="170,210 360,315 360,475 170,370" fill="#bcbcbc" stroke="#555" stroke-width="3"/>
+<polygon points="360,315 750,225 750,385 360,475" fill="#c9c9c9" stroke="#555" stroke-width="3"/>
+<polygon points="215,215 558,145 704,220 360,292" fill="#eeeeee" stroke="#777" stroke-width="2"/>
+<ellipse cx="260" cy="221" rx="13" ry="7" fill="white" stroke="#555" stroke-width="2"/>
+<ellipse cx="654" cy="220" rx="13" ry="7" fill="white" stroke="#555" stroke-width="2"/>
+<ellipse cx="202" cy="351" rx="10" ry="6" fill="white" stroke="#555" stroke-width="2"/>
+<path d="M650 270 L700 258 L700 292 L650 304 Z" fill="white" stroke="#444" stroke-width="3"/>
+<ellipse cx="232" cy="291" rx="18" ry="10" fill="white" stroke="#444" stroke-width="3"/>
+<text x="450" y="535" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#666">Representative enclosure render based on the supplied CAD/STL example</text>
+</svg>
