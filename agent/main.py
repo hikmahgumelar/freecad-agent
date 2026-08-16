@@ -1,10 +1,14 @@
 import signal
 import time
+from datetime import datetime, timezone
 
 from .config import load_config
 from .freecad_executor import FreeCADExecutor
 from .github import GitHubClient
 from .jobs import Job, JobQueue
+
+
+STATUS_LOG_PATH = "status.log"
 
 
 class Watchdog:
@@ -46,6 +50,43 @@ class Watchdog:
 
         return result
 
+    def _write_status_log(
+        self,
+        job: Job,
+        status: str,
+        error: str | None = None,
+    ):
+        timestamp = datetime.now(
+            timezone.utc
+        ).isoformat()
+
+        parts = [
+            timestamp,
+            f"job={job.job_id}",
+            f"action={job.action}",
+            f"status={status}",
+        ]
+
+        if error:
+            safe_error = " ".join(
+                str(error).splitlines()
+            )
+            parts.append(f"error={safe_error}")
+
+        line = " | ".join(parts)
+
+        try:
+            self.github.append_status_log(line)
+            print(
+                f"[STATUS] {job.job_id} "
+                f"status={status} logged"
+            )
+        except Exception as exc:
+            print(
+                f"[ERROR] Could not write "
+                f"{STATUS_LOG_PATH}: {exc}"
+            )
+
     def process_job(self, job: Job):
         print(
             f"[JOB] {job.job_id} "
@@ -75,6 +116,11 @@ class Watchdog:
                 f"status=completed"
             )
 
+            self._write_status_log(
+                job,
+                "completed",
+            )
+
         except Exception as exc:
             print(
                 f"[JOB] {job.job_id} "
@@ -93,6 +139,12 @@ class Watchdog:
                     "[ERROR] Could not report "
                     f"job failure: {report_error}"
                 )
+
+            self._write_status_log(
+                job,
+                "failed",
+                error=str(exc),
+            )
 
     def run(self):
         print("================================")
