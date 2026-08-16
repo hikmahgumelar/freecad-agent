@@ -1,0 +1,2 @@
+# FreeCAD Agent execution status log
+# Format: timestamp | job=<id> | action=<action> | status=<completed|failed> [| error=<message>]
