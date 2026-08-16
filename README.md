@@ -124,14 +124,25 @@ Verify the environment with:
 
 The watchdog uses the configured GitHub repository as the CAD job queue and reports job state/results back to GitHub.
 
-Configure the repository in `.env`:
+Create a local `.env` file in the repository root:
 
 ```env
 GITHUB_REPO=hikmahgumelar/freecad-agent
+GITHUB_TOKEN=github_pat_*******************
 POLL_INTERVAL=30
 ```
 
-The GitHub authentication token must also be configured using the project's supported environment/configuration mechanism. Do not commit the token or any other credentials to the repository.
+`GITHUB_TOKEN` must contain your own GitHub Personal Access Token (PAT). The value above is only a placeholder; never copy it as a real credential.
+
+Do **not** commit `.env` or any real token to the repository. The repository `.gitignore` is configured to ignore `.env`.
+
+A safe starting point is the included `.env.example`:
+
+```bash
+cp .env.example .env
+```
+
+Then replace the placeholder token with your own PAT.
 
 ### FreeCAD listener
 
@@ -270,6 +281,7 @@ The polling interval is configured through `.env`:
 
 ```env
 GITHUB_REPO=hikmahgumelar/freecad-agent
+GITHUB_TOKEN=github_pat_*******************
 POLL_INTERVAL=30
 ```
 
