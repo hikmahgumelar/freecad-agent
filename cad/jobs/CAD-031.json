@@ -11,7 +11,7 @@
     "cover_thickness": 1.5,
     "height": 11.0,
     "length": 90.0,
-    "output_path": "/app/freecad-agent/cad/output/box-90x60x11.FCStd",
+    "output_path": "/home/hikmah/projectx/freecad-agent/cad/output/box-90x60x11.FCStd",
     "post_outer_diameter": 6.0,
     "screw_diameter": 3.0,
     "screw_margin": 5.0,
@@ -22,6 +22,6 @@
   },
   "result": null,
   "started_at": null,
-  "status": "running",
-  "updated_at": "2026-08-16T05:06:46.752840+00:00"
+  "status": "pending",
+  "updated_at": "2026-08-16T13:45:00+07:00"
 }
