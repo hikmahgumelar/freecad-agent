@@ -1,27 +1,27 @@
 {
-  "id": "CAD-031",
   "action": "create_box_enclosure",
-  "status": "pending",
+  "completed_at": null,
   "created_at": "2026-08-16T11:44:00+07:00",
   "created_by": "ChatGPT",
-  "started_at": null,
-  "completed_at": null,
-  "updated_at": null,
+  "error": null,
+  "id": "CAD-031",
   "parameters": {
-    "length": 90.0,
-    "width": 60.0,
-    "height": 11.0,
-    "wall": 1.5,
-    "cover_thickness": 1.5,
-    "screw_diameter": 3.0,
-    "screw_margin": 5.0,
     "antenna_diameter": 7.0,
     "antenna_left_offset": 10.0,
-    "usb_width": 12.0,
-    "usb_height": 5.0,
+    "cover_thickness": 1.5,
+    "height": 11.0,
+    "length": 90.0,
+    "output_path": "/app/freecad-agent/cad/output/box-90x60x11.FCStd",
     "post_outer_diameter": 6.0,
-    "output_path": "/app/freecad-agent/cad/output/box-90x60x11.FCStd"
+    "screw_diameter": 3.0,
+    "screw_margin": 5.0,
+    "usb_height": 5.0,
+    "usb_width": 12.0,
+    "wall": 1.5,
+    "width": 60.0
   },
   "result": null,
-  "error": null
+  "started_at": null,
+  "status": "running",
+  "updated_at": "2026-08-16T04:50:26.363539+00:00"
 }
