@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
 
-from .github import GitHubClient
+from .github import GitHubClient, GitHubConflictError
 
 
 JOB_DIRECTORY = "cad/jobs"
@@ -98,15 +98,50 @@ class JobQueue:
             sort_keys=True,
         ) + "\n"
 
-        self.github.update_file(
-            path=job.path,
-            content=content,
-            sha=job.sha,
-            message=(
-                f"CAD job {job.job_id}: "
-                f"{status}"
-            ),
-        )
+        try:
+            self.github.update_file(
+                path=job.path,
+                content=content,
+                sha=job.sha,
+                message=(
+                    f"CAD job {job.job_id}: "
+                    f"{status}"
+                ),
+            )
+        except GitHubConflictError:
+            # The job SHA may have changed while the watchdog was processing
+            # the job. Refresh once and retry using the latest blob SHA.
+            print(
+                f"[GITHUB] SHA conflict for {job.job_id}; "
+                "refreshing job before retry"
+            )
+
+            latest_content, latest_sha = (
+                self.github.read_file(job.path)
+            )
+            latest_data = json.loads(latest_content)
+
+            # Preserve the latest server-side job data, then apply only the
+            # state transition requested by this watchdog instance.
+            latest_data["status"] = status
+            latest_data["updated_at"] = utc_now()
+            latest_data.update(extra)
+
+            latest_serialized = json.dumps(
+                latest_data,
+                indent=2,
+                sort_keys=True,
+            ) + "\n"
+
+            self.github.update_file(
+                path=job.path,
+                content=latest_serialized,
+                sha=latest_sha,
+                message=(
+                    f"CAD job {job.job_id}: "
+                    f"{status} (refresh)"
+                ),
+            )
 
         # Re-read file to obtain the new SHA.
         new_content, new_sha = (
