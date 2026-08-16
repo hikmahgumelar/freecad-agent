@@ -74,6 +74,26 @@ class FreeCADExecutor:
                 "post_outer_diameter": p.get("post_outer_diameter", 6.0),
                 "output_path": p.get("output_path", "/app/freecad-agent/cad/output/box-90x60x11.FCStd"),
             })
+        if action == "create_large_enclosure":
+            p = job.get("parameters", {})
+            return self._send({
+                "action": "create_large_enclosure",
+                "length": p.get("length", 200.0),
+                "width": p.get("width", 100.0),
+                "height": p.get("height", 250.0),
+                "wall": p.get("wall", 2.0),
+                "bottom_thickness": p.get("bottom_thickness", 2.0),
+                "lid_length": p.get("lid_length", 202.0),
+                "lid_width": p.get("lid_width", 102.0),
+                "lid_height": p.get("lid_height", 60.0),
+                "lid_wall": p.get("lid_wall", 2.0),
+                "plate_center_z": p.get("plate_center_z", 125.0),
+                "plate_thickness": p.get("plate_thickness", 2.0),
+                "hole_diameter": p.get("hole_diameter", 50.0),
+                "hole_columns": p.get("hole_columns", 3),
+                "hole_rows": p.get("hole_rows", 2),
+                "output_path": p.get("output_path", "/home/hikmah/projectx/freecad-agent/cad/output/enclosure-200x100x250.FCStd"),
+            })
         raise RuntimeError(f"Unsupported action: {action}")
 
     def _send(self, command):
