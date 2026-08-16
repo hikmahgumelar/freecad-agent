@@ -123,16 +123,29 @@ cd /app/freecad-agent
 ./freecad-agent-watchdog
 ```
 
-If you cloned the repository to another location, use that location instead.
+The watchdog uses the Python virtual environment contained in the repository (`bin/`) and starts the agent with `python3`.
 
-Expected startup output:
+The polling interval is configured through `.env`:
+
+```env
+GITHUB_REPO=hikmahgumelar/freecad-agent
+POLL_INTERVAL=30
+```
+
+`POLL_INTERVAL` is the normal idle polling interval in seconds. A value of `30` is recommended for normal operation to reduce unnecessary GitHub API traffic.
+
+Expected startup output for v0.5:
 
 ```text
 ================================
- freecad-agent-watchdog v0.2
+ freecad-agent-watchdog v0.5
 ================================
-Polling interval: 5s
+Polling interval: 30s
 FreeCAD endpoint: 127.0.0.1:8765
+Health check: enabled
+GitHub rate-limit handling: enabled
+GitHub SHA-conflict recovery: enabled
+GitHub network retry/backoff: enabled
 ```
 
 ### Supervisor start
@@ -193,21 +206,75 @@ Watchdog errors are written to:
 /var/log/freecad-agent-err.log
 ```
 
-## What does the watchdog do?
+## Watchdog v0.5 reliability features
 
-The watchdog is the external job runner. Every polling cycle it checks GitHub for pending CAD jobs.
+Version 0.5 adds reliability controls around GitHub API communication so temporary network failures and API rate limits do not cause the watchdog to repeatedly hammer GitHub or terminate unnecessarily.
 
-For each job it:
+### 30-second normal polling
 
-1. Finds the pending job in the GitHub queue.
-2. Marks the job as running.
-3. Sends the requested action to the FreeCAD listener at `127.0.0.1:8765`.
-4. Waits for FreeCAD to execute the command.
-5. Marks the job as completed and stores the result when successful.
-6. Marks the job as failed and stores the error when execution fails.
-7. Appends the final execution result to `status.log` so the external agent can quickly determine whether the task completed or failed.
+The normal polling interval is controlled by `POLL_INTERVAL` in `.env`. The recommended value is `30` seconds instead of the previous 5-second interval.
 
-### Execution status log
+This reduces the number of GitHub API requests while keeping the job queue responsive enough for normal CAD work.
+
+### GitHub rate-limit handling
+
+When GitHub returns a rate-limit response, the watchdog detects the condition and enters a cooldown instead of continuing to poll at the normal interval.
+
+The watchdog uses GitHub's `X-RateLimit-Reset` value when available to determine when the rate-limit window should recover. If the reset time cannot be determined, a safe fallback cooldown is used.
+
+During cooldown, the watchdog does not continuously issue GitHub queue requests. After the cooldown expires, normal polling resumes.
+
+Conceptually:
+
+```text
+normal polling
+      |
+      v
+GitHub request
+      |
+      +-- normal --> continue every POLL_INTERVAL
+      |
+      +-- rate limit --> cooldown until reset
+                              |
+                              v
+                       resume polling
+```
+
+### SHA-conflict recovery
+
+GitHub Contents API updates require the current blob SHA. If another update changes the job file before the watchdog writes its result, GitHub can return HTTP 409.
+
+The watchdog handles this conflict by refreshing the latest job state/SHA and retrying the state transition rather than immediately losing the result.
+
+### Network retry and backoff
+
+Transient GitHub connection failures such as `RemoteDisconnected`, connection errors, and timeouts are treated differently from permanent API errors.
+
+The watchdog retries with increasing delays instead of exiting immediately:
+
+```text
+network error
+    |
+    +--> 30s
+          |
+          +--> 60s
+                |
+                +--> 120s
+                      |
+                      +--> 240s
+                            |
+                            +--> max 300s
+```
+
+A successful request resets the retry backoff.
+
+### FreeCAD health check
+
+Before executing a real CAD job, the watchdog checks the FreeCAD listener using the `ping` action.
+
+If the listener is unavailable, the watchdog can report the execution failure instead of blindly sending the CAD command to a dead endpoint.
+
+### Status log is best-effort
 
 The watchdog maintains:
 
@@ -226,12 +293,28 @@ The `cad/jobs/CAD-xxx.json` file remains the authoritative per-job record. `stat
 
 A failure to write `status.log` does **not** override the actual job result. The watchdog will still report the job status through `cad/jobs/*.json`.
 
+## What does the watchdog do?
+
+The watchdog is the external job runner. Every polling cycle it checks GitHub for pending CAD jobs.
+
+For each job it:
+
+1. Finds the pending job in the GitHub queue.
+2. Marks the job as running.
+3. Checks that the FreeCAD listener is healthy.
+4. Sends the requested action to the FreeCAD listener at `127.0.0.1:8765`.
+5. Waits for FreeCAD to execute the command.
+6. Marks the job as completed and stores the result when successful.
+7. Marks the job as failed and stores the error when execution fails.
+8. Appends the final execution result to `status.log` so the external agent can quickly determine whether the task completed or failed.
+
 Typical watchdog output looks like:
 
 ```text
 [QUEUE] 1 pending job(s)
 [JOB] CAD-029 status=pending
 [JOB] CAD-029 action=ping
+[FREECAD] listener healthy
 [JOB] CAD-029 status=completed
 [STATUS] CAD-029 status=completed logged
 ```
