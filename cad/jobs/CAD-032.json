@@ -1,6 +1,6 @@
 {
   "action": "create_large_enclosure",
-  "completed_at": null,
+  "completed_at": "2026-08-16T09:59:37.399022+00:00",
   "created_at": "2026-08-16T16:48:00+07:00",
   "created_by": "ChatGPT",
   "error": null,
@@ -22,9 +22,45 @@
     "wall": 2.0,
     "width": 100.0
   },
+  "result": {
+    "action": "create_large_enclosure",
+    "box": {
+      "bottom": 2.0,
+      "height": 250.0,
+      "length": 200.0,
+      "wall": 2.0,
+      "width": 100.0
+    },
+    "document": "Enclosure200x100x250",
+    "internal_plate": {
+      "center_z": 125.0,
+      "hole_count": 6,
+      "hole_diameter": 50.0,
+      "hole_pattern": "3 x 2",
+      "length": 200.0,
+      "orientation": "TOP",
+      "thickness": 2.0,
+      "touches_all_sides": true,
+      "width": 100.0
+    },
+    "lid": {
+      "height": 60.0,
+      "length": 202.0,
+      "separate": true,
+      "wall": 2.0,
+      "width": 102.0
+    },
+    "objects": [
+      "LargeBoxBase",
+      "InternalTopPlate",
+      "LargeBoxLid"
+    ],
+    "ok": true,
+    "output_path": "/home/hikmah/projectx/freecad-agent/cad/output/enclosure-200x100x250.FCStd"
+  },
   "revision": 2,
   "revision_note": "Retry after executor update. Create box 200x100x250 mm with 2 mm walls and 2 mm bottom; separate hollow lid 202x102x60 mm with 2 mm wall; internal horizontal plate at center Z=125 mm, touching all four sides, holes facing TOP, 6x \u00d850 mm in symmetric 3x2 pattern.",
   "started_at": "2026-08-16T09:59:35.410172+00:00",
-  "status": "running",
-  "updated_at": "2026-08-16T09:59:35.410191+00:00"
+  "status": "completed",
+  "updated_at": "2026-08-16T09:59:37.399047+00:00"
 }
