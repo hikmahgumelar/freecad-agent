@@ -16,6 +16,10 @@ class GitHubConflictError(RuntimeError):
     """Raised when a GitHub contents update has a stale blob SHA."""
 
 
+class GitHubTransientError(RuntimeError):
+    """Raised when a temporary network failure prevents a GitHub request."""
+
+
 class GitHubClient:
     def __init__(self, token: str, repository: str):
         self.repository = repository
@@ -40,12 +44,17 @@ class GitHubClient:
     ):
         url = f"{self.base_url}/{path.lstrip('/')}"
 
-        response = self.session.request(
-            method,
-            url,
-            timeout=30,
-            **kwargs,
-        )
+        try:
+            response = self.session.request(
+                method,
+                url,
+                timeout=30,
+                **kwargs,
+            )
+        except requests.RequestException as exc:
+            raise GitHubTransientError(
+                f"GitHub network error: {exc}"
+            ) from exc
 
         if not response.ok:
             message = response.text
@@ -79,7 +88,12 @@ class GitHubClient:
         if not response.text:
             return None
 
-        return response.json()
+        try:
+            return response.json()
+        except ValueError as exc:
+            raise GitHubTransientError(
+                "GitHub returned an invalid JSON response"
+            ) from exc
 
     def list_directory(self, path: str):
         return self._request(
