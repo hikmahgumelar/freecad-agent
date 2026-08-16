@@ -1,10 +1,94 @@
 # FreeCAD Agent
 
-This repository coordinates FreeCAD agent jobs between GitHub, the local watchdog, and a running FreeCAD instance.
+**AI-driven CAD automation for creating and modifying 3D models in FreeCAD through natural-language prompting.**
+
+FreeCAD Agent connects an AI agent to a running FreeCAD instance. Instead of manually translating every requirement into CAD operations, a user or AI can describe the desired model or modification in natural language. The request becomes a CAD job, the watchdog picks it up, and the FreeCAD listener executes the operation against the active FreeCAD document.
+
+![FreeCAD Agent example 3D output](docs/images/CasingStd-v2-Body.svg)
+
+> Example output: an enclosure model used as a representative CAD example for the FreeCAD Agent workflow.
+
+## What is FreeCAD Agent?
+
+FreeCAD Agent is a bridge between **AI prompting, job orchestration, and FreeCAD**.
+
+A typical request can look like:
+
+```text
+Create an enclosure 90 mm × 60 mm × 11 mm.
+Add a USB-C opening centered on one 60 mm side,
+a 7 mm antenna opening on the opposite side,
+corner mounting holes, and a 1.5 mm cover.
+```
+
+The request is translated into a CAD job and processed by the system:
+
+```text
+Natural-language prompt
+        |
+        v
+     CAD Job
+        |
+        v
+      GitHub
+        |
+        v
+freecad-agent-watchdog
+        |
+        | TCP 127.0.0.1:8765
+        v
+ FreeCAD listener
+        |
+        v
+  Active 3D model
+        |
+        v
+Result / status
+```
+
+The actual CAD engine remains FreeCAD. FreeCAD Agent provides the automation and communication layer around it.
+
+## What can it do?
+
+FreeCAD Agent is designed to:
+
+- Create 3D CAD geometry from AI-generated CAD jobs.
+- Modify existing `.FCStd` models while working against the active FreeCAD document.
+- Inspect models, features, geometry, and bounding boxes.
+- Execute FreeCAD operations through the FreeCAD Python API.
+- Verify that the FreeCAD listener is alive before executing a job.
+- Report completed and failed jobs back to GitHub.
+- Maintain a lightweight execution history in `status.log`.
+- Recover from GitHub SHA conflicts.
+- Handle GitHub API rate limits without continuously polling.
+- Retry transient GitHub network failures using exponential backoff.
+
+## Example: prompt to CAD
+
+A high-level CAD requirement can be expressed as a normal prompt:
+
+```text
+Create a small electronics enclosure.
+
+Dimensions:
+- 90 mm long
+- 60 mm wide
+- 11 mm high
+
+Features:
+- USB-C opening centered on one 60 mm side
+- 7 mm antenna opening on the opposite 60 mm side
+- corner mounting holes
+- removable 1.5 mm cover
+```
+
+The AI agent can turn that requirement into a structured CAD job. The watchdog retrieves the job, checks FreeCAD, sends the requested action to the listener, and records the result.
+
+This makes the project useful as an automation layer for AI-assisted CAD rather than as another standalone CAD application.
 
 ## Architecture
 
-The system has two runtime components:
+The system has two primary runtime components:
 
 1. **FreeCAD listener** — runs inside the FreeCAD Python Console. It opens a local TCP endpoint at `127.0.0.1:8765` and executes CAD commands against the currently active FreeCAD document.
 2. **freecad-agent-watchdog** — runs outside FreeCAD. It polls the GitHub job queue, takes pending CAD jobs, sends them to the FreeCAD listener, and reports the result back to GitHub.
@@ -274,7 +358,7 @@ Before executing a real CAD job, the watchdog checks the FreeCAD listener using 
 
 If the listener is unavailable, the watchdog can report the execution failure instead of blindly sending the CAD command to a dead endpoint.
 
-### Status log is best-effort
+### Status log
 
 The watchdog maintains:
 
@@ -344,15 +428,17 @@ For existing CAD models, preserve the source model and its feature history whene
 ## Typical workflow
 
 ```text
-1. Start FreeCAD
-2. Open the source .FCStd model
-3. Make sure the correct document is active
-4. View -> Panels -> Python console
-5. Start the FreeCAD listener
-6. Start/verify freecad-agent-watchdog
-7. Submit a CAD job to GitHub
-8. Watch watchdog stdout/logs
-9. FreeCAD executes the requested operation
-10. Watchdog reports the result back to GitHub
-11. Check status.log for a quick execution summary
+1. Write or generate a CAD prompt
+2. Convert the prompt into a CAD job
+3. Start FreeCAD
+4. Open the source .FCStd model if required
+5. Make sure the correct document is active
+6. View -> Panels -> Python console
+7. Start the FreeCAD listener
+8. Start/verify freecad-agent-watchdog
+9. Submit the CAD job to GitHub
+10. Watch watchdog stdout/logs
+11. FreeCAD executes the requested operation
+12. Watchdog reports the result back to GitHub
+13. Check status.log for a quick execution summary
 ```
