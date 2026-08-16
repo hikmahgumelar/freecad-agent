@@ -8,4 +8,4 @@ cd "$SCRIPT_DIR"
 
 source "$SCRIPT_DIR/bin/activate"
 
-exec python -m agent.main
+exec python3 -m agent.main
