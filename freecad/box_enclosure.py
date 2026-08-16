@@ -27,7 +27,7 @@ def create_box_enclosure(command):
     screw_d = float(command.get("screw_diameter", 3.0))
     screw_margin = float(command.get("screw_margin", 5.0))
     antenna_d = float(command.get("antenna_diameter", 7.0))
-    antenna_left = float(command.get("antenna_left_offset", 10.0))
+    antenna_edge_offset = float(command.get("antenna_left_offset", 10.0))
     usb_w = float(command.get("usb_width", 12.0))
     usb_h = float(command.get("usb_height", 5.0))
     post_outer_d = float(command.get("post_outer_diameter", 6.0))
@@ -37,17 +37,16 @@ def create_box_enclosure(command):
     ))
 
     if min(L, W, H, wall, cover_t, screw_d, screw_margin,
-           antenna_d, antenna_left, usb_w, usb_h, post_outer_d) <= 0:
+           antenna_d, antenna_edge_offset, usb_w, usb_h, post_outer_d) <= 0:
         raise RuntimeError("All enclosure dimensions must be positive")
     if wall * 2 >= min(L, W) or wall >= H:
         raise RuntimeError("Invalid wall thickness")
 
-    # The USB-C and antenna interfaces are on the two opposite
-    # short faces (60 mm wide), not on the 90 mm faces.
+    # Interfaces are on the two opposite short faces (60 mm wide).
     if usb_w >= W or usb_h >= H:
         raise RuntimeError("USB-C opening is too large for the 60 mm side")
-    if antenna_left + antenna_d / 2 > W or antenna_left - antenna_d / 2 < 0:
-        raise RuntimeError("Antenna position is outside the 60 mm side")
+    if antenna_edge_offset + antenna_d > W:
+        raise RuntimeError("Antenna opening is outside the 60 mm side")
 
     for name in (
         "BoxBase", "BoxCover",
@@ -76,9 +75,10 @@ def create_box_enclosure(command):
     )
     base_shape = base_shape.cut(usb)
 
-    # Antenna: on the opposite 60 mm side (x = L),
-    # 10 mm from the left edge of that 60 mm face.
-    antenna_y = antenna_left
+    # Antenna: opposite 60 mm side (x = L).
+    # The requested 10 mm is measured from the edge of the face
+    # to the edge of the Ø7 mm opening, matching the reference drawing.
+    antenna_y = antenna_edge_offset + antenna_d / 2.0
     antenna_z = H / 2.0
     antenna = Part.makeCylinder(
         antenna_d / 2.0,
@@ -114,8 +114,6 @@ def create_box_enclosure(command):
         post.Label = f"Screw post {index} - hole Ø{int(screw_d)} mm"
         post.Shape = post_shape
 
-    # Cover remains a separate FreeCAD object. It can be exported as
-    # its own STL later, independently from the body.
     cover_shape = Part.makeBox(L, W, cover_t, App.Vector(0, 0, H))
     for x, y in screw_positions:
         hole = Part.makeCylinder(
@@ -143,8 +141,8 @@ def create_box_enclosure(command):
     base.WallThickness = wall
     base.addProperty("App::PropertyLength", "AntennaDiameter", "Interfaces")
     base.AntennaDiameter = antenna_d
-    base.addProperty("App::PropertyLength", "AntennaLeftOffset", "Interfaces")
-    base.AntennaLeftOffset = antenna_left
+    base.addProperty("App::PropertyLength", "AntennaEdgeOffset", "Interfaces")
+    base.AntennaEdgeOffset = antenna_edge_offset
     base.addProperty("App::PropertyLength", "UsbCutoutWidth", "Interfaces")
     base.UsbCutoutWidth = usb_w
     base.addProperty("App::PropertyLength", "UsbCutoutHeight", "Interfaces")
@@ -152,7 +150,7 @@ def create_box_enclosure(command):
     base.addProperty("App::PropertyString", "DesignNote", "Interfaces")
     base.DesignNote = (
         "USB-C centered on one 60 mm side; Ø7 mm antenna opening "
-        "on the opposite 60 mm side, 10 mm from the left edge."
+        "on the opposite 60 mm side, with 10 mm edge clearance."
     )
 
     doc.recompute()
@@ -183,7 +181,7 @@ def create_box_enclosure(command):
         "antenna": {
             "side": "opposite 60 mm side",
             "diameter": antenna_d,
-            "left_offset": antenna_left,
+            "edge_offset": antenna_edge_offset,
         },
         "screw_posts": {
             "count": 4,
