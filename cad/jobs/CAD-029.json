@@ -1,13 +1,13 @@
 {
-  "id": "CAD-029",
   "action": "ping",
-  "status": "pending",
-  "created_by": "ChatGPT",
-  "created_at": "2026-08-16T07:55:00+07:00",
-  "started_at": null,
   "completed_at": null,
-  "updated_at": null,
+  "created_at": "2026-08-16T07:55:00+07:00",
+  "created_by": "ChatGPT",
   "error": null,
+  "id": "CAD-029",
   "parameters": {},
-  "result": null
+  "result": null,
+  "started_at": null,
+  "status": "running",
+  "updated_at": "2026-08-16T01:20:11.073124+00:00"
 }
