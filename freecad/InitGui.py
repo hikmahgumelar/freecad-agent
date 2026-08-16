@@ -20,7 +20,7 @@ if not os.path.isdir(module_dir):
             module_dir = candidate
             break
 
-listener_path = os.path.join(module_dir, "freecad_agent_listener.py")
+listener_path = os.path.join(module_dir, "freecad_agent_listener_large.py")
 
 if not os.path.isfile(listener_path):
     print(f"[freecad-agent] startup listener not found: {listener_path}")
@@ -36,8 +36,6 @@ else:
         listener_module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(listener_module)
 
-        # Startup is idempotent. If FreeCAD reloads this module, don't leave
-        # an older listener socket behind.
         try:
             listener_module.stop_server()
         except Exception:
