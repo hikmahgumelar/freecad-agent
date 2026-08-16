@@ -1,6 +1,5 @@
 {
   "action": "create_box_enclosure",
-  "completed_at": "2026-08-16T06:45:38.793097+00:00",
   "created_at": "2026-08-16T11:44:00+07:00",
   "created_by": "ChatGPT",
   "error": null,
@@ -20,49 +19,8 @@
     "wall": 1.5,
     "width": 60.0
   },
-  "result": {
-    "action": "create_box_enclosure",
-    "antenna": {
-      "diameter": 7.0,
-      "left_offset": 10.0,
-      "side": "opposite 60 mm side"
-    },
-    "cover": {
-      "length": 90.0,
-      "screw_hole_diameter": 3.0,
-      "thickness": 1.5,
-      "width": 60.0
-    },
-    "dimensions": {
-      "height": 11.0,
-      "length": 90.0,
-      "width": 60.0
-    },
-    "document": "Box90x60x11",
-    "objects": [
-      "BoxBase",
-      "BoxCover",
-      "ScrewPost1",
-      "ScrewPost2",
-      "ScrewPost3",
-      "ScrewPost4"
-    ],
-    "ok": true,
-    "output_path": "/home/hikmah/projectx/freecad-agent/cad/output/box-90x60x11.FCStd",
-    "screw_posts": {
-      "count": 4,
-      "hole_diameter": 3.0,
-      "outer_diameter": 6.0
-    },
-    "usb_c": {
-      "height": 5.0,
-      "position": "center",
-      "side": "60 mm side",
-      "width": 12.0
-    },
-    "wall_thickness": 1.5
-  },
-  "started_at": "2026-08-16T06:45:36.631709+00:00",
-  "status": "completed",
-  "updated_at": "2026-08-16T06:45:38.793119+00:00"
+  "revision": 2,
+  "revision_note": "Fix interface orientation: USB-C centered on one 60 mm side and antenna opening on the opposite 60 mm side.",
+  "status": "pending",
+  "updated_at": "2026-08-16T13:45:00+07:00"
 }
