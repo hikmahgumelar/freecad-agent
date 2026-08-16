@@ -108,3 +108,32 @@ class GitHubClient:
             message=message,
             sha=sha,
         )
+
+    def append_status_log(self, line: str):
+        """Append one execution result to status.log.
+
+        The status log is intentionally best-effort. A failure to write the
+        log must never prevent the watchdog from reporting the actual job
+        result through cad/jobs/*.json.
+        """
+        path = "status.log"
+
+        try:
+            content, sha = self.read_file(path)
+        except RuntimeError as exc:
+            if "404" not in str(exc):
+                raise
+            content = ""
+            sha = None
+
+        if content and not content.endswith("\n"):
+            content += "\n"
+
+        content += line.rstrip("\n") + "\n"
+
+        self.write_file(
+            path=path,
+            content=content,
+            sha=sha,
+            message="chore: update CAD execution status log",
+        )
