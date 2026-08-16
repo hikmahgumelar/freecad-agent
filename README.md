@@ -86,6 +86,63 @@ The AI agent can turn that requirement into a structured CAD job. The watchdog r
 
 This makes the project useful as an automation layer for AI-assisted CAD rather than as another standalone CAD application.
 
+## Prerequisites
+
+Before running FreeCAD Agent, prepare the following:
+
+### Required software
+
+- **FreeCAD** — must be installed and available on the machine where the CAD model will be executed. FreeCAD must be running when a CAD job is processed.
+- **Python 3** — used by the external watchdog. The repository includes a Python virtual environment under `bin/`.
+- **Git** — required to clone and update the repository.
+- **Supervisor** — optional, but recommended when running the watchdog as a background service.
+
+### Python dependencies
+
+The watchdog currently requires:
+
+```text
+requests>=2.32,<3
+python-dotenv>=1.0,<2
+```
+
+They are defined in `requirements.txt` and should be installed into the repository's Python virtual environment.
+
+From the repository root:
+
+```bash
+./bin/python3 -m pip install -r requirements.txt
+```
+
+Verify the environment with:
+
+```bash
+./bin/python3 -c 'import requests, dotenv; print("Python dependencies OK")'
+```
+
+### GitHub access
+
+The watchdog uses the configured GitHub repository as the CAD job queue and reports job state/results back to GitHub.
+
+Configure the repository in `.env`:
+
+```env
+GITHUB_REPO=hikmahgumelar/freecad-agent
+POLL_INTERVAL=30
+```
+
+The GitHub authentication token must also be configured using the project's supported environment/configuration mechanism. Do not commit the token or any other credentials to the repository.
+
+### FreeCAD listener
+
+The FreeCAD listener runs **inside FreeCAD**, not inside the watchdog virtual environment. It uses the FreeCAD Python API and exposes the local endpoint:
+
+```text
+127.0.0.1:8765
+```
+
+The listener must be started before the watchdog can execute CAD jobs.
+
 ## Architecture
 
 The system has two primary runtime components:
