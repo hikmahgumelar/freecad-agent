@@ -511,3 +511,79 @@ For existing CAD models, preserve the source model and its feature history whene
 12. Watchdog reports the result back to GitHub
 13. Check status.log for a quick execution summary
 ```
+
+## Verified CAD result
+
+The enclosure automation was verified end-to-end in FreeCAD using the `create_box_enclosure` CAD job.
+
+Verified model:
+
+```text
+90 mm × 60 mm × 11 mm enclosure
+1.5 mm removable cover
+4 × Ø3 mm mounting holes
+USB-C opening on a 60 mm face
+Ø7 mm SMA antenna opening on the opposite 60 mm face
+10 mm antenna clearance measured from the face edge to the opening edge
+```
+
+The final FreeCAD document was inspected directly through the FreeCAD Python console rather than relying only on the visual orientation of the viewport. The base bounding box was verified as:
+
+```text
+BoundBox (0, 0, 0, 90, 60, 11)
+Length = 90 mm
+Width  = 60 mm
+Height = 11 mm
+```
+
+The successful result places the USB-C and antenna interfaces on the two opposite **60 mm × 11 mm end faces**, not on the 90 mm × 11 mm long faces.
+
+The antenna requirement is specifically:
+
+```text
+Face: 60 mm × 11 mm
+Opening: Ø7 mm
+Clearance: 10 mm from the face edge to the opening edge
+```
+
+For a Ø7 mm opening, this means the opening center is 13.5 mm from the corresponding face edge.
+
+The final model also keeps the cover as a separate FreeCAD object so the base and cover can be exported independently for 3D printing.
+
+### Runtime verification
+
+During debugging, the FreeCAD model topology was inspected directly using `Shape.Faces` and bounding boxes. This exposed an earlier listener/runtime problem where the generated result did not match the current geometry source.
+
+The listener was subsequently changed so the enclosure module is loaded from the exact repository path and the enclosure function is resolved at job execution time. This prevents a stale imported function reference from being reused after source changes.
+
+The verified runtime sequence is therefore:
+
+```text
+AI prompt
+   |
+   v
+CAD job
+   |
+   v
+GitHub queue
+   |
+   v
+freecad-agent-watchdog
+   |
+   v
+FreeCAD listener
+   |
+   v
+create_box_enclosure()
+   |
+   v
+FreeCAD document
+   |
+   v
+Topology / geometry verification
+   |
+   v
+Completed CAD result
+```
+
+This verification is an example of the intended FreeCAD Agent workflow: CAD generation is not considered complete merely because a job reports `completed`; the resulting FreeCAD geometry can also be inspected programmatically when dimensional or placement accuracy matters.
