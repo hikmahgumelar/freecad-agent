@@ -31,37 +31,61 @@ def create_box_enclosure(command):
     usb_w = float(command.get("usb_width", 12.0))
     usb_h = float(command.get("usb_height", 5.0))
     post_outer_d = float(command.get("post_outer_diameter", 6.0))
-    output_path = os.path.abspath(command.get("output_path", "/app/freecad-agent/cad/output/box-90x60x11.FCStd"))
+    output_path = os.path.abspath(command.get(
+        "output_path",
+        "/home/hikmah/projectx/freecad-agent/cad/output/box-90x60x11.FCStd"
+    ))
 
-    if min(L, W, H, wall, cover_t, screw_d, screw_margin, antenna_d, antenna_left, usb_w, usb_h, post_outer_d) <= 0:
+    if min(L, W, H, wall, cover_t, screw_d, screw_margin,
+           antenna_d, antenna_left, usb_w, usb_h, post_outer_d) <= 0:
         raise RuntimeError("All enclosure dimensions must be positive")
     if wall * 2 >= min(L, W) or wall >= H:
         raise RuntimeError("Invalid wall thickness")
-    if antenna_left + antenna_d / 2 > L or antenna_left - antenna_d / 2 < 0:
-        raise RuntimeError("Antenna position is outside the 90 mm side")
-    if usb_w >= L or usb_h >= H:
-        raise RuntimeError("USB-C opening is too large")
 
-    for name in ("BoxBase", "BoxCover", "ScrewPost1", "ScrewPost2", "ScrewPost3", "ScrewPost4"):
+    # The USB-C and antenna interfaces are on the two opposite
+    # short faces (60 mm wide), not on the 90 mm faces.
+    if usb_w >= W or usb_h >= H:
+        raise RuntimeError("USB-C opening is too large for the 60 mm side")
+    if antenna_left + antenna_d / 2 > W or antenna_left - antenna_d / 2 < 0:
+        raise RuntimeError("Antenna position is outside the 60 mm side")
+
+    for name in (
+        "BoxBase", "BoxCover",
+        "ScrewPost1", "ScrewPost2", "ScrewPost3", "ScrewPost4"
+    ):
         obj = doc.getObject(name)
         if obj is not None:
             doc.removeObject(name)
 
     outer = Part.makeBox(L, W, H)
-    inner = Part.makeBox(L - 2 * wall, W - 2 * wall, H - wall,
-                         App.Vector(wall, wall, wall))
+    inner = Part.makeBox(
+        L - 2 * wall,
+        W - 2 * wall,
+        H - wall,
+        App.Vector(wall, wall, wall)
+    )
     base_shape = outer.cut(inner)
 
-    usb_x = (L - usb_w) / 2.0
-    usb = Part.makeBox(usb_w, wall + 2.0, usb_h,
-                       App.Vector(usb_x, -1.0, (H - usb_h) / 2.0))
+    # USB-C: centered on the first 60 mm side (x = 0).
+    usb_y = (W - usb_w) / 2.0
+    usb = Part.makeBox(
+        wall + 2.0,
+        usb_w,
+        usb_h,
+        App.Vector(-1.0, usb_y, (H - usb_h) / 2.0)
+    )
     base_shape = base_shape.cut(usb)
 
-    antenna_x = antenna_left
+    # Antenna: on the opposite 60 mm side (x = L),
+    # 10 mm from the left edge of that 60 mm face.
+    antenna_y = antenna_left
     antenna_z = H / 2.0
-    antenna = Part.makeCylinder(antenna_d / 2.0, wall + 2.0,
-                                App.Vector(antenna_x, W - wall - 1.0, antenna_z),
-                                App.Vector(0, 1, 0))
+    antenna = Part.makeCylinder(
+        antenna_d / 2.0,
+        wall + 2.0,
+        App.Vector(L - wall - 1.0, antenna_y, antenna_z),
+        App.Vector(1, 0, 0)
+    )
     base_shape = base_shape.cut(antenna)
 
     base = doc.addObject("Part::Feature", "BoxBase")
@@ -75,19 +99,30 @@ def create_box_enclosure(command):
         (L - screw_margin, W - screw_margin),
     ]
     for index, (x, y) in enumerate(screw_positions, 1):
-        outer_post = Part.makeCylinder(post_outer_d / 2.0, H - wall,
-                                       App.Vector(x, y, wall))
-        inner_hole = Part.makeCylinder(screw_d / 2.0, H + 1.0,
-                                       App.Vector(x, y, 0))
+        outer_post = Part.makeCylinder(
+            post_outer_d / 2.0,
+            H - wall,
+            App.Vector(x, y, wall)
+        )
+        inner_hole = Part.makeCylinder(
+            screw_d / 2.0,
+            H + 1.0,
+            App.Vector(x, y, 0)
+        )
         post_shape = outer_post.cut(inner_hole)
         post = doc.addObject("Part::Feature", f"ScrewPost{index}")
         post.Label = f"Screw post {index} - hole Ø{int(screw_d)} mm"
         post.Shape = post_shape
 
+    # Cover remains a separate FreeCAD object. It can be exported as
+    # its own STL later, independently from the body.
     cover_shape = Part.makeBox(L, W, cover_t, App.Vector(0, 0, H))
     for x, y in screw_positions:
-        hole = Part.makeCylinder(screw_d / 2.0, cover_t + 2.0,
-                                 App.Vector(x, y, H - 1.0))
+        hole = Part.makeCylinder(
+            screw_d / 2.0,
+            cover_t + 2.0,
+            App.Vector(x, y, H - 1.0)
+        )
         cover_shape = cover_shape.cut(hole)
 
     cover = doc.addObject("Part::Feature", "BoxCover")
@@ -115,7 +150,10 @@ def create_box_enclosure(command):
     base.addProperty("App::PropertyLength", "UsbCutoutHeight", "Interfaces")
     base.UsbCutoutHeight = usb_h
     base.addProperty("App::PropertyString", "DesignNote", "Interfaces")
-    base.DesignNote = "USB-C centered on one 60 mm side; Ø7 mm antenna opening on opposite 60 mm side, 10 mm from left edge."
+    base.DesignNote = (
+        "USB-C centered on one 60 mm side; Ø7 mm antenna opening "
+        "on the opposite 60 mm side, 10 mm from the left edge."
+    )
 
     doc.recompute()
     _fit_view(doc)
@@ -129,9 +167,31 @@ def create_box_enclosure(command):
         "output_path": output_path,
         "dimensions": {"length": L, "width": W, "height": H},
         "wall_thickness": wall,
-        "cover": {"length": L, "width": W, "thickness": cover_t, "screw_hole_diameter": screw_d},
-        "usb_c": {"side": "60 mm side", "position": "center", "width": usb_w, "height": usb_h},
-        "antenna": {"side": "opposite 60 mm side", "diameter": antenna_d, "left_offset": antenna_left},
-        "screw_posts": {"count": 4, "hole_diameter": screw_d, "outer_diameter": post_outer_d},
-        "objects": ["BoxBase", "BoxCover", "ScrewPost1", "ScrewPost2", "ScrewPost3", "ScrewPost4"],
+        "cover": {
+            "length": L,
+            "width": W,
+            "thickness": cover_t,
+            "screw_hole_diameter": screw_d,
+            "separate_object": True,
+        },
+        "usb_c": {
+            "side": "60 mm side",
+            "position": "center",
+            "width": usb_w,
+            "height": usb_h,
+        },
+        "antenna": {
+            "side": "opposite 60 mm side",
+            "diameter": antenna_d,
+            "left_offset": antenna_left,
+        },
+        "screw_posts": {
+            "count": 4,
+            "hole_diameter": screw_d,
+            "outer_diameter": post_outer_d,
+        },
+        "objects": [
+            "BoxBase", "BoxCover",
+            "ScrewPost1", "ScrewPost2", "ScrewPost3", "ScrewPost4"
+        ],
     }
