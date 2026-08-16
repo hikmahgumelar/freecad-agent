@@ -4,16 +4,18 @@ from datetime import datetime, timezone
 
 from .config import load_config
 from .freecad_executor import FreeCADExecutor
-from .github import GitHubClient
+from .github import GitHubClient, GitHubRateLimitError
 from .jobs import Job, JobQueue
 
 
 STATUS_LOG_PATH = "status.log"
+DEFAULT_RATE_LIMIT_SLEEP = 300
 
 
 class Watchdog:
     def __init__(self):
         self.running = True
+        self.rate_limit_reset_at = None
 
         config = load_config()
 
@@ -35,6 +37,46 @@ class Watchdog:
         print("\nStopping watchdog...")
         self.running = False
 
+    def _rate_limit_cooldown(self, exc: GitHubRateLimitError):
+        now = int(time.time())
+        reset_at = exc.reset_at
+
+        if reset_at is not None and reset_at > now:
+            sleep_seconds = reset_at - now + 2
+            reset_text = datetime.fromtimestamp(
+                reset_at,
+                tz=timezone.utc,
+            ).isoformat()
+        else:
+            sleep_seconds = DEFAULT_RATE_LIMIT_SLEEP
+            reset_text = "unknown"
+
+        self.rate_limit_reset_at = reset_at
+
+        print(
+            "[GITHUB] API rate limit reached; "
+            f"cooling down for {sleep_seconds}s "
+            f"(reset={reset_text})"
+        )
+
+        deadline = time.monotonic() + sleep_seconds
+
+        while self.running and time.monotonic() < deadline:
+            remaining = max(
+                0,
+                int(deadline - time.monotonic()),
+            )
+            print(
+                f"[GITHUB] rate-limit cooldown: "
+                f"{remaining}s remaining",
+                end="\r",
+                flush=True,
+            )
+            time.sleep(min(5, max(0.1, remaining)))
+
+        if self.running:
+            print("[GITHUB] rate-limit cooldown finished")
+
     def execute_job(self, job: Job):
         print(
             f"[JOB] {job.job_id} "
@@ -47,8 +89,6 @@ class Watchdog:
             )
 
         # Health-check the FreeCAD listener before executing a real CAD job.
-        # This makes stale/missing FreeCAD listeners fail explicitly instead
-        # of leaving the job hanging until the socket timeout.
         self.freecad.execute({"action": "ping"})
         print("[FREECAD] listener healthy")
 
@@ -87,6 +127,12 @@ class Watchdog:
                 f"[STATUS] {job.job_id} "
                 f"status={status} logged"
             )
+        except GitHubRateLimitError as exc:
+            print(
+                f"[GITHUB] Could not write {STATUS_LOG_PATH}: "
+                "rate limit reached"
+            )
+            self._rate_limit_cooldown(exc)
         except Exception as exc:
             print(
                 f"[ERROR] Could not write "
@@ -136,6 +182,13 @@ class Watchdog:
                 "completed",
             )
 
+        except GitHubRateLimitError as exc:
+            print(
+                f"[GITHUB] Rate limit interrupted "
+                f"job {job.job_id}"
+            )
+            self._rate_limit_cooldown(exc)
+
         except Exception as exc:
             print(
                 f"[JOB] {job.job_id} "
@@ -154,6 +207,12 @@ class Watchdog:
                     error=str(exc),
                     completed_at=failed_at,
                 )
+            except GitHubRateLimitError as rate_exc:
+                print(
+                    f"[GITHUB] Could not report failure for "
+                    f"{job.job_id}: rate limit reached"
+                )
+                self._rate_limit_cooldown(rate_exc)
             except Exception as report_error:
                 print(
                     "[ERROR] Could not report "
@@ -168,7 +227,7 @@ class Watchdog:
 
     def run(self):
         print("================================")
-        print(" freecad-agent-watchdog v0.3")
+        print(" freecad-agent-watchdog v0.4")
         print("================================")
         print(
             f"Polling interval: "
@@ -179,6 +238,8 @@ class Watchdog:
             f"{self.freecad.host}:{self.freecad.port}"
         )
         print("Health check: enabled")
+        print("GitHub rate-limit handling: enabled")
+        print("GitHub SHA-conflict recovery: enabled")
         print()
 
         while self.running:
@@ -196,6 +257,9 @@ class Watchdog:
                         break
 
                     self.process_job(job)
+
+            except GitHubRateLimitError as exc:
+                self._rate_limit_cooldown(exc)
 
             except Exception as exc:
                 print(f"[ERROR] {exc}")
