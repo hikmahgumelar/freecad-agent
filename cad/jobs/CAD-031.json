@@ -1,5 +1,6 @@
 {
   "action": "create_box_enclosure",
+  "completed_at": null,
   "created_at": "2026-08-16T14:45:00+07:00",
   "created_by": "ChatGPT",
   "error": null,
@@ -21,7 +22,8 @@
   },
   "result": null,
   "revision": 6,
-  "revision_note": "Verification run after listener fix. USB-C must be on X=0 60mm face centered; antenna Ø7 must be on opposite X=90 60mm face with 10mm edge-to-edge clearance; cover separate.",
-  "status": "pending",
-  "updated_at": "2026-08-16T14:45:00+07:00"
+  "revision_note": "Verification run after listener fix. USB-C must be on X=0 60mm face centered; antenna \u00d87 must be on opposite X=90 60mm face with 10mm edge-to-edge clearance; cover separate.",
+  "started_at": "2026-08-16T07:54:23.665088+00:00",
+  "status": "running",
+  "updated_at": "2026-08-16T07:54:23.665103+00:00"
 }
