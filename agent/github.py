@@ -4,6 +4,18 @@ from typing import Any
 import requests
 
 
+class GitHubRateLimitError(RuntimeError):
+    """Raised when GitHub API rate limit is exhausted."""
+
+    def __init__(self, message: str, reset_at: int | None = None):
+        super().__init__(message)
+        self.reset_at = reset_at
+
+
+class GitHubConflictError(RuntimeError):
+    """Raised when a GitHub contents update has a stale blob SHA."""
+
+
 class GitHubClient:
     def __init__(self, token: str, repository: str):
         self.repository = repository
@@ -36,10 +48,32 @@ class GitHubClient:
         )
 
         if not response.ok:
+            message = response.text
+
+            if response.status_code == 403 and (
+                "rate limit" in message.lower()
+                or response.headers.get("X-RateLimit-Remaining") == "0"
+            ):
+                reset_raw = response.headers.get("X-RateLimit-Reset")
+                try:
+                    reset_at = int(reset_raw) if reset_raw else None
+                except ValueError:
+                    reset_at = None
+
+                raise GitHubRateLimitError(
+                    f"GitHub API rate limit exceeded: {message}",
+                    reset_at=reset_at,
+                )
+
+            if response.status_code == 409:
+                raise GitHubConflictError(
+                    f"GitHub API conflict: {message}"
+                )
+
             raise RuntimeError(
                 f"GitHub API error "
                 f"{response.status_code}: "
-                f"{response.text}"
+                f"{message}"
             )
 
         if not response.text:
