@@ -201,14 +201,35 @@ For each job it:
 4. Waits for FreeCAD to execute the command.
 5. Marks the job as completed and stores the result when successful.
 6. Marks the job as failed and stores the error when execution fails.
+7. Appends the final execution result to `status.log` so the external agent can quickly determine whether the task completed or failed.
 
-Typical output looks like:
+### Execution status log
+
+The watchdog maintains:
+
+```text
+status.log
+```
+
+Each completed or failed job adds one line, for example:
+
+```text
+2026-08-16T01:30:00+00:00 | job=CAD-030 | action=ping | status=completed
+2026-08-16T01:31:00+00:00 | job=CAD-031 | action=create_case_rails | status=failed | error=No active FreeCAD document
+```
+
+The `cad/jobs/CAD-xxx.json` file remains the authoritative per-job record. `status.log` is a lightweight execution history that makes it easy to see the latest watchdog results without inspecting every job file.
+
+A failure to write `status.log` does **not** override the actual job result. The watchdog will still report the job status through `cad/jobs/*.json`.
+
+Typical watchdog output looks like:
 
 ```text
 [QUEUE] 1 pending job(s)
 [JOB] CAD-029 status=pending
 [JOB] CAD-029 action=ping
 [JOB] CAD-029 status=completed
+[STATUS] CAD-029 status=completed logged
 ```
 
 If FreeCAD or the listener is not running, the watchdog cannot execute the CAD command. A typical error is:
@@ -246,4 +267,5 @@ For existing CAD models, preserve the source model and its feature history whene
 8. Watch watchdog stdout/logs
 9. FreeCAD executes the requested operation
 10. Watchdog reports the result back to GitHub
+11. Check status.log for a quick execution summary
 ```
