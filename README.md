@@ -59,6 +59,8 @@ The Python Console appears at the bottom of the FreeCAD window.
 
 ### 3. Start the listener
 
+The repository path used in this example is `/app/freecad-agent`. If you clone the repository somewhere else, replace `/app/freecad-agent` with your local repository path.
+
 Paste the following into the FreeCAD Python Console and press Enter:
 
 ```python
@@ -69,7 +71,7 @@ try:
 except Exception:
     pass
 
-path = "/home/hikmah/projectx/freecad-agent/freecad/freecad_agent_listener.py"
+path = "/app/freecad-agent/freecad/freecad_agent_listener.py"
 
 spec = importlib.util.spec_from_file_location(
     "freecad_agent_listener_latest",
@@ -114,12 +116,14 @@ The watchdog itself does not create a CAD model unless FreeCAD is running and th
 
 ### Manual start
 
-From a terminal:
+From a terminal, assuming the repository is located at `/app/freecad-agent`:
 
 ```bash
-cd /home/hikmah/projectx/freecad-agent
+cd /app/freecad-agent
 ./freecad-agent-watchdog
 ```
+
+If you cloned the repository to another location, use that location instead.
 
 Expected startup output:
 
@@ -139,9 +143,9 @@ Example:
 
 ```ini
 [program:freecad]
-directory=/home/hikmah/projectx/freecad-agent
+directory=/app/freecad-agent
 
-command=/home/hikmah/projectx/freecad-agent/freecad-agent-watchdog
+command=/app/freecad-agent/freecad-agent-watchdog
 
 autostart=true
 autorestart=true
@@ -247,7 +251,7 @@ For CAD jobs that modify an existing model, open the source `.FCStd` file from `
 Example:
 
 ```text
-/home/hikmah/projectx/freecad-agent/cad/source/case-V1.FCStd
+/app/freecad-agent/cad/source/case-V1.FCStd
 ```
 
 Do not open a previously generated output file when the job is intended to modify the source model.
