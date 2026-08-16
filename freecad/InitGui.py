@@ -1,20 +1,42 @@
 """FreeCAD GUI startup hook for freecad-agent.
 
-This file is loaded automatically when the repository's ``freecad``
-directory is installed/linked as a FreeCAD user Mod module.
+FreeCAD executes InitGui.py from a Mod module without guaranteeing the
+normal Python ``__file__`` global. Resolve the installed module directory
+from FreeCAD's user Mod path instead of relying on ``__file__``.
 """
 
 import importlib.util
 import os
 
+import FreeCAD as App
+
 
 _listener_module = None
+
+
+def _module_dir():
+    user_mod_dir = os.path.join(App.getUserAppDataDir(), "Mod", "freecad-agent")
+    if os.path.isdir(user_mod_dir):
+        return user_mod_dir
+
+    import sys
+    for path in sys.path:
+        candidate = os.path.join(path, "freecad-agent")
+        if os.path.isdir(candidate):
+            return candidate
+
+    return None
 
 
 def _start_freecad_agent_listener():
     global _listener_module
 
-    listener_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "freecad_agent_listener.py")
+    module_dir = _module_dir()
+    if module_dir is None:
+        print("[freecad-agent] startup listener failed: module directory not found")
+        return
+
+    listener_path = os.path.join(module_dir, "freecad_agent_listener.py")
 
     if not os.path.isfile(listener_path):
         print(f"[freecad-agent] listener not found: {listener_path}")
@@ -31,8 +53,6 @@ def _start_freecad_agent_listener():
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
 
-        # Idempotent startup: a repeated FreeCAD module initialization should
-        # not create multiple listener sockets.
         try:
             module.stop_server()
         except Exception:
