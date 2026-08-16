@@ -56,6 +56,24 @@ class FreeCADExecutor:
                 "skirt_width": p.get("skirt_width", 1.6),
                 "output_path": p.get("output_path", "/home/hikmah/projectx/freecad-agent/cad/output/case-v1-with-slider-v1.FCStd"),
             })
+        if action == "create_box_enclosure":
+            p = job.get("parameters", {})
+            return self._send({
+                "action": "create_box_enclosure",
+                "length": p.get("length", 90.0),
+                "width": p.get("width", 60.0),
+                "height": p.get("height", 11.0),
+                "wall": p.get("wall", 1.5),
+                "cover_thickness": p.get("cover_thickness", 1.5),
+                "screw_diameter": p.get("screw_diameter", 3.0),
+                "screw_margin": p.get("screw_margin", 5.0),
+                "antenna_diameter": p.get("antenna_diameter", 7.0),
+                "antenna_left_offset": p.get("antenna_left_offset", 10.0),
+                "usb_width": p.get("usb_width", 12.0),
+                "usb_height": p.get("usb_height", 5.0),
+                "post_outer_diameter": p.get("post_outer_diameter", 6.0),
+                "output_path": p.get("output_path", "/app/freecad-agent/cad/output/box-90x60x11.FCStd"),
+            })
         raise RuntimeError(f"Unsupported action: {action}")
 
     def _send(self, command):
