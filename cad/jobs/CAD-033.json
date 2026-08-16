@@ -1,9 +1,9 @@
 {
   "action": "create_large_enclosure",
-  "completed_at": null,
+  "completed_at": "2026-08-16T10:54:43.870963+00:00",
   "created_at": "2026-08-16T17:50:00+07:00",
   "created_by": "ChatGPT",
-  "error": null,
+  "error": "[Errno 111] Connection refused",
   "id": "CAD-033",
   "parameters": {
     "bottom_thickness": 2.0,
@@ -27,6 +27,6 @@
   "revision": 1,
   "revision_note": "Final revision: body 200x100x150 mm, wall 2 mm, bottom 2 mm; internal horizontal TOP plate centered at Z=75 mm, 2 mm thick, touching all four sides, with 6x \u00d850 mm holes in symmetric 3x2 pattern; removable lid 204.4x104.4x60 mm, 2 mm walls/top, 58 mm skirt, inner 200.4x100.4 mm, 0.2 mm clearance per side, lid surrounds body externally and top sits above body.",
   "started_at": "2026-08-16T10:54:42.661251+00:00",
-  "status": "running",
-  "updated_at": "2026-08-16T10:54:42.661267+00:00"
+  "status": "failed",
+  "updated_at": "2026-08-16T10:54:43.870979+00:00"
 }
