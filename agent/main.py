@@ -4,18 +4,25 @@ from datetime import datetime, timezone
 
 from .config import load_config
 from .freecad_executor import FreeCADExecutor
-from .github import GitHubClient, GitHubRateLimitError
+from .github import (
+    GitHubClient,
+    GitHubRateLimitError,
+    GitHubTransientError,
+)
 from .jobs import Job, JobQueue
 
 
 STATUS_LOG_PATH = "status.log"
 DEFAULT_RATE_LIMIT_SLEEP = 300
+DEFAULT_TRANSIENT_SLEEP = 30
+MAX_TRANSIENT_SLEEP = 300
 
 
 class Watchdog:
     def __init__(self):
         self.running = True
         self.rate_limit_reset_at = None
+        self.transient_sleep = DEFAULT_TRANSIENT_SLEEP
 
         config = load_config()
 
@@ -59,7 +66,31 @@ class Watchdog:
             f"(reset={reset_text})"
         )
 
-        deadline = time.monotonic() + sleep_seconds
+        self._sleep_with_progress(sleep_seconds, "rate-limit cooldown")
+
+        if self.running:
+            print("[GITHUB] rate-limit cooldown finished")
+
+    def _transient_cooldown(self, exc: GitHubTransientError):
+        sleep_seconds = self.transient_sleep
+
+        print(
+            "[GITHUB] transient network error; "
+            f"retrying in {sleep_seconds}s: {exc}"
+        )
+
+        self._sleep_with_progress(
+            sleep_seconds,
+            "network retry cooldown",
+        )
+
+        self.transient_sleep = min(
+            self.transient_sleep * 2,
+            MAX_TRANSIENT_SLEEP,
+        )
+
+    def _sleep_with_progress(self, seconds: int, label: str):
+        deadline = time.monotonic() + seconds
 
         while self.running and time.monotonic() < deadline:
             remaining = max(
@@ -67,15 +98,12 @@ class Watchdog:
                 int(deadline - time.monotonic()),
             )
             print(
-                f"[GITHUB] rate-limit cooldown: "
+                f"[GITHUB] {label}: "
                 f"{remaining}s remaining",
                 end="\r",
                 flush=True,
             )
             time.sleep(min(5, max(0.1, remaining)))
-
-        if self.running:
-            print("[GITHUB] rate-limit cooldown finished")
 
     def execute_job(self, job: Job):
         print(
@@ -133,6 +161,12 @@ class Watchdog:
                 "rate limit reached"
             )
             self._rate_limit_cooldown(exc)
+        except GitHubTransientError as exc:
+            print(
+                f"[GITHUB] Could not write {STATUS_LOG_PATH}: "
+                "temporary network error"
+            )
+            self._transient_cooldown(exc)
         except Exception as exc:
             print(
                 f"[ERROR] Could not write "
@@ -182,12 +216,21 @@ class Watchdog:
                 "completed",
             )
 
+            self.transient_sleep = DEFAULT_TRANSIENT_SLEEP
+
         except GitHubRateLimitError as exc:
             print(
                 f"[GITHUB] Rate limit interrupted "
                 f"job {job.job_id}"
             )
             self._rate_limit_cooldown(exc)
+
+        except GitHubTransientError as exc:
+            print(
+                f"[GITHUB] Network failure interrupted "
+                f"job {job.job_id}: {exc}"
+            )
+            self._transient_cooldown(exc)
 
         except Exception as exc:
             print(
@@ -213,6 +256,12 @@ class Watchdog:
                     f"{job.job_id}: rate limit reached"
                 )
                 self._rate_limit_cooldown(rate_exc)
+            except GitHubTransientError as network_exc:
+                print(
+                    f"[GITHUB] Could not report failure for "
+                    f"{job.job_id}: network error"
+                )
+                self._transient_cooldown(network_exc)
             except Exception as report_error:
                 print(
                     "[ERROR] Could not report "
@@ -227,7 +276,7 @@ class Watchdog:
 
     def run(self):
         print("================================")
-        print(" freecad-agent-watchdog v0.4")
+        print(" freecad-agent-watchdog v0.5")
         print("================================")
         print(
             f"Polling interval: "
@@ -240,6 +289,7 @@ class Watchdog:
         print("Health check: enabled")
         print("GitHub rate-limit handling: enabled")
         print("GitHub SHA-conflict recovery: enabled")
+        print("GitHub network retry/backoff: enabled")
         print()
 
         while self.running:
@@ -260,6 +310,9 @@ class Watchdog:
 
             except GitHubRateLimitError as exc:
                 self._rate_limit_cooldown(exc)
+
+            except GitHubTransientError as exc:
+                self._transient_cooldown(exc)
 
             except Exception as exc:
                 print(f"[ERROR] {exc}")
