@@ -86,6 +86,32 @@ The AI agent can turn that requirement into a structured CAD job. The watchdog r
 
 This makes the project useful as an automation layer for AI-assisted CAD rather than as another standalone CAD application.
 
+## How to use FreeCAD Agent with ChatGPT
+
+The intended workflow starts with a normal conversation with **ChatGPT**. Describe the CAD model you want in natural language, including dimensions, interfaces, mounting points, clearances, and which parts should remain separate.
+
+For example:
+
+```text
+Create a 90 × 60 × 11 mm electronics enclosure.
+
+Requirements:
+- USB-C opening centered on one 60 mm side.
+- SMA antenna opening Ø7 mm on the opposite 60 mm side.
+- The antenna opening must be 10 mm from the edge of that face,
+  measured from the face edge to the opening edge.
+- Four Ø3 mm mounting holes at the corners.
+- Separate removable cover, 90 × 60 × 1.5 mm.
+```
+
+ChatGPT can then help translate the prompt into a structured CAD job for FreeCAD Agent. The important part is to state **which physical face** a feature belongs to, not only its coordinates. This makes requirements such as “antenna on the 60 mm face” unambiguous.
+
+The resulting job is submitted to the GitHub queue, where `freecad-agent-watchdog` picks it up and sends it to the FreeCAD listener.
+
+![FreeCAD Agent CAD result](docs/images/verified-enclosure-perspective.svg)
+
+> Example: a natural-language CAD requirement is turned into a FreeCAD enclosure with the requested interfaces and mounting features.
+
 ## Prerequisites
 
 Before running FreeCAD Agent, prepare the following:
@@ -497,24 +523,50 @@ For existing CAD models, preserve the source model and its feature history whene
 ## Typical workflow
 
 ```text
-1. Write or generate a CAD prompt
-2. Convert the prompt into a CAD job
-3. Start FreeCAD
-4. Open the source .FCStd model if required
-5. Make sure the correct document is active
-6. View -> Panels -> Python console
-7. Start the FreeCAD listener
-8. Start/verify freecad-agent-watchdog
-9. Submit the CAD job to GitHub
-10. Watch watchdog stdout/logs
-11. FreeCAD executes the requested operation
-12. Watchdog reports the result back to GitHub
-13. Check status.log for a quick execution summary
+1. Write or generate a CAD prompt in ChatGPT
+2. Describe dimensions, faces, interfaces, mounting points, and clearances
+3. Convert the prompt into a CAD job
+4. Start FreeCAD
+5. Open the source .FCStd model if required
+6. Make sure the correct document is active
+7. View -> Panels -> Python console
+8. Start the FreeCAD listener
+9. Start/verify freecad-agent-watchdog
+10. Submit the CAD job to GitHub
+11. Watch watchdog stdout/logs
+12. FreeCAD executes the requested operation
+13. Watchdog reports the result back to GitHub
+14. Inspect the resulting geometry in FreeCAD
+15. Check status.log for a quick execution summary
 ```
 
 ## Verified CAD result
 
 The enclosure automation was verified end-to-end in FreeCAD using the `create_box_enclosure` CAD job.
+
+### Overall enclosure result
+
+![Verified FreeCAD enclosure](docs/images/verified-enclosure-perspective.svg)
+
+> **Overall result:** 90 × 60 × 11 mm enclosure with the requested USB-C and SMA interfaces and four corner mounting holes.
+
+### USB-C and antenna placement
+
+![Verified enclosure interface placement](docs/images/verified-enclosure-top.svg)
+
+> **USB-C:** centered on one **60 mm × 11 mm face**.
+>
+> **SMA antenna:** Ø7 mm opening on the **opposite 60 mm × 11 mm face**.
+>
+> **Antenna clearance:** 10 mm measured from the face edge to the opening edge. For a Ø7 mm opening, the center is therefore 13.5 mm from that edge.
+
+### Removable cover and mounting holes
+
+![Verified removable cover](docs/images/verified-enclosure-cover.svg)
+
+> **Cover:** separate 90 × 60 × 1.5 mm part.
+>
+> **Mounting holes:** 4 × Ø3 mm holes aligned with the enclosure mounting posts so the cover can be exported separately for 3D printing.
 
 Verified model:
 
@@ -559,7 +611,7 @@ The listener was subsequently changed so the enclosure module is loaded from the
 The verified runtime sequence is therefore:
 
 ```text
-AI prompt
+AI prompt in ChatGPT
    |
    v
 CAD job
