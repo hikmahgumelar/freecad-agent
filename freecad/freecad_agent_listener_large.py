@@ -22,12 +22,21 @@ def _create_large_enclosure(command):
     return module.create_large_enclosure(command)
 
 
+def _create_character_figurine(command):
+    module = importlib.import_module("character_figurine")
+    module = importlib.reload(module)
+    return module.create_character_figurine(command)
+
+
 _original_execute_command = base_listener.execute_command
 
 
 def execute_command(command):
-    if command.get("action") == "create_large_enclosure":
+    action = command.get("action")
+    if action == "create_large_enclosure":
         return _create_large_enclosure(command)
+    if action == "create_character_figurine":
+        return _create_character_figurine(command)
     return _original_execute_command(command)
 
 
