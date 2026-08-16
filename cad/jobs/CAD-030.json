@@ -6,8 +6,11 @@
   "error": null,
   "id": "CAD-030",
   "parameters": {},
-  "result": null,
+  "result": {
+    "message": "FreeCAD agent is alive",
+    "ok": true
+  },
   "started_at": null,
-  "status": "running",
-  "updated_at": "2026-08-16T01:41:26.728437+00:00"
+  "status": "completed",
+  "updated_at": "2026-08-16T01:41:28.087091+00:00"
 }
