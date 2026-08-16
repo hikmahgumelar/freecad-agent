@@ -94,6 +94,16 @@ class FreeCADExecutor:
                 "hole_rows": p.get("hole_rows", 2),
                 "output_path": p.get("output_path", "/home/hikmah/projectx/freecad-agent/cad/output/enclosure-200x100x250.FCStd"),
             })
+        if action == "create_character_figurine":
+            p = job.get("parameters", {})
+            return self._send({
+                "action": "create_character_figurine",
+                "height": p.get("height", 120.0),
+                "base_diameter": p.get("base_diameter", 46.0),
+                "base_thickness": p.get("base_thickness", 3.0),
+                "output_path": p.get("output_path", "/home/hikmah/projectx/freecad-agent/cad/output/character-figurine-120mm.FCStd"),
+                "stl_path": p.get("stl_path", "/home/hikmah/projectx/freecad-agent/cad/output/character-figurine-120mm.stl"),
+            })
         raise RuntimeError(f"Unsupported action: {action}")
 
     def _send(self, command):
