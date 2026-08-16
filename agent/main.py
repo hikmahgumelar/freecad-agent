@@ -46,6 +46,12 @@ class Watchdog:
                 "Job is missing 'action'"
             )
 
+        # Health-check the FreeCAD listener before executing a real CAD job.
+        # This makes stale/missing FreeCAD listeners fail explicitly instead
+        # of leaving the job hanging until the socket timeout.
+        self.freecad.execute({"action": "ping"})
+        print("[FREECAD] listener healthy")
+
         result = self.freecad.execute(job.data)
 
         return result
@@ -94,21 +100,30 @@ class Watchdog:
         )
 
         try:
+            started_at = datetime.now(
+                timezone.utc
+            ).isoformat()
+
             job = self.queue.update(
                 job,
                 "running",
-                started_at=job.data.get(
-                    "started_at"
-                ) or None,
+                started_at=started_at,
+                completed_at=None,
+                error=None,
             )
 
             result = self.execute_job(job)
+
+            completed_at = datetime.now(
+                timezone.utc
+            ).isoformat()
 
             self.queue.update(
                 job,
                 "completed",
                 result=result,
-                completed_at=None,
+                completed_at=completed_at,
+                error=None,
             )
 
             print(
@@ -129,10 +144,15 @@ class Watchdog:
             )
 
             try:
+                failed_at = datetime.now(
+                    timezone.utc
+                ).isoformat()
+
                 self.queue.update(
                     job,
                     "failed",
                     error=str(exc),
+                    completed_at=failed_at,
                 )
             except Exception as report_error:
                 print(
@@ -148,7 +168,7 @@ class Watchdog:
 
     def run(self):
         print("================================")
-        print(" freecad-agent-watchdog v0.2")
+        print(" freecad-agent-watchdog v0.3")
         print("================================")
         print(
             f"Polling interval: "
@@ -158,6 +178,7 @@ class Watchdog:
             "FreeCAD endpoint: "
             f"{self.freecad.host}:{self.freecad.port}"
         )
+        print("Health check: enabled")
         print()
 
         while self.running:
