@@ -1,6 +1,6 @@
 {
   "action": "create_large_enclosure",
-  "completed_at": null,
+  "completed_at": "2026-08-16T11:02:36.906799+00:00",
   "created_at": "2026-08-16T17:50:00+07:00",
   "created_by": "ChatGPT",
   "error": null,
@@ -24,9 +24,45 @@
     "wall": 2.0,
     "width": 100.0
   },
+  "result": {
+    "action": "create_large_enclosure",
+    "box": {
+      "bottom": 2.0,
+      "height": 150.0,
+      "length": 200.0,
+      "wall": 2.0,
+      "width": 100.0
+    },
+    "document": "Enclosure200x100x250",
+    "internal_plate": {
+      "center_z": 75.0,
+      "hole_count": 6,
+      "hole_diameter": 50.0,
+      "hole_pattern": "3 x 2",
+      "length": 200.0,
+      "orientation": "TOP",
+      "thickness": 2.0,
+      "touches_all_sides": true,
+      "width": 100.0
+    },
+    "lid": {
+      "height": 60.0,
+      "length": 204.4,
+      "separate": true,
+      "wall": 2.0,
+      "width": 104.4
+    },
+    "objects": [
+      "LargeBoxBase",
+      "InternalTopPlate",
+      "LargeBoxLid"
+    ],
+    "ok": true,
+    "output_path": "/home/hikmah/projectx/freecad-agent/cad/output/enclosure-200x100x150-final.FCStd"
+  },
   "revision": 2,
   "revision_note": "Retry after FreeCAD listener became available. Final revision: body 200x100x150 mm, wall 2 mm, bottom 2 mm; internal horizontal TOP plate centered at Z=75 mm, 2 mm thick, touching all four sides, with 6x \u00d850 mm holes in symmetric 3x2 pattern; removable lid 204.4x104.4x60 mm, 2 mm walls/top, 58 mm skirt, inner 200.4x100.4 mm, 0.2 mm clearance per side, lid surrounds body externally and top sits above body.",
   "started_at": "2026-08-16T11:02:26.790726+00:00",
-  "status": "running",
-  "updated_at": "2026-08-16T11:02:26.790745+00:00"
+  "status": "completed",
+  "updated_at": "2026-08-16T11:02:36.906826+00:00"
 }
