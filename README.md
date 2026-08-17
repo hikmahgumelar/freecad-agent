@@ -8,7 +8,7 @@ You describe what you want to build. An AI agent turns the intent into a structu
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-![FreeCAD Agent enclosure result](docs/images/verified-enclosure-perspective.svg)
+![Real FreeCAD enclosure with removable cover](docs/images/case-with-cover.jpg)
 
 > **From a prompt to a real CAD result — without manually rebuilding the model from scratch.**
 
