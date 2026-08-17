@@ -3,7 +3,7 @@ __pycache__/
 *.py[cod]
 *.so
 
-# Virtual environment / generated runtime files
+# Local virtual environment / generated runtime files
 bin/
 lib/
 lib64/
