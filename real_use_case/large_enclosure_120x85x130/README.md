@@ -36,9 +36,16 @@ The verified result was visually inspected in FreeCAD: the lid covers the body e
 
 ## Files / Images
 
+
 **Place the final FreeCAD screenshot here.**
 
-**Place the final printed/physical result here when available.**
+### Cover (Large Box Lid)
+<img width="1920" height="1049" alt="image" src="https://github.com/user-attachments/assets/22092fd7-65bd-4a9c-a211-723721d944bb" />
+
+
+### Cover (Large Box Base and Internal Top Plate with six Ø35 Holes )
+<img width="1920" height="1049" alt="image" src="https://github.com/user-attachments/assets/671a4888-4b09-42fc-ace3-c035cbad64e5" />
+
 
 ## Why this example matters
 
