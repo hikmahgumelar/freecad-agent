@@ -315,6 +315,7 @@ Before creating a new job:
 2. Do not reuse an old job ID accidentally.
 3. If an existing job is already `completed`, prefer a revision/new job rather than overwriting its historical result.
 4. Clearly describe the requested geometry in `revision_note`.
+5. Include printability constraints when they materially affect the requested design.
 
 After submission, the user-side watchdog should pick it up automatically when it is running.
 
@@ -349,6 +350,8 @@ Visual review
   ↓
 Geometry validation
   ↓
+Printability review
+  ↓
 User approval
   ↓
 Real Use Case documentation
@@ -372,7 +375,139 @@ Do not rely on a generated sketch or verbal description when the user wants a re
 
 ---
 
-## 10. Important CAD design lesson: hole placement
+## 10. CAD Printability Skill — mandatory
+
+**Every CAD creation, modification, or print request must be reviewed from the real FDM/3D-printing point of view before the design is considered ready.**
+
+CAD-valid is not automatically FDM-printable.
+
+The mandatory workflow is:
+
+```text
+Prompt
+  ↓
+CAD requirements
+  ↓
+FreeCAD geometry
+  ↓
+Printability review
+  ↓
+STL / STEP
+  ↓
+Slicer validation
+  ↓
+3D print
+  ↓
+Assembly / fit validation
+```
+
+### 10.1 Print orientation
+
+Determine the sensible print orientation for each part. Check build-plate contact, layer direction, unsupported surfaces, and whether rotating the part eliminates unnecessary support.
+
+Never assume the CAD orientation is the correct printing orientation.
+
+### 10.2 Overhangs and floating geometry
+
+Explicitly identify:
+
+- ceiling / roof surfaces
+- horizontal shelves or plates
+- bridges
+- deep recesses
+- underside features
+- lid geometry
+- any geometry effectively floating above empty space
+
+A large horizontal enclosure ceiling attached to vertical walls is a common FDM support problem.
+
+If a feature floats in the intended print orientation, solve it by changing orientation, splitting the part, redesigning the feature, adding permanent structure, or using slicer-generated support when appropriate.
+
+### 10.3 Support strategy
+
+If support is required, evaluate whether it is practical to remove.
+
+Prefer minimal support volume, accessible contact interfaces, breakaway-friendly surfaces, and tree support when it materially improves removal.
+
+Do not automatically model temporary slicer support as permanent CAD geometry.
+
+### 10.4 Part separation
+
+Split a design into separate printable parts when a one-piece design creates avoidable support problems.
+
+Common examples:
+
+- body + lid
+- body + internal perforated plate
+- enclosure + mounting bracket
+- shell + removable panel
+
+Every separate part must have a clear insertion/removal direction and appropriate assembly clearance.
+
+### 10.5 FDM clearance
+
+Do not make mating parts exactly the same nominal dimension unless the fit requirement and manufacturing process are known.
+
+For initial FDM fit testing, around **0.3 mm clearance per side** is a reasonable starting point, not a universal guarantee. Actual fit depends on printer, nozzle, material, layer height, cooling, extrusion calibration, and slicer settings.
+
+Treat clearance as a design parameter and document it in the CAD job.
+
+### 10.6 Wall thickness and small features
+
+Check whether wall thickness, bosses, ribs, ledges, holes, gaps, and other small features are realistic for the intended FDM process.
+
+Do not claim a feature is printable solely because FreeCAD accepts the geometry.
+
+### 10.7 Assembly and fit
+
+For multi-part designs explicitly verify:
+
+- which part enters which part
+- insertion direction
+- insertion depth
+- stop/shoulder location
+- supporting ledge or rail
+- clearance for insertion and removal
+- whether the user can physically assemble it after printing
+
+For example, if the requirement says the body enters an outer lid, the lid must not accidentally be designed to enter the body.
+
+### 10.8 Example: enclosure with removable perforated plate
+
+For an enclosure with a horizontal internal plate containing six Ø35 mm holes:
+
+```text
+             TOP / LID
+          separate part
+               ↓
+      ┌─────────────────┐
+      │                 │
+      │  ○    ○    ○    │  ← removable plate
+      │  ○    ○    ○    │     facing TOP
+      │─────────────────│
+      │                 │
+      │      BODY       │
+      │                 │
+      └─────────────────┘
+        ↑             ↑
+        └── 1 mm ─────┘
+            ledge
+```
+
+If a one-piece enclosure causes the top ceiling to float during normal FDM printing, do not force it. A better solution may be:
+
+1. print the body open at the top;
+2. print the perforated plate separately;
+3. provide a 1 mm supporting ledge on all four sides of the body;
+4. give the plate a small FDM clearance, initially around 0.3 mm per side;
+5. print the top/lid as a separate part;
+6. assemble the parts after printing.
+
+The six holes remain in the horizontal plate and face upward in the assembled design. They must not accidentally become holes in the enclosure side walls.
+
+---
+
+## 11. Important CAD design lesson: hole placement
 
 One of the recent real cases exposed an important bug: using fixed percentage positions for large holes can cause requested circles to overlap.
 
@@ -399,278 +534,39 @@ General rule:
 
 **Never hard-code hole positions in a way that ignores requested diameter and available plate dimensions.**
 
-The generator should validate the geometry before saving the `.FCStd` result.
+---
+
+## 12. Real Use Cases
+
+Successful, verified real-world CAD jobs should be documented under the dedicated Real Use Cases workspace:
+
+`docs/real-use-cases`
+
+A case should ideally contain the prompt/specification and the resulting artifact or images. Failed attempts and useful iterations can also be documented when they teach an engineering or printability lesson.
+
+The objective is to demonstrate:
+
+**Prompt → CAD → Printability → STL/STEP → Real print → Result.**
 
 ---
 
-## 11. Current verified real-use case
+## 13. Final assistant behavior
 
-The first major Real Use Case is:
+Before declaring a CAD job successful, ask internally:
 
-**AI-Generated Enclosure Box — 6-Hole Internal Plate & Outer Cover**
+1. Is the geometry what the user requested?
+2. Are dimensions and feature positions correct?
+3. Are mating parts oriented correctly?
+4. Can the intended printer actually manufacture the geometry?
+5. Are there floating surfaces or large overhangs?
+6. Is support required, and if so, can it be removed easily?
+7. Should the design be split into separate printable parts?
+8. Are clearances realistic for FDM?
+9. Can the printed parts actually be assembled?
+10. Has the real result been inspected or verified?
 
-Requirements:
+If any answer is uncertain, do not silently assume success. State the risk and resolve it before treating the design as print-ready.
 
-- Body: 120 mm length
-- Body: 85 mm width
-- Body: 130 mm height
-- Wall thickness: 1 mm
-- Bottom thickness: 1 mm
-- Horizontal internal plate at Z=70 mm
-- Plate thickness: 1 mm
-- Plate attached to all four sides
-- Six Ø35 mm holes
-- Hole pattern: 3 columns × 2 rows
-- Holes face TOP
-- Holes are complete circles and do not overlap
-- Lid is an outer cap
-- Body enters inside the lid
-- Lid insertion depth: 60 mm
-- Lid wall thickness: 1 mm
-- Practical fit clearance
+The core philosophy is:
 
-The result contains these conceptual objects:
-
-```text
-LargeBoxBase
-InternalTopPlate
-LargeBoxLid
-```
-
-The result was visually inspected and accepted by the user as the correct design direction.
-
-The STL was also sent to a 3D-print service for physical validation.
-
-The final real-use-case documentation lives on the `docs/real-use-cases` branch until the user approves the PR.
-
----
-
-## 12. Real Use Case documentation strategy
-
-The project is intentionally trying to attract forks and collaborators.
-
-The Real Use Case section should show that the project is not just an AI/CAD concept. It should demonstrate:
-
-```text
-Prompt
-  ↓
-AI interpretation
-  ↓
-CAD job
-  ↓
-FreeCAD model
-  ↓
-STL / slicer
-  ↓
-3D print
-```
-
-Each Real Use Case should contain, where available:
-
-```text
-real_use_case/<case-name>/
-├── README.md
-├── PROMPT.md
-└── result/
-    └── <job-result>.json
-```
-
-Images should be added by the project owner when the final screenshots/physical results are available.
-
-The user wants the main README to have a section titled:
-
-`Real Use Case`
-
-with numbered, clickable case titles. Example:
-
-`1. AI-Generated Enclosure Box — 6-Hole Internal Plate & Outer Cover`
-
-Clicking the title should open the corresponding Real Use Case directory, where readers can see the full prompting and result.
-
-The user will provide the final images. Do not invent or replace them with generated sketches.
-
----
-
-## 13. README positioning / project goal
-
-The README is intended to make people want to fork the project.
-
-Core message:
-
-**Prompt → CAD → 3D Print.**
-
-The project should demonstrate that a user can describe a design in natural language and get a real FreeCAD result instead of manually rebuilding the geometry from scratch.
-
-The README should emphasize:
-
-- real CAD execution
-- natural-language design intent
-- FreeCAD as the geometry source of truth
-- local execution
-- extensible AI/model layer
-- real 3D-print workflows
-- practical examples
-- easy forking and experimentation
-
-The Real Use Cases are especially important because they provide concrete evidence and invite people to add their own designs.
-
-Potential future examples discussed:
-
-1. Raspberry Pi enclosure.
-2. Cyberdeck / phone-oriented case.
-3. Additional community-generated CAD examples.
-
----
-
-## 14. FreeCAD vs slicer presentation
-
-FreeCAD is the design/geometry environment.
-
-A slicer such as Bambu Studio, OrcaSlicer, or PrusaSlicer is used after STL export for print preparation and layer preview.
-
-For documentation, both can be useful:
-
-- FreeCAD screenshot: proves the CAD result and geometry.
-- Slicer screenshot: proves the STL has moved into a real 3D-print preparation workflow.
-- Physical print photo: strongest evidence that the pipeline reached manufacturing.
-
-The user already sent the current STL to a print service. When the physical result is available, it should be added to the Real Use Case.
-
----
-
-## 15. Do not confuse CAD execution with generated images
-
-The user specifically values real CAD results.
-
-When the task is to create a FreeCAD model, do not answer with a conceptual sketch as a substitute for the actual CAD workflow.
-
-The expected artifact is a real `.FCStd` result generated through the FreeCAD listener.
-
-A visual screenshot is evidence/documentation, not the CAD source itself.
-
----
-
-## 16. Existing repository hygiene decisions
-
-Keep these out of Git:
-
-```text
-bin/
-lib/
-lib64/
-```
-
-These are local runtime / virtual-environment directories.
-
-The repository should contain source code, configuration examples, documentation, CAD job definitions/results where intentionally tracked, and other project artifacts—not a developer's local Python environment.
-
-Do not accidentally re-add these directories during environment repair.
-
----
-
-## 17. How a new ChatGPT session should start
-
-When a new session starts, do this before proposing changes:
-
-1. Read `GPT-FreeCad-Agent.md`.
-2. Read the current `README.md`.
-3. Inspect the current branch / PR state.
-4. Inspect the relevant current source files before making implementation assumptions.
-5. Check whether the user's requested work belongs on a new branch or is an explicit master maintenance change.
-6. For CAD jobs, inspect the current listener and existing job schema.
-7. Never assume a previous job succeeded just because the conversation says it did; verify repository state or ask the user for the current machine status when necessary.
-
-Useful first questions when continuing an active CAD task:
-
-```text
-Is FreeCAD listener listening on 127.0.0.1:8765?
-Is Supervisor RUNNING?
-What is the current job ID/status?
-Has the user already reviewed the generated model?
-```
-
-Do not restart a completed workflow from scratch merely because the session changed.
-
----
-
-## 18. Safe operational checklist
-
-Before sending a CAD job:
-
-- [ ] Understand the exact geometry request.
-- [ ] Confirm the intended action exists in the current listener.
-- [ ] Choose a unique job ID.
-- [ ] Write an explicit revision note.
-- [ ] Keep experimental changes on a branch.
-
-After sending:
-
-- [ ] Confirm watchdog is running.
-- [ ] Confirm listener is healthy.
-- [ ] Wait for the job to be picked up.
-- [ ] Check `running` → `completed` / `failed`.
-- [ ] Inspect the actual CAD result.
-- [ ] Validate geometry, not just status.
-- [ ] Ask the user to review visual output.
-
-Before merging documentation:
-
-- [ ] User reviewed the result.
-- [ ] Real Use Case prompt is included.
-- [ ] Result metadata is included.
-- [ ] Final images are added or intentionally left as placeholders.
-- [ ] Main README links to the Real Use Case.
-- [ ] User explicitly agrees to merge.
-
----
-
-## 19. Current state at handoff
-
-At the time this document was created:
-
-- The FreeCAD Agent repository is active.
-- The watchdog architecture is operational.
-- FreeCAD listener uses `127.0.0.1:8765`.
-- Supervisor is used for long-running watchdog operation on the user's Debian machine.
-- Python 3 is used for the watchdog environment.
-- The virtual environment is intentionally excluded from Git.
-- The first major Real Use Case is the 120×85×130 mm enclosure with a 3×2 pattern of Ø35 mm holes and an outer lid.
-- The user has visually accepted the CAD result.
-- The STL has been sent for printing.
-- Real Use Case documentation is being prepared on `docs/real-use-cases` and should not be merged until the user approves.
-
-This file itself belongs on `master` so a future session can load it immediately.
-
----
-
-## 20. Golden rule
-
-The assistant should always preserve the project's core loop:
-
-```text
-USER INTENT
-    ↓
-AI / PROMPT
-    ↓
-STRUCTURED CAD JOB
-    ↓
-GITHUB QUEUE
-    ↓
-WATCHDOG
-    ↓
-FREECAD LISTENER
-    ↓
-REAL FREECAD GEOMETRY
-    ↓
-INSPECTION / USER REVIEW
-    ↓
-STL / STEP
-    ↓
-3D PRINT
-    ↓
-REAL USE CASE
-    ↓
-COMMUNITY / FORKS / COLLABORATION
-```
-
-The objective is not merely to generate CAD code. The objective is to make **natural-language-driven, reproducible, inspectable, real-world FreeCAD workflows** that other people can fork and extend.
+> **Do not stop at “the CAD looks right.” Make sure the design can actually be printed, assembled, and used.**
