@@ -8,52 +8,60 @@ You describe what you want to build. An AI agent turns the intent into a structu
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-![FreeCAD Agent enclosure result](docs/images/verified-enclosure-perspective.svg)
+<img width="1096" height="634" alt="image" src="https://github.com/user-attachments/assets/16673dd6-d9a9-457b-9ac1-160f08ecb89a" />
 
 > **From a prompt to a real CAD result — without manually rebuilding the model from scratch.**
 
 ## See it in action
 
-This repository was built around a real workflow, not a mock demo.
+This repository is built around a real workflow, not a mock demo.
 
-A user can describe an enclosure in natural language, for example:
+A real enclosure requirement was described in natural language:
 
 ```text
-Create an electronics enclosure.
+Create a 90 × 60 × 11 mm electronics enclosure.
 
-- 90 mm long × 60 mm wide × 11 mm high
-- USB-C opening on the correct 60 mm side
-- SMA antenna opening on the opposite 60 mm side
-- mounting holes for screws
-- separate removable cover
-- keep the geometry suitable for 3D printing
+Requirements:
+- USB-C opening centered on one 60 mm side.
+- SMA antenna opening Ø7 mm on the opposite 60 mm side.
+- Four Ø3 mm mounting holes at the corners.
+- Separate removable 1.5 mm cover.
+- Keep the geometry suitable for 3D printing.
 ```
 
-The AI agent converts that intent into a CAD operation, the watchdog delivers the job, and FreeCAD creates the actual geometry.
-
-The result can then be inspected visually and exported as a manufacturing/3D-printable asset.
+The important part is that the design starts as **intent expressed in a prompt**, not as a hand-written FreeCAD script. The AI agent translates the request into a CAD job, the watchdog delivers it, and FreeCAD creates the actual geometry.
 
 ### Real result
 
-![Enclosure perspective](docs/images/verified-enclosure-perspective.svg)
+<img width="1920" height="1052" alt="Screenshot From 2026-08-17 11-45-43" src="https://github.com/user-attachments/assets/507e5fac-9c41-4098-affb-9723bfaa51ee" />
+<img width="1920" height="1052" alt="Screenshot From 2026-08-17 11-46-22" src="https://github.com/user-attachments/assets/c8e1930a-a816-4a47-905d-101eae681349" />
+<img width="1920" height="1052" alt="Screenshot From 2026-08-17 11-46-07" src="https://github.com/user-attachments/assets/324ffe6a-9ed3-4608-a167-28bc05c1a4d0" />
 
-*Generated enclosure body — the geometry produced by the FreeCAD Agent workflow.*
+The workflow is:
 
-![Enclosure cover](docs/images/verified-enclosure-cover.svg)
+```text
+Prompt
+  ↓
+AI understands the design intent
+  ↓
+Structured CAD job
+  ↓
+FreeCAD Agent
+  ↓
+Real FreeCAD geometry
+  ↓
+STL / STEP
+  ↓
+3D print
+```
 
-*Separate removable cover generated as part of the same CAD workflow.*
-
-![Enclosure top](docs/images/verified-enclosure-top.svg)
-
-*Top view used to verify the resulting geometry and openings.*
-
-The important part is the workflow: **the input is intent, not a hand-written CAD script.**
+The enclosure example is only one possibility. The same infrastructure can be used for brackets, adapters, mechanical parts, robotics components, fixtures, electronics cases, and other CAD workflows.
 
 ## Why this project exists
 
 FreeCAD is already a powerful CAD engine. The difficult part for an AI system is turning a user's intent into reliable operations against a real CAD document.
 
-FreeCAD Agent provides that missing execution layer.
+FreeCAD Agent provides that execution layer.
 
 ```text
 Natural-language prompt
@@ -124,9 +132,9 @@ You should be able to say:
 
 ```text
 Make this enclosure 200 × 100 × 150 mm.
-Use 2 mm walls.
+Use 2 mm walls and a 2 mm bottom.
 Put a 2 mm internal plate in the middle.
-Add six 50 mm holes in a 3 × 2 pattern.
+Add six Ø50 mm holes in a 3 × 2 pattern.
 Create a separate lid that fits over the body.
 ```
 
@@ -297,6 +305,10 @@ GitHub rate-limit handling: enabled
 GitHub SHA-conflict recovery: enabled
 GitHub network retry/backoff: enabled
 ```
+
+### The Screenshot of freecad-agent-watchdog
+
+<img width="507" height="219" alt="image" src="https://github.com/user-attachments/assets/b3745e7d-ce5c-4fad-bd64-ac087e2aeb28" />
 
 The infrastructure is now ready to receive and execute CAD jobs.
 
