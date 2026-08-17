@@ -1,17 +1,2 @@
-# Python
-__pycache__/
-*.py[cod]
-*.so
-
-# Local virtual environment / generated runtime files
-bin/
-lib/
-lib64/
-include/
-pyvenv.cfg
-
-# Environment / secrets
-.env
-
-# Logs
-*.log
+# Created by venv; see https://docs.python.org/3/library/venv.html
+*
