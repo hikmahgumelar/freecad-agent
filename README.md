@@ -1,30 +1,69 @@
 # FreeCAD Agent
 
-**Open-source AI agent infrastructure for controlling FreeCAD through natural language and structured CAD jobs.**
+**Prompt → CAD → 3D Print.**
 
-FreeCAD Agent connects an AI agent to a running [FreeCAD](https://www.freecad.org/) instance. A CAD request becomes a job, GitHub acts as the queue and state store, the watchdog executes the job, and a lightweight listener inside FreeCAD performs the actual CAD operation.
+FreeCAD Agent is an open-source AI agent infrastructure for turning natural-language CAD requests into real FreeCAD models through a lightweight, local execution pipeline.
 
-The goal is simple: **describe what you want to build or change, let an AI generate the CAD operation, and let FreeCAD execute it.**
+You describe what you want to build. An AI agent turns the intent into a structured CAD job. FreeCAD executes it. The result is a real `.FCStd` model that can be inspected, modified, and exported for manufacturing or 3D printing.
 
-![FreeCAD Agent example](docs/images/verified-enclosure-perspective.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> Example: a natural-language electronics-enclosure requirement translated into a FreeCAD model.
+![FreeCAD Agent enclosure result](docs/images/verified-enclosure-perspective.svg)
 
-## Why FreeCAD Agent?
+> **From a prompt to a real CAD result — without manually rebuilding the model from scratch.**
 
-FreeCAD is already a powerful parametric CAD engine. FreeCAD Agent does not replace it. It provides the automation layer around FreeCAD so AI systems can interact with real CAD documents.
+## See it in action
+
+This repository was built around a real workflow, not a mock demo.
+
+A user can describe an enclosure in natural language, for example:
 
 ```text
-Natural-language request
+Create an electronics enclosure.
+
+- 90 mm long × 60 mm wide × 11 mm high
+- USB-C opening on the correct 60 mm side
+- SMA antenna opening on the opposite 60 mm side
+- mounting holes for screws
+- separate removable cover
+- keep the geometry suitable for 3D printing
+```
+
+The AI agent converts that intent into a CAD operation, the watchdog delivers the job, and FreeCAD creates the actual geometry.
+
+The result can then be inspected visually and exported as a manufacturing/3D-printable asset.
+
+### Real result
+
+![Enclosure perspective](docs/images/verified-enclosure-perspective.svg)
+
+*Generated enclosure body — the geometry produced by the FreeCAD Agent workflow.*
+
+![Enclosure cover](docs/images/verified-enclosure-cover.svg)
+
+*Separate removable cover generated as part of the same CAD workflow.*
+
+![Enclosure top](docs/images/verified-enclosure-top.svg)
+
+*Top view used to verify the resulting geometry and openings.*
+
+The important part is the workflow: **the input is intent, not a hand-written CAD script.**
+
+## Why this project exists
+
+FreeCAD is already a powerful CAD engine. The difficult part for an AI system is turning a user's intent into reliable operations against a real CAD document.
+
+FreeCAD Agent provides that missing execution layer.
+
+```text
+Natural-language prompt
         |
         v
      AI Agent
         |
+        | intent → structured CAD job
         v
-    CAD Job JSON
-        |
-        v
-      GitHub
+    GitHub Job
         |
         v
 freecad-agent-watchdog
@@ -37,8 +76,33 @@ freecad-agent-watchdog
 Active FreeCAD document
         |
         v
-   CAD result/status
+  CAD result / status
+        |
+        v
+.FCStd → STEP / STL → 3D print
 ```
+
+The goal is not to replace FreeCAD. The goal is to make FreeCAD **programmable by AI through natural language** while keeping FreeCAD itself as the source of truth for geometry and document state.
+
+## Why fork it?
+
+This project is intentionally designed to be **forked, modified, and extended**.
+
+Fork it if you want to build:
+
+- Your own AI-powered CAD assistant.
+- A local LLM → FreeCAD workflow.
+- A prompt-to-3D-print pipeline.
+- A CAD automation agent for electronics enclosures.
+- A robotics or manufacturing CAD pipeline.
+- A custom FreeCAD tool server.
+- An experimental parametric-modeling agent.
+
+The core infrastructure does not care which AI model generates the intent. You can connect your own LLM, agent framework, UI, or workflow on top of the same execution layer.
+
+**Fork the infrastructure. Add your own CAD actions. Bring your own ideas.**
+
+The more people build on top of it, the more useful the ecosystem becomes.
 
 ## What can it do?
 
@@ -52,47 +116,37 @@ Active FreeCAD document
 - Recover from GitHub SHA conflicts.
 - Handle GitHub API rate limits without aggressive polling.
 - Retry transient GitHub network failures with exponential backoff.
+- Provide an extension point for export and manufacturing workflows such as STEP/STL.
 
-The architecture is intentionally small so it can be extended with new CAD actions, AI agents, workflows, and integrations.
+## The core idea
 
-## Example
-
-A user can describe a model like this:
-
-```text
-Create a 90 × 60 × 11 mm electronics enclosure.
-
-Requirements:
-- USB-C opening centered on one 60 mm side.
-- SMA antenna opening Ø7 mm on the opposite 60 mm side.
-- Four Ø3 mm mounting holes at the corners.
-- Separate removable 1.5 mm cover.
-```
-
-An AI agent can translate that requirement into a CAD job. The watchdog retrieves the job, verifies FreeCAD, sends the operation to the listener, and records the result.
-
-The same infrastructure can handle modifications such as:
+You should be able to say:
 
 ```text
-Move the mounting hole 5 mm toward the center.
-Keep all other geometry unchanged.
+Make this enclosure 200 × 100 × 150 mm.
+Use 2 mm walls.
+Put a 2 mm internal plate in the middle.
+Add six 50 mm holes in a 3 × 2 pattern.
+Create a separate lid that fits over the body.
 ```
 
-## Fork it and build your own agent
+…and let the agent deal with the CAD execution details.
 
-This project is designed to be **forkable infrastructure**, not a closed application.
+The same workflow can then handle iterative changes:
 
-Fork it if you want to build your own:
+```text
+Make the lid fit with 0.2 mm clearance.
+Keep everything else unchanged.
+```
 
-- AI-powered CAD assistant.
-- FreeCAD automation agent.
-- Local LLM → FreeCAD workflow.
-- CAD job runner.
-- Robotics or manufacturing CAD pipeline.
-- Custom FreeCAD tool server.
-- Parametric-modeling agent experiments.
+Or:
 
-The AI layer and CAD actions can evolve independently from the execution infrastructure. A custom agent can generate jobs and reuse the existing queue/watchdog/listener pipeline instead of rebuilding the infrastructure from scratch.
+```text
+Move the antenna opening 10 mm from the edge.
+Do not change the USB-C opening.
+```
+
+This is the direction of the project: **natural-language design iteration against real CAD geometry.**
 
 ## Architecture
 
@@ -139,7 +193,7 @@ freecad-agent/
 ├── cad/
 │   ├── jobs/                      # CAD job definitions/results
 │   └── source/                    # Source FreeCAD documents
-├── docs/images/                   # Example CAD output
+├── docs/images/                   # Real CAD result examples
 ├── .env.example
 ├── requirements.txt
 ├── freecad-agent-watchdog
@@ -365,26 +419,29 @@ The core execution infrastructure is operational:
 - Rate-limit handling
 - SHA-conflict recovery
 - Network retry/backoff
+- Real CAD example workflow
 
 The project is moving from **infrastructure construction** toward **useful CAD actions, AI integrations, reusable examples, and community contributions**.
 
 ## Roadmap
 
 ```text
-Infrastructure
-     ↓
+Prompt-to-CAD infrastructure
+            ↓
 Reliable CAD execution
-     ↓
+            ↓
 More CAD actions
-     ↓
-AI agent integrations
-     ↓
-Examples and reusable workflows
-     ↓
+            ↓
+AI / local-LLM integrations
+            ↓
+STEP / STL manufacturing workflows
+            ↓
+Reusable examples
+            ↓
 Community contributions
 ```
 
-Good contribution areas include new FreeCAD actions, model inspection, CAD examples, AI/local-LLM integrations, job schema improvements, testing, reliability, and documentation.
+Good contribution areas include new FreeCAD actions, model inspection, CAD examples, AI/local-LLM integrations, job schema improvements, testing, reliability, manufacturing workflows, and documentation.
 
 ## Contributing
 
@@ -393,6 +450,16 @@ Fork the repository, create a branch, make your change, test it against FreeCAD,
 Small focused contributions are especially useful: new CAD actions, reproducible examples, integrations, and documentation.
 
 If you build something interesting on top of FreeCAD Agent, share it so others can fork and extend it too.
+
+### Community direction
+
+The long-term goal is bigger than one CAD assistant.
+
+Different people will want different things from the same infrastructure: electronics enclosures, mechanical parts, robotics components, brackets, adapters, manufacturing fixtures, or completely new AI-driven CAD workflows.
+
+**Fork it. Try a different prompt. Add a CAD action. Share the result.**
+
+That is how this project can grow from an automation tool into a community-driven prompt-to-CAD platform.
 
 ## Design principle
 
@@ -403,3 +470,5 @@ The agent describes intent and generates structured operations. FreeCAD remains 
 ## License
 
 FreeCAD Agent is released under the **MIT License**. See [`LICENSE`](LICENSE) for the full license text.
+
+Copyright (c) 2026 Gugum.
