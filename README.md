@@ -8,7 +8,8 @@ You describe what you want to build. An AI agent turns the intent into a structu
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-![Real FreeCAD enclosure with removable cover](docs/images/case-with-cover.jpg)
+<img width="1096" height="634" alt="image" src="https://github.com/user-attachments/assets/16673dd6-d9a9-457b-9ac1-160f08ecb89a" />
+
 
 > **From a prompt to a real CAD result — without manually rebuilding the model from scratch.**
 
@@ -33,7 +34,10 @@ The important part is that the design starts as **intent expressed in a prompt**
 
 ### Real result
 
-**TARUH GAMBAR HASIL DI SINI**
+<img width="1920" height="1052" alt="Screenshot From 2026-08-17 11-45-43" src="https://github.com/user-attachments/assets/507e5fac-9c41-4098-affb-9723bfaa51ee" />
+<img width="1920" height="1052" alt="Screenshot From 2026-08-17 11-46-22" src="https://github.com/user-attachments/assets/c8e1930a-a816-4a47-905d-101eae681349" />
+<img width="1920" height="1052" alt="Screenshot From 2026-08-17 11-46-07" src="https://github.com/user-attachments/assets/324ffe6a-9ed3-4608-a167-28bc05c1a4d0" />
+
 
 Use the real result image here — ideally the screenshot showing the finished enclosure with the **SMA antenna opening, USB-C opening, mounting holes, and removable cover**.
 
@@ -305,6 +309,10 @@ GitHub rate-limit handling: enabled
 GitHub SHA-conflict recovery: enabled
 GitHub network retry/backoff: enabled
 ```
+### The Screenshot of freecad-agent-watchdog
+<img width="507" height="219" alt="image" src="https://github.com/user-attachments/assets/b3745e7d-ce5c-4fad-bd64-ac087e2aeb28" />
+
+
 
 The infrastructure is now ready to receive and execute CAD jobs.
 
