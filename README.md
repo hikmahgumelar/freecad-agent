@@ -402,6 +402,4 @@ The agent describes intent and generates structured operations. FreeCAD remains 
 
 ## License
 
-No license has been declared in this repository yet. Until a license is added, the source code should not be assumed to be freely redistributable under an open-source license.
-
-For a project intended to attract public forks and community contributions, adding an explicit open-source license should be part of the next repository-hardening step.
+FreeCAD Agent is released under the **MIT License**. See [`LICENSE`](LICENSE) for the full license text.
