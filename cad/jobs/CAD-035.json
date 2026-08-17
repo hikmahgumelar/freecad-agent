@@ -1,6 +1,6 @@
 {
   "action": "create_large_enclosure",
-  "completed_at": null,
+  "completed_at": "2026-08-17T10:31:27.112895+00:00",
   "created_at": "2026-08-17T17:15:00+07:00",
   "created_by": "ChatGPT",
   "error": null,
@@ -30,9 +30,53 @@
     "wall": 1.0,
     "width": 85.0
   },
+  "result": {
+    "action": "create_large_enclosure",
+    "box": {
+      "bottom": 1.0,
+      "height": 130.0,
+      "length": 120.0,
+      "wall": 1.0,
+      "width": 85.0
+    },
+    "document": "Enclosure200x100x150",
+    "internal_plate": {
+      "center_z": 70.0,
+      "hole_count": 6,
+      "hole_diameter": 35.0,
+      "hole_pattern": "3 x 2",
+      "length": 120.0,
+      "orientation": "TOP",
+      "thickness": 1.0,
+      "touches_all_sides": true,
+      "width": 85.0
+    },
+    "lid": {
+      "clearance_per_side": 0.2,
+      "height": 60.0,
+      "inner_length": 120.4,
+      "inner_width": 85.4,
+      "length": 122.4,
+      "separate": true,
+      "skirt_height": 58.0,
+      "top_thickness": 2.0,
+      "wall": 1.0,
+      "width": 87.4,
+      "z_body_top": 130.0,
+      "z_max": 132.0,
+      "z_min": 72.0
+    },
+    "objects": [
+      "LargeBoxBase",
+      "InternalTopPlate",
+      "LargeBoxLid"
+    ],
+    "ok": true,
+    "output_path": "/home/hikmah/projectx/freecad-agent/cad/output/enclosure-120x85x130-final.FCStd"
+  },
   "revision": 1,
   "revision_note": "Create enclosure 120x85x130 mm with 1 mm walls and bottom. Add one internal horizontal plate at Z=70 mm, 1 mm thick, touching all four sides, with six \u00d835 mm holes arranged 3x2 and facing TOP. Lid is an outer cap: body must slide INSIDE the lid to a depth of 60 mm. Use 0.2 mm clearance per side for the lid fit; lid inner dimensions 120.4x85.4 mm and outer dimensions 122.4x87.4 mm with 1 mm lid wall and 1 mm top thickness.",
   "started_at": "2026-08-17T10:31:25.043760+00:00",
-  "status": "running",
-  "updated_at": "2026-08-17T10:31:25.043799+00:00"
+  "status": "completed",
+  "updated_at": "2026-08-17T10:31:27.112924+00:00"
 }
