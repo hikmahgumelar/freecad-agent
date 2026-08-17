@@ -14,46 +14,54 @@ You describe what you want to build. An AI agent turns the intent into a structu
 
 ## See it in action
 
-This repository was built around a real workflow, not a mock demo.
+This repository is built around a real workflow, not a mock demo.
 
-A user can describe an enclosure in natural language, for example:
+A real enclosure requirement was described in natural language:
 
 ```text
-Create an electronics enclosure.
+Create a 90 × 60 × 11 mm electronics enclosure.
 
-- 90 mm long × 60 mm wide × 11 mm high
-- USB-C opening on the correct 60 mm side
-- SMA antenna opening on the opposite 60 mm side
-- mounting holes for screws
-- separate removable cover
-- keep the geometry suitable for 3D printing
+Requirements:
+- USB-C opening centered on one 60 mm side.
+- SMA antenna opening Ø7 mm on the opposite 60 mm side.
+- Four Ø3 mm mounting holes at the corners.
+- Separate removable 1.5 mm cover.
+- Keep the geometry suitable for 3D printing.
 ```
 
-The AI agent converts that intent into a CAD operation, the watchdog delivers the job, and FreeCAD creates the actual geometry.
-
-The result can then be inspected visually and exported as a manufacturing/3D-printable asset.
+The important part is that the design starts as **intent expressed in a prompt**, not as a hand-written FreeCAD script. The AI agent translates the request into a CAD job, the watchdog delivers it, and FreeCAD creates the actual geometry.
 
 ### Real result
 
-![Enclosure perspective](docs/images/verified-enclosure-perspective.svg)
+**TARUH GAMBAR HASIL DI SINI**
 
-*Generated enclosure body — the geometry produced by the FreeCAD Agent workflow.*
+Use the real result image here — ideally the screenshot showing the finished enclosure with the **SMA antenna opening, USB-C opening, mounting holes, and removable cover**.
 
-![Enclosure cover](docs/images/verified-enclosure-cover.svg)
+The workflow is:
 
-*Separate removable cover generated as part of the same CAD workflow.*
+```text
+Prompt
+  ↓
+AI understands the design intent
+  ↓
+Structured CAD job
+  ↓
+FreeCAD Agent
+  ↓
+Real FreeCAD geometry
+  ↓
+STL / STEP
+  ↓
+3D print
+```
 
-![Enclosure top](docs/images/verified-enclosure-top.svg)
-
-*Top view used to verify the resulting geometry and openings.*
-
-The important part is the workflow: **the input is intent, not a hand-written CAD script.**
+The enclosure example is only one possibility. The same infrastructure can be used for brackets, adapters, mechanical parts, robotics components, fixtures, electronics cases, and other CAD workflows.
 
 ## Why this project exists
 
 FreeCAD is already a powerful CAD engine. The difficult part for an AI system is turning a user's intent into reliable operations against a real CAD document.
 
-FreeCAD Agent provides that missing execution layer.
+FreeCAD Agent provides that execution layer.
 
 ```text
 Natural-language prompt
@@ -124,9 +132,9 @@ You should be able to say:
 
 ```text
 Make this enclosure 200 × 100 × 150 mm.
-Use 2 mm walls.
+Use 2 mm walls and a 2 mm bottom.
 Put a 2 mm internal plate in the middle.
-Add six 50 mm holes in a 3 × 2 pattern.
+Add six Ø50 mm holes in a 3 × 2 pattern.
 Create a separate lid that fits over the body.
 ```
 
