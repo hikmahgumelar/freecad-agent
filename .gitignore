@@ -13,13 +13,5 @@ pyvenv.cfg
 # Environment / secrets
 .env
 
-# FreeCAD / CAD generated files
-*.FCStd
-*.FCStd1
-*.step
-*.stp
-*.stl
-*.brep
-
 # Logs
 *.log
