@@ -15,11 +15,35 @@ def _fit_view(doc):
         pass
 
 
+def _center_positions(size, count, diameter, preferred_edge_margin=5.0):
+    """Return evenly spaced hole centers with a safe edge margin when possible."""
+    if count < 1:
+        raise RuntimeError("Hole count must be positive")
+    radius = diameter / 2.0
+    min_size = count * diameter
+    if size < min_size:
+        raise RuntimeError(
+            f"Cannot fit {count} holes of Ø{diameter:.1f} mm in {size:.1f} mm"
+        )
+
+    # Keep a practical edge margin when the requested hole pattern permits it.
+    max_margin = (size - min_size) / 2.0
+    margin = min(preferred_edge_margin, max_margin)
+    start = radius + margin
+    end = size - radius - margin
+
+    if count == 1:
+        return [size / 2.0]
+
+    step = (end - start) / (count - 1)
+    return [start + index * step for index in range(count)]
+
+
 def create_large_enclosure(command):
-    """Create the 200x100x150 enclosure, 6-hole internal TOP plate, and removable lid."""
+    """Create a large enclosure with a horizontal TOP plate and removable outer lid."""
     doc = App.ActiveDocument
     if doc is None:
-        doc = App.newDocument("Enclosure200x100x150")
+        doc = App.newDocument("LargeEnclosure")
 
     L = float(command.get("length", 200.0))
     W = float(command.get("width", 100.0))
@@ -39,10 +63,11 @@ def create_large_enclosure(command):
     hole_d = float(command.get("hole_diameter", 50.0))
     hole_columns = int(command.get("hole_columns", 3))
     hole_rows = int(command.get("hole_rows", 2))
+    hole_edge_margin = float(command.get("hole_edge_margin", 5.0))
 
     output_path = os.path.abspath(command.get(
         "output_path",
-        "/home/hikmah/projectx/freecad-agent/cad/output/enclosure-200x100x150.FCStd"
+        "/home/hikmah/projectx/freecad-agent/cad/output/enclosure-final.FCStd"
     ))
 
     values = (L, W, H, wall, bottom, lid_L, lid_W, lid_H, lid_wall,
@@ -55,6 +80,8 @@ def create_large_enclosure(command):
         raise RuntimeError("Invalid lid wall/top thickness")
     if hole_columns != 3 or hole_rows != 2:
         raise RuntimeError("This design requires a 3 x 2 hole pattern")
+    if hole_edge_margin < 0:
+        raise RuntimeError("Hole edge margin cannot be negative")
 
     lid_skirt_h = lid_H - lid_top
     expected_inner_L = L + 2.0 * lid_clearance
@@ -73,16 +100,16 @@ def create_large_enclosure(command):
     if plate_z <= bottom or plate_z + plate_t >= H:
         raise RuntimeError("Internal plate position is outside the enclosure")
 
-    # 6 x Ø50 mm vertical holes, symmetric 3 columns x 2 rows.
-    x_centers = [L * 0.25, L * 0.5, L * 0.75]
-    y_centers = [W * 0.25, W * 0.75]
+    # Generate centers from the actual hole diameter and available plate area.
+    # This prevents overlapping circles when the requested pattern is tight.
+    x_centers = _center_positions(L, hole_columns, hole_d, hole_edge_margin)
+    y_centers = _center_positions(W, hole_rows, hole_d, hole_edge_margin)
 
     for name in ("LargeBoxBase", "InternalTopPlate", "LargeBoxLid"):
         old = doc.getObject(name)
         if old is not None:
             doc.removeObject(name)
 
-    # Open-top enclosure: 2 mm walls and 2 mm bottom.
     outer = Part.makeBox(L, W, H)
     inner = Part.makeBox(
         L - 2 * wall,
@@ -93,10 +120,9 @@ def create_large_enclosure(command):
     base_shape = outer.cut(inner)
 
     base = doc.addObject("Part::Feature", "LargeBoxBase")
-    base.Label = "Base 200x100x150 mm - wall 2 mm - bottom 2 mm"
+    base.Label = f"Base {L:.0f}x{W:.0f}x{H:.0f} mm - wall {wall:.1f} mm - bottom {bottom:.1f} mm"
     base.Shape = base_shape
 
-    # Plate touches all four sides and is centered vertically in the 150 mm body.
     plate_shape = Part.makeBox(
         plate_L, plate_W, plate_t,
         App.Vector(0, 0, plate_z)
@@ -112,13 +138,10 @@ def create_large_enclosure(command):
             plate_shape = plate_shape.cut(hole)
 
     plate = doc.addObject("Part::Feature", "InternalTopPlate")
-    plate.Label = "Internal TOP plate - touches all sides - 6x Ø50 mm"
+    plate.Label = f"Internal TOP plate - 6x Ø{hole_d:.0f} mm - no overlap"
     plate.Shape = plate_shape
 
-    # Removable cap: 204.4 x 104.4 x 60 mm outer, 2 mm walls/top.
-    # The 58 mm skirt surrounds the body from Z=92 to Z=150; the 2 mm top
-    # sits above the body from Z=150 to Z=152. Inner opening is 200.4 x 100.4,
-    # giving 0.2 mm clearance per side to the 200 x 100 body.
+    # Removable outer cap. The body slides inside the lid.
     lid_x = -(lid_L - L) / 2.0
     lid_y = -(lid_W - W) / 2.0
     lid_z = H - lid_skirt_h
@@ -132,7 +155,7 @@ def create_large_enclosure(command):
     lid_shape = lid_outer.cut(lid_inner)
 
     lid = doc.addObject("Part::Feature", "LargeBoxLid")
-    lid.Label = "Lid 204.4x104.4x60 mm - 2 mm wall - 58 mm skirt"
+    lid.Label = f"Lid {lid_L:.1f}x{lid_W:.1f}x{lid_H:.0f} mm - outer cap"
     lid.Shape = lid_shape
 
     for obj, props in (
@@ -161,14 +184,29 @@ def create_large_enclosure(command):
     plate.addProperty("App::PropertyString", "Mounting", "Design")
     plate.Mounting = "Plate edges touch all four enclosure sides"
     plate.addProperty("App::PropertyString", "HolePattern", "Design")
-    plate.HolePattern = "3 columns x 2 rows, symmetric, 6 x Ø50 mm"
+    plate.HolePattern = f"{hole_columns} columns x {hole_rows} rows, symmetric, 6 x Ø{hole_d:.0f} mm"
+    plate.addProperty("App::PropertyString", "HoleCenters", "Design")
+    plate.HoleCenters = (
+        "X=" + ", ".join(f"{value:.2f}" for value in x_centers) +
+        " mm; Y=" + ", ".join(f"{value:.2f}" for value in y_centers) + " mm"
+    )
+    plate.addProperty("App::PropertyLength", "HoleEdgeMargin", "Design")
+    plate.HoleEdgeMargin = hole_edge_margin
 
     lid.addProperty("App::PropertyString", "Fit", "Design")
-    lid.Fit = "Removable outer cap; 0.2 mm clearance per side"
+    lid.Fit = f"Removable outer cap; {lid_clearance:.1f} mm clearance per side"
     lid.addProperty("App::PropertyString", "Insertion", "Design")
-    lid.Insertion = "58 mm skirt surrounds the 150 mm body; 2 mm top above body"
+    lid.Insertion = f"{lid_skirt_h:.0f} mm skirt surrounds the body; {lid_top:.0f} mm top above body"
 
     doc.recompute()
+
+    if not plate.Shape.isValid():
+        raise RuntimeError("Generated internal plate geometry is invalid")
+    if not base.Shape.isValid():
+        raise RuntimeError("Generated enclosure geometry is invalid")
+    if not lid.Shape.isValid():
+        raise RuntimeError("Generated lid geometry is invalid")
+
     _fit_view(doc)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     doc.saveAs(output_path)
@@ -184,6 +222,8 @@ def create_large_enclosure(command):
             "center_z": plate_z_center, "touches_all_sides": True,
             "orientation": "TOP", "hole_diameter": hole_d,
             "hole_pattern": "3 x 2", "hole_count": 6,
+            "hole_centers_x": x_centers, "hole_centers_y": y_centers,
+            "hole_edge_margin": hole_edge_margin,
         },
         "lid": {
             "length": lid_L, "width": lid_W, "height": lid_H,
