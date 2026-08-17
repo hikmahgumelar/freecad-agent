@@ -46,6 +46,8 @@ The verified result was visually inspected in FreeCAD: the lid covers the body e
 ### Cover (Large Box Base and Internal Top Plate with six Ø35 Holes )
 <img width="1920" height="1049" alt="image" src="https://github.com/user-attachments/assets/671a4888-4b09-42fc-ace3-c035cbad64e5" />
 
+<img width="1920" height="1049" alt="image" src="https://github.com/user-attachments/assets/1aa0d117-b2e1-40ec-8f11-80f747357025" />
+
 
 ## Why this example matters
 
