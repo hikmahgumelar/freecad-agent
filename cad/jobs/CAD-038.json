@@ -1,0 +1,13 @@
+{
+  "id": "CAD-038",
+  "action": "create_circle_test",
+  "status": "pending",
+  "created_by": "ChatGPT",
+  "revision": 1,
+  "revision_note": "Supervisor/FreeCAD pipeline smoke test: create one perfect circular cylinder, diameter 50 mm, height 5 mm, single solid. Test only; no Medicine Box geometry.",
+  "parameters": {
+    "diameter": 50.0,
+    "height": 5.0,
+    "output_path": "/Users/gugum/projectx/freecad-agent/cad/output/circle-test-v1.FCStd"
+  }
+}
