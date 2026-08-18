@@ -1,9 +1,7 @@
 {
   "action": "create_medicine_box",
-  "completed_at": "2026-08-18T08:56:45.539669+00:00",
   "created_at": "2026-08-18T15:00:00+07:00",
   "created_by": "ChatGPT",
-  "error": "Unsupported action: create_medicine_box",
   "id": "CAD-037",
   "parameters": {
     "bottom_thickness": 1.0,
@@ -26,9 +24,7 @@
     "wall": 1.0,
     "width": 85.0
   },
-  "revision": 2,
-  "revision_note": "Retry Medicine Box v1 after executor/listener update. Exactly three separate printable parts: body 120x85x130 mm with 1 mm wall and continuous internal 1 mm ledge on all four sides at Z=70 mm; removable 1 mm plate with six \u00d835 mm holes in 3x2 pattern and 0.2 mm clearance per side; separate outer-cap cover with 60 mm body insertion and 0.25 mm clearance per side. Validate solid geometry and printability.",
-  "started_at": "2026-08-18T08:56:44.158866+00:00",
-  "status": "failed",
-  "updated_at": "2026-08-18T08:56:45.539754+00:00"
+  "revision": 3,
+  "revision_note": "Retry Medicine Box v1 with Supervisor stopped to eliminate race conditions. Exactly three separate printable parts: body 120x85x130 mm with 1 mm wall and continuous internal 1 mm ledge on all four sides at Z=70 mm; removable 1 mm plate with six Ø35 mm holes in 3x2 pattern and 0.2 mm clearance per side; separate outer-cap cover with 60 mm body insertion and 0.25 mm clearance per side. Validate solid geometry and printability.",
+  "status": "pending"
 }
