@@ -1,8 +1,8 @@
 {
   "action": "create_box",
-  "completed_at": null,
+  "completed_at": "2026-08-18T09:29:55.689095+00:00",
   "created_by": "ChatGPT",
-  "error": null,
+  "error": "Unsupported action: create_box",
   "id": "CAD-039",
   "parameters": {
     "height": 5.0,
@@ -13,6 +13,6 @@
   "revision": 1,
   "revision_note": "Pipeline smoke test placeholder; do not use for the circle test unless create_box is confirmed supported.",
   "started_at": "2026-08-18T09:29:54.360906+00:00",
-  "status": "running",
-  "updated_at": "2026-08-18T09:29:54.360985+00:00"
+  "status": "failed",
+  "updated_at": "2026-08-18T09:29:55.689164+00:00"
 }
