@@ -1,9 +1,9 @@
 {
   "action": "create_medicine_box",
-  "completed_at": null,
+  "completed_at": "2026-08-18T08:54:33.438196+00:00",
   "created_at": "2026-08-18T15:00:00+07:00",
   "created_by": "ChatGPT",
-  "error": null,
+  "error": "Unsupported action: create_medicine_box",
   "id": "CAD-037",
   "parameters": {
     "bottom_thickness": 1.0,
@@ -29,6 +29,6 @@
   "revision": 1,
   "revision_note": "Medicine Box v1: exactly 3 separate printable parts. Body 120x85x130 mm with 1 mm wall and a continuous 1 mm thick internal ledge on all four inner sides supporting the removable plate at Z=70 mm. Plate is 1 mm thick, sized to the body cavity with 0.2 mm clearance per side, and has six \u00d835 mm holes in a 3x2 pattern facing TOP. Cover is a separate outer cap; body enters cover 60 mm with 0.25 mm clearance per side and 1 mm walls/top. Validate solid geometry and printability before declaring ready.",
   "started_at": "2026-08-18T08:54:31.903298+00:00",
-  "status": "running",
-  "updated_at": "2026-08-18T08:54:31.903324+00:00"
+  "status": "failed",
+  "updated_at": "2026-08-18T08:54:33.438263+00:00"
 }
