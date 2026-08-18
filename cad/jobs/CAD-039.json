@@ -1,18 +1,15 @@
 {
-  "action": "create_box",
-  "completed_at": "2026-08-18T09:29:55.689095+00:00",
-  "created_by": "ChatGPT",
-  "error": "Unsupported action: create_box",
   "id": "CAD-039",
+  "action": "create_sphere",
+  "created_by": "ChatGPT",
+  "status": "pending",
+  "completed_at": null,
+  "started_at": null,
+  "updated_at": null,
   "parameters": {
-    "height": 5.0,
-    "length": 50.0,
-    "output_path": "/Users/gugum/projectx/freecad-agent/cad/output/smoke-test-v1.FCStd",
-    "width": 50.0
+    "radius": 25.0
   },
-  "revision": 1,
-  "revision_note": "Pipeline smoke test placeholder; do not use for the circle test unless create_box is confirmed supported.",
-  "started_at": "2026-08-18T09:29:54.360906+00:00",
-  "status": "failed",
-  "updated_at": "2026-08-18T09:29:55.689164+00:00"
+  "result": null,
+  "revision": 2,
+  "revision_note": "Clean Supervisor smoke test: create one solid sphere with radius 25 mm. This verifies Supervisor -> watchdog -> FreeCAD listener execution path using a known supported create_sphere action."
 }
