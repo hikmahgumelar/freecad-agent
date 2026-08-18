@@ -1,15 +1,16 @@
 {
-  "id": "CAD-039",
   "action": "create_sphere",
-  "created_by": "ChatGPT",
-  "status": "pending",
   "completed_at": null,
-  "started_at": null,
-  "updated_at": null,
+  "created_by": "ChatGPT",
+  "error": null,
+  "id": "CAD-039",
   "parameters": {
     "radius": 25.0
   },
   "result": null,
   "revision": 2,
-  "revision_note": "Clean Supervisor smoke test: create one solid sphere with radius 25 mm. This verifies Supervisor -> watchdog -> FreeCAD listener execution path using a known supported create_sphere action."
+  "revision_note": "Clean Supervisor smoke test: create one solid sphere with radius 25 mm. This verifies Supervisor -> watchdog -> FreeCAD listener execution path using a known supported create_sphere action.",
+  "started_at": "2026-08-18T09:33:09.166334+00:00",
+  "status": "running",
+  "updated_at": "2026-08-18T09:33:09.166399+00:00"
 }
