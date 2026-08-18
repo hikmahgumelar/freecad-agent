@@ -94,6 +94,30 @@ class FreeCADExecutor:
                 "hole_rows": p.get("hole_rows", 2),
                 "output_path": p.get("output_path", "/home/hikmah/projectx/freecad-agent/cad/output/enclosure-200x100x250.FCStd"),
             })
+        if action == "create_medicine_box":
+            p = job.get("parameters", {})
+            return self._send({
+                "action": "create_medicine_box",
+                "length": p.get("length", 120.0),
+                "width": p.get("width", 85.0),
+                "height": p.get("height", 130.0),
+                "wall": p.get("wall", 1.0),
+                "bottom_thickness": p.get("bottom_thickness", 1.0),
+                "plate_bottom_z": p.get("plate_bottom_z", 70.0),
+                "plate_thickness": p.get("plate_thickness", 1.0),
+                "ledge_thickness": p.get("ledge_thickness", 1.0),
+                "ledge_width": p.get("ledge_width", 3.0),
+                "plate_clearance_per_side": p.get("plate_clearance_per_side", 0.2),
+                "hole_diameter": p.get("hole_diameter", 35.0),
+                "hole_columns": p.get("hole_columns", 3),
+                "hole_rows": p.get("hole_rows", 2),
+                "hole_edge_margin": p.get("hole_edge_margin", 6.0),
+                "cover_clearance_per_side": p.get("cover_clearance_per_side", 0.25),
+                "cover_wall": p.get("cover_wall", 1.0),
+                "cover_top_thickness": p.get("cover_top_thickness", 1.0),
+                "cover_insertion_depth": p.get("cover_insertion_depth", 60.0),
+                "output_path": p.get("output_path", "/home/hikmah/projectx/freecad-agent/cad/output/medicine-box-v1.FCStd"),
+            })
         if action == "create_character_figurine":
             p = job.get("parameters", {})
             return self._send({
@@ -101,8 +125,8 @@ class FreeCADExecutor:
                 "height": p.get("height", 120.0),
                 "base_diameter": p.get("base_diameter", 46.0),
                 "base_thickness": p.get("base_thickness", 3.0),
-                "output_path": p.get("output_path", "/home/hikmah/projectx/freecad-agent/cad/output/character-figurine-120mm.FCStd"),
-                "stl_path": p.get("stl_path", "/home/hikmah/projectx/freecad-agent/cad/output/character-figurine-120mm.stl"),
+                "output_path": p.get("output_path", "/app/freecad-agent/cad/output/character-figurine-120mm.FCStd"),
+                "stl_path": p.get("stl_path", "/app/freecad-agent/cad/output/character-figurine-120mm.stl"),
             })
         raise RuntimeError(f"Unsupported action: {action}")
 
