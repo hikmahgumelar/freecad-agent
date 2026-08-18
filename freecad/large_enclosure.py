@@ -16,15 +16,12 @@ def _fit_view(doc):
 
 
 def _center_positions(size, count, diameter, preferred_edge_margin=5.0):
-    """Return evenly spaced hole centers with a safe edge margin when possible."""
     if count < 1:
         raise RuntimeError("Hole count must be positive")
     radius = diameter / 2.0
     min_size = count * diameter
     if size < min_size:
-        raise RuntimeError(
-            f"Cannot fit {count} holes of Ø{diameter:.1f} mm in {size:.1f} mm"
-        )
+        raise RuntimeError(f"Cannot fit {count} holes of Ø{diameter:.1f} mm in {size:.1f} mm")
     max_margin = (size - min_size) / 2.0
     margin = min(preferred_edge_margin, max_margin)
     start = radius + margin
@@ -36,7 +33,22 @@ def _center_positions(size, count, diameter, preferred_edge_margin=5.0):
 
 
 def create_large_enclosure(command):
-    """Create a large enclosure, or dispatch the Medicine Box design."""
+    """Create a large enclosure, Medicine Box, or one standalone Medicine Box part."""
+    if command.get("design") == "medicine_box_part":
+        from medicine_box_parts import (
+            create_medicine_body,
+            create_medicine_cover,
+            create_medicine_plate,
+        )
+        part = command.get("part")
+        if part == "cover":
+            return create_medicine_cover(command)
+        if part == "plate":
+            return create_medicine_plate(command)
+        if part == "body":
+            return create_medicine_body(command)
+        raise RuntimeError("medicine_box_part requires part=cover, plate, or body")
+
     if command.get("design") == "medicine_box":
         from medicine_box import create_medicine_box
         return create_medicine_box(command)
@@ -64,8 +76,7 @@ def create_large_enclosure(command):
     hole_edge_margin = float(command.get("hole_edge_margin", 5.0))
     output_path = os.path.abspath(command.get("output_path", "/home/hikmah/projectx/freecad-agent/cad/output/enclosure-final.FCStd"))
 
-    values = (L, W, H, wall, bottom, lid_L, lid_W, lid_H, lid_wall,
-              lid_clearance, lid_top, plate_z_center, plate_t, hole_d)
+    values = (L, W, H, wall, bottom, lid_L, lid_W, lid_H, lid_wall, lid_clearance, lid_top, plate_z_center, plate_t, hole_d)
     if min(values) <= 0:
         raise RuntimeError("All enclosure dimensions must be positive")
     if wall * 2 >= min(L, W) or bottom >= H:
@@ -83,10 +94,7 @@ def create_large_enclosure(command):
     expected_outer_L = expected_inner_L + 2.0 * lid_wall
     expected_outer_W = expected_inner_W + 2.0 * lid_wall
     if abs(lid_L - expected_outer_L) > 0.01 or abs(lid_W - expected_outer_W) > 0.01:
-        raise RuntimeError(
-            f"Lid dimensions must be {expected_outer_L:.1f} x {expected_outer_W:.1f} mm "
-            f"for {lid_clearance:.1f} mm/side clearance and {lid_wall:.1f} mm walls"
-        )
+        raise RuntimeError(f"Lid dimensions must be {expected_outer_L:.1f} x {expected_outer_W:.1f} mm for {lid_clearance:.1f} mm/side clearance and {lid_wall:.1f} mm walls")
 
     plate_L = L
     plate_W = W
@@ -162,13 +170,8 @@ def create_large_enclosure(command):
     _fit_view(doc)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     doc.saveAs(output_path)
-    return {
-        "ok": True,
-        "action": "create_large_enclosure",
-        "document": doc.Name,
-        "output_path": output_path,
-        "box": {"length": L, "width": W, "height": H, "wall": wall, "bottom": bottom},
-        "internal_plate": {"length": plate_L, "width": plate_W, "thickness": plate_t, "center_z": plate_z_center, "touches_all_sides": True, "orientation": "TOP", "hole_diameter": hole_d, "hole_pattern": "3 x 2", "hole_count": 6, "hole_centers_x": x_centers, "hole_centers_y": y_centers, "hole_edge_margin": hole_edge_margin},
-        "lid": {"length": lid_L, "width": lid_W, "height": lid_H, "wall": lid_wall, "top_thickness": lid_top, "skirt_height": lid_skirt_h, "inner_length": expected_inner_L, "inner_width": expected_inner_W, "clearance_per_side": lid_clearance, "z_min": lid_z, "z_body_top": H, "z_max": H + lid_top, "separate": True},
-        "objects": ["LargeBoxBase", "InternalTopPlate", "LargeBoxLid"],
-    }
+    return {"ok": True, "action": "create_large_enclosure", "document": doc.Name, "output_path": output_path,
+            "box": {"length": L, "width": W, "height": H, "wall": wall, "bottom": bottom},
+            "internal_plate": {"length": plate_L, "width": plate_W, "thickness": plate_t, "center_z": plate_z_center, "touches_all_sides": True, "orientation": "TOP", "hole_diameter": hole_d, "hole_pattern": "3 x 2", "hole_count": 6, "hole_centers_x": x_centers, "hole_centers_y": y_centers, "hole_edge_margin": hole_edge_margin},
+            "lid": {"length": lid_L, "width": lid_W, "height": lid_H, "wall": lid_wall, "top_thickness": lid_top, "skirt_height": lid_skirt_h, "inner_length": expected_inner_L, "inner_width": expected_inner_W, "clearance_per_side": lid_clearance, "z_min": lid_z, "z_body_top": H, "z_max": H + lid_top, "separate": True},
+            "objects": ["LargeBoxBase", "InternalTopPlate", "LargeBoxLid"]}
