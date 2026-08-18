@@ -1,0 +1,14 @@
+{
+  "id": "CAD-039",
+  "action": "create_box",
+  "status": "pending",
+  "created_by": "ChatGPT",
+  "revision": 1,
+  "revision_note": "Pipeline smoke test placeholder; do not use for the circle test unless create_box is confirmed supported.",
+  "parameters": {
+    "length": 50.0,
+    "width": 50.0,
+    "height": 5.0,
+    "output_path": "/Users/gugum/projectx/freecad-agent/cad/output/smoke-test-v1.FCStd"
+  }
+}
