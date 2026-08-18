@@ -22,6 +22,24 @@ def _create_large_enclosure(command):
     return module.create_large_enclosure(command)
 
 
+def _medicine_parts():
+    module = importlib.import_module("medicine_box_parts")
+    module = importlib.reload(module)
+    return module
+
+
+def _create_medicine_cover(command):
+    return _medicine_parts().create_medicine_cover(command)
+
+
+def _create_medicine_plate(command):
+    return _medicine_parts().create_medicine_plate(command)
+
+
+def _create_medicine_body(command):
+    return _medicine_parts().create_medicine_body(command)
+
+
 def _create_character_figurine(command):
     module = importlib.import_module("character_figurine")
     module = importlib.reload(module)
@@ -35,6 +53,12 @@ def execute_command(command):
     action = command.get("action")
     if action == "create_large_enclosure":
         return _create_large_enclosure(command)
+    if action == "create_medicine_cover":
+        return _create_medicine_cover(command)
+    if action == "create_medicine_plate":
+        return _create_medicine_plate(command)
+    if action == "create_medicine_body":
+        return _create_medicine_body(command)
     if action == "create_character_figurine":
         return _create_character_figurine(command)
     return _original_execute_command(command)
