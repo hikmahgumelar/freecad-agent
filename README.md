@@ -246,11 +246,43 @@ Never commit a real token. `.env` is ignored by Git.
 ./bin/python3 -c 'import requests, dotenv; print("Python dependencies OK")'
 ```
 
-### 4. Start FreeCAD
+### 4. Install the FreeCAD startup module
+
+FreeCAD Agent can automatically load its listener when FreeCAD starts. The installer detects the operating system and installs the startup module in the correct FreeCAD user-data directory.
+
+```bash
+bash scripts/install-freecad-startup.sh
+```
+
+On macOS, the installer resolves FreeCAD's versioned user-data directory automatically (for example, `~/Library/Application Support/FreeCAD/v1-1/`). On Linux, it uses the Linux FreeCAD user-data location.
+
+You can also run the platform-specific installers explicitly:
+
+```bash
+bash scripts/install-freecad-startup-macos.sh
+bash scripts/install-freecad-startup-linux.sh
+```
+
+Restart FreeCAD after installation. The listener should then start automatically on `127.0.0.1:8765`.
+
+Verify it with:
+
+```bash
+lsof -nP -iTCP:8765 -sTCP:LISTEN   # macOS
+ss -ltnp | grep 8765               # Linux
+```
+
+A successful listener looks like:
+
+```text
+127.0.0.1:8765 (LISTEN)
+```
+
+### 5. Start FreeCAD
 
 Open FreeCAD and the `.FCStd` document you want to work on. Make sure it is the **active document**.
 
-### 5. Start the listener
+The startup module installed above should automatically start the listener. If you are troubleshooting or running without the startup module, you can start the listener manually from the FreeCAD Python console.
 
 Open:
 
