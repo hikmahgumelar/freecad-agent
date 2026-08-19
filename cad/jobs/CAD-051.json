@@ -1,8 +1,8 @@
 {
   "action": "create_smoke_test_box",
-  "completed_at": null,
+  "completed_at": "2026-08-19T07:46:23.418721+00:00",
   "created_by": "ChatGPT",
-  "error": null,
+  "error": "Unsupported action: create_smoke_test_box",
   "id": "CAD-051",
   "parameters": {
     "body_height": 50.0,
@@ -24,6 +24,6 @@
   "revision": 1,
   "revision_note": "Retry of CAD-050 after adding the smoke-test action handler. Reference geometry: body 50 mm high, cover 40 mm high, all structural thicknesses 3 mm added outward, plate fits body, body fits cover. This is the reference for future Medicine Box variants where only height changes.",
   "started_at": "2026-08-19T07:46:21.839985+00:00",
-  "status": "running",
-  "updated_at": "2026-08-19T07:46:21.840344+00:00"
+  "status": "failed",
+  "updated_at": "2026-08-19T07:46:23.418808+00:00"
 }
