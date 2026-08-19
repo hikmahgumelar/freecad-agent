@@ -1,8 +1,8 @@
 {
   "action": "create_smoke_test_box",
-  "completed_at": null,
+  "completed_at": "2026-08-19T05:29:02.808336+00:00",
   "created_by": "ChatGPT",
-  "error": null,
+  "error": "Unsupported action: create_smoke_test_box",
   "id": "CAD-050",
   "parameters": {
     "body_height": 50.0,
@@ -24,6 +24,6 @@
   "revision": 1,
   "revision_note": "Reference Smoke-Test Box for future Medicine Box variants. Goals: 3 mm wall/thickness grows outward, 3 mm plate fits into body, and 50 mm body fits into 40 mm cover. Only height will vary in future Medicine Box variants; footprint and fit rules remain the reference.",
   "started_at": "2026-08-19T05:29:01.109523+00:00",
-  "status": "running",
-  "updated_at": "2026-08-19T05:29:01.109932+00:00"
+  "status": "failed",
+  "updated_at": "2026-08-19T05:29:02.808428+00:00"
 }
