@@ -40,6 +40,12 @@ def _create_medicine_body(command):
     return _medicine_parts().create_medicine_body(command)
 
 
+def _create_smoke_test_box(command):
+    module = importlib.import_module("smoke_test_box")
+    module = importlib.reload(module)
+    return module.create_smoke_test_box(command)
+
+
 def _create_character_figurine(command):
     module = importlib.import_module("character_figurine")
     module = importlib.reload(module)
@@ -59,6 +65,8 @@ def execute_command(command):
         return _create_medicine_plate(command)
     if action == "create_medicine_body":
         return _create_medicine_body(command)
+    if action == "create_smoke_test_box":
+        return _create_smoke_test_box(command)
     if action == "create_character_figurine":
         return _create_character_figurine(command)
     return _original_execute_command(command)
