@@ -28,3 +28,4 @@
 2026-08-18T10:27:40.366287+00:00 | job=CAD-046 | action=create_medicine_cover | status=completed
 2026-08-18T10:27:44.844219+00:00 | job=CAD-047 | action=create_medicine_plate | status=completed
 2026-08-18T10:27:49.674711+00:00 | job=CAD-048 | action=create_medicine_body | status=completed
+2026-08-19T05:29:04.138838+00:00 | job=CAD-050 | action=create_smoke_test_box | status=failed | error=Unsupported action: create_smoke_test_box
