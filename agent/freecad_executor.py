@@ -56,6 +56,26 @@ class FreeCADExecutor:
         if action == "create_medicine_body":
             p = job.get("parameters", {})
             return self._send({"action": "create_medicine_body", "output_path": p.get("output_path", "cad/output/medicine-box-body-v1.FCStd")})
+        if action == "create_smoke_test_box":
+            p = job.get("parameters", {})
+            return self._send({
+                "action": "create_smoke_test_box",
+                "plate_length": p.get("plate_length", 117.6),
+                "plate_width": p.get("plate_width", 82.6),
+                "plate_thickness": p.get("plate_thickness", 3.0),
+                "plate_clearance_per_side": p.get("plate_clearance_per_side", 0.3),
+                "wall": p.get("wall", 3.0),
+                "body_height": p.get("body_height", 50.0),
+                "bottom_thickness": p.get("bottom_thickness", 3.0),
+                "plate_support_z": p.get("plate_support_z", 25.0),
+                "ledge_thickness": p.get("ledge_thickness", 3.0),
+                "ledge_width": p.get("ledge_width", 3.0),
+                "cover_height": p.get("cover_height", 40.0),
+                "cover_wall": p.get("cover_wall", 3.0),
+                "cover_clearance_per_side": p.get("cover_clearance_per_side", 0.3),
+                "cover_top_thickness": p.get("cover_top_thickness", 3.0),
+                "output_path": p.get("output_path", "cad/output/smoke-test-box-v1.FCStd"),
+            })
         if action == "create_character_figurine":
             p = job.get("parameters", {})
             return self._send({"action": "create_character_figurine", "height": p.get("height", 120.0), "base_diameter": p.get("base_diameter", 46.0), "base_thickness": p.get("base_thickness", 3.0), "output_path": p.get("output_path", "/app/freecad-agent/cad/output/character-figurine-120mm.FCStd"), "stl_path": p.get("stl_path", "/app/freecad-agent/cad/output/character-figurine-120mm.stl")})
