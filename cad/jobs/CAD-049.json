@@ -1,0 +1,21 @@
+{
+  "id": "CAD-049",
+  "action": "create_medicine_body",
+  "created_by": "ChatGPT",
+  "status": "pending",
+  "revision": 1,
+  "revision_note": "Smoke-Test Box body: same 120 x 85 mm footprint as Medicine Box V3, reduced body height 50 mm, all thicknesses 3 mm, with internal plate ledge. Smoke-test geometry is intended to validate body/plate/cover fit before full Medicine Box V3.",
+  "parameters": {
+    "length": 120.0,
+    "width": 85.0,
+    "height": 50.0,
+    "wall": 3.0,
+    "bottom_thickness": 3.0,
+    "plate_thickness": 3.0,
+    "ledge_thickness": 3.0,
+    "ledge_width": 3.0,
+    "plate_clearance_per_side": 0.3,
+    "plate_support_z": 25.0,
+    "output_path": "/Users/gugum/projectx/freecad-agent/cad/output/smoke-test-box-body-v1.FCStd"
+  }
+}
