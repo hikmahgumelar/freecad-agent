@@ -1,0 +1,25 @@
+{
+  "id": "CAD-050",
+  "action": "create_smoke_test_box",
+  "created_by": "ChatGPT",
+  "status": "pending",
+  "revision": 1,
+  "revision_note": "Reference Smoke-Test Box for future Medicine Box variants. Goals: 3 mm wall/thickness grows outward, 3 mm plate fits into body, and 50 mm body fits into 40 mm cover. Only height will vary in future Medicine Box variants; footprint and fit rules remain the reference.",
+  "parameters": {
+    "plate_length": 117.6,
+    "plate_width": 82.6,
+    "plate_thickness": 3.0,
+    "plate_clearance_per_side": 0.3,
+    "wall": 3.0,
+    "body_height": 50.0,
+    "bottom_thickness": 3.0,
+    "plate_support_z": 25.0,
+    "ledge_thickness": 3.0,
+    "ledge_width": 3.0,
+    "cover_height": 40.0,
+    "cover_wall": 3.0,
+    "cover_clearance_per_side": 0.3,
+    "cover_top_thickness": 3.0,
+    "output_path": "/Users/gugum/projectx/freecad-agent/cad/output/smoke-test-box-v1.FCStd"
+  }
+}
