@@ -1,0 +1,25 @@
+{
+  "id": "CAD-051",
+  "action": "create_smoke_test_box",
+  "created_by": "ChatGPT",
+  "status": "pending",
+  "revision": 1,
+  "revision_note": "Retry of CAD-050 after adding the smoke-test action handler. Reference geometry: body 50 mm high, cover 40 mm high, all structural thicknesses 3 mm added outward, plate fits body, body fits cover. This is the reference for future Medicine Box variants where only height changes.",
+  "parameters": {
+    "body_height": 50.0,
+    "cover_height": 40.0,
+    "wall": 3.0,
+    "bottom_thickness": 3.0,
+    "plate_thickness": 3.0,
+    "ledge_thickness": 3.0,
+    "ledge_width": 3.0,
+    "plate_length": 117.6,
+    "plate_width": 82.6,
+    "plate_clearance_per_side": 0.3,
+    "plate_support_z": 25.0,
+    "cover_wall": 3.0,
+    "cover_clearance_per_side": 0.3,
+    "cover_top_thickness": 3.0,
+    "output_path": "/Users/gugum/projectx/freecad-agent/cad/output/smoke-test-box-v2.FCStd"
+  }
+}
