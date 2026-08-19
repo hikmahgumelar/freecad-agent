@@ -2,9 +2,9 @@
   "id": "CAD-049",
   "action": "create_medicine_body",
   "created_by": "ChatGPT",
-  "status": "pending",
-  "revision": 1,
-  "revision_note": "Smoke-Test Box body: same 120 x 85 mm footprint as Medicine Box V3, reduced body height 50 mm, all thicknesses 3 mm, with internal plate ledge. Smoke-test geometry is intended to validate body/plate/cover fit before full Medicine Box V3.",
+  "status": "cancelled",
+  "revision": 2,
+  "revision_note": "Cancelled before execution: 3 mm body wall with 120 x 85 mm outer dimensions would shrink the internal space and make the unchanged 6-hole plate unable to fit. Reconcile outward-thickness dimensions before running the Smoke-Test Box.",
   "parameters": {
     "length": 120.0,
     "width": 85.0,
