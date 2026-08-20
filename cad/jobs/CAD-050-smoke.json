@@ -1,6 +1,6 @@
 {
   "action": "create_medicine_body",
-  "completed_at": null,
+  "completed_at": "2026-08-20T03:04:54.771972+00:00",
   "created_by": "ChatGPT",
   "error": null,
   "id": "CAD-050",
@@ -16,9 +16,29 @@
     "wall": 3.0,
     "width": 85.0
   },
+  "result": {
+    "action": "create_medicine_body",
+    "dimensions": {
+      "height": 130.0,
+      "length": 120.0,
+      "wall": 1.0,
+      "width": 85.0
+    },
+    "ok": true,
+    "output_path": "/Users/gugum/projectx/freecad-agent/cad/output/smoke-test-box-body-v3.FCStd",
+    "plate_support": {
+      "thickness": 1.0,
+      "width": 3.0,
+      "z": 70.0
+    },
+    "printability": {
+      "orientation": "upright",
+      "support_required": false
+    }
+  },
   "revision": 1,
   "revision_note": "Medicine Box V3 smoke test: functional/internal footprint 120 x 85 mm; 3 mm wall and 3 mm bottom added outward, producing 126 x 91 mm outer footprint. Height 50 mm for smoke test. Continuous 3 mm thick x 3 mm wide internal plate ledge at Z=25 mm.",
   "started_at": "2026-08-20T03:04:50.721652+00:00",
-  "status": "running",
-  "updated_at": "2026-08-20T03:04:50.721928+00:00"
+  "status": "completed",
+  "updated_at": "2026-08-20T03:04:54.772033+00:00"
 }
