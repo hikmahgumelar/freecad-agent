@@ -7,18 +7,18 @@ import Part
 L = 120.0
 W = 85.0
 H = 130.0
-WALL = 1.0
-BOTTOM = 1.0
+WALL = 3.0
+BOTTOM = 3.0
 PLATE_Z = 70.0
-PLATE_T = 1.0
-LEDGE_T = 1.0
+PLATE_T = 3.0
+LEDGE_T = 3.0
 LEDGE_WIDTH = 3.0
-PLATE_CLEARANCE = 0.2
+PLATE_CLEARANCE = 0.3
 HOLE_D = 35.0
 HOLE_MARGIN = 6.0
-COVER_WALL = 1.0
-COVER_CLEARANCE = 0.25
-COVER_TOP = 1.0
+COVER_WALL = 3.0
+COVER_CLEARANCE = 0.3
+COVER_TOP = 3.0
 COVER_INSERTION = 60.0
 
 
@@ -47,10 +47,10 @@ def _save(doc, output_path):
 
 
 def create_medicine_cover(command):
-    """Standalone FDM cover with the closed 1 mm face on the build plate."""
+    """Standalone FDM cover; functional body footprint remains L x W."""
     doc = App.newDocument("MedicineCover")
-    outer_L = L + 2 * (COVER_WALL + COVER_CLEARANCE)
-    outer_W = W + 2 * (COVER_WALL + COVER_CLEARANCE)
+    outer_L = L + 2 * COVER_WALL + 2 * COVER_CLEARANCE
+    outer_W = W + 2 * COVER_WALL + 2 * COVER_CLEARANCE
     inner_L = L + 2 * COVER_CLEARANCE
     inner_W = W + 2 * COVER_CLEARANCE
     total_H = COVER_INSERTION + COVER_TOP
@@ -63,7 +63,7 @@ def create_medicine_cover(command):
     obj.Label = "Medicine Box Cover - PRINT ORIENTATION"
     obj.Shape = shape
     obj.addProperty("App::PropertyString", "PrintOrientation", "Printing")
-    obj.PrintOrientation = "Closed 1 mm face DOWN on build plate; opening UP"
+    obj.PrintOrientation = "Closed face DOWN on build plate; opening UP"
     obj.addProperty("App::PropertyLength", "ClearancePerSide", "Dimensions")
     obj.ClearancePerSide = COVER_CLEARANCE
     obj.addProperty("App::PropertyLength", "InsertionDepth", "Dimensions")
@@ -73,27 +73,26 @@ def create_medicine_cover(command):
     obj.addProperty("App::PropertyString", "Support", "Printing")
     obj.Support = "No support required by design"
 
-    output = command.get("output_path", "cad/output/medicine-box-cover-v1.FCStd")
+    output = command.get("output_path", "cad/output/medicine-box-cover-v3.FCStd")
     return {"ok": True, "action": "create_medicine_cover", "output_path": _save(doc, output),
             "dimensions": {"length": outer_L, "width": outer_W, "height": total_H},
+            "functional_footprint": {"length": L, "width": W},
             "printability": {"orientation": "closed face down / opening up", "support_required": False}}
 
 
 def create_medicine_plate(command):
     """Standalone 6-hole plate, printed flat on the build plate."""
     doc = App.newDocument("MedicinePlate6Holes")
-    plate_L = L - 2 * WALL - 2 * PLATE_CLEARANCE
-    plate_W = W - 2 * WALL - 2 * PLATE_CLEARANCE
+    plate_L = L
+    plate_W = W
 
-    # 6 mm edge margin around the Ø35 mm holes.
-    xs = [HOLE_MARGIN + HOLE_D / 2,
-          plate_L / 2,
-          plate_L - HOLE_MARGIN - HOLE_D / 2]
-    ys = [HOLE_MARGIN + HOLE_D / 2,
-          plate_W - HOLE_MARGIN - HOLE_D / 2]
-
-    if plate_L < 3 * HOLE_D + 2 * HOLE_MARGIN or plate_W < 2 * HOLE_D + 2 * HOLE_MARGIN:
+    margin = HOLE_MARGIN
+    radius = HOLE_D / 2.0
+    if plate_L < 3 * HOLE_D + 2 * margin or plate_W < 2 * HOLE_D + 2 * margin:
         raise RuntimeError("Plate is too small for 6 x Ø35 mm holes with 6 mm edge margin")
+
+    xs = [margin + radius, plate_L / 2.0, plate_L - margin - radius]
+    ys = [margin + radius, plate_W - margin - radius]
 
     shape = Part.makeBox(plate_L, plate_W, PLATE_T, App.Vector(0, 0, 0))
     for x in xs:
@@ -107,42 +106,65 @@ def create_medicine_plate(command):
     obj.addProperty("App::PropertyString", "PrintOrientation", "Printing")
     obj.PrintOrientation = "Flat on build plate; holes vertical through plate"
     obj.addProperty("App::PropertyString", "Fit", "Design")
-    obj.Fit = "117.6 x 82.6 mm; 0.2 mm clearance per side to body cavity"
+    obj.Fit = "120 x 85 mm functional plate; body cavity remains 120 x 85 mm"
     obj.addProperty("App::PropertyString", "HolePattern", "Design")
     obj.HolePattern = "3 columns x 2 rows; 6 x Ø35 mm; 6 mm edge margin"
 
-    output = command.get("output_path", "cad/output/medicine-box-plate-6holes-v1.FCStd")
+    output = command.get("output_path", "cad/output/medicine-box-plate-6holes-v3.FCStd")
     return {"ok": True, "action": "create_medicine_plate", "output_path": _save(doc, output),
             "dimensions": {"length": plate_L, "width": plate_W, "thickness": PLATE_T},
-            "holes": {"count": 6, "diameter": HOLE_D, "pattern": "3 x 2", "edge_margin": HOLE_MARGIN},
+            "holes": {"count": 6, "diameter": HOLE_D, "pattern": "3 x 2", "edge_margin": margin,
+                      "centers_x": xs, "centers_y": ys},
             "printability": {"orientation": "flat", "support_required": False}}
 
 
 def create_medicine_body(command):
-    """Standalone body with bottom and continuous internal plate ledge."""
+    """Standalone body. length/width are functional internal dimensions; wall is added outward."""
     doc = App.newDocument("MedicineBody")
-    outer = Part.makeBox(L, W, H)
-    cavity = Part.makeBox(L - 2 * WALL, W - 2 * WALL, H - BOTTOM, App.Vector(WALL, WALL, BOTTOM))
+    functional_L = float(command.get("length", L))
+    functional_W = float(command.get("width", W))
+    height = float(command.get("height", H))
+    wall = float(command.get("wall", WALL))
+    bottom = float(command.get("bottom_thickness", BOTTOM))
+    plate_z = float(command.get("plate_support_z", PLATE_Z))
+    plate_t = float(command.get("plate_thickness", PLATE_T))
+    ledge_t = float(command.get("ledge_thickness", LEDGE_T))
+    ledge_width = float(command.get("ledge_width", LEDGE_WIDTH))
+    if min(functional_L, functional_W, height, wall, bottom, plate_t, ledge_t, ledge_width) <= 0:
+        raise RuntimeError("All body dimensions must be positive")
+    if plate_z <= bottom or plate_z + plate_t > height:
+        raise RuntimeError("Plate support position is outside the body")
+
+    outer_L = functional_L + 2 * wall
+    outer_W = functional_W + 2 * wall
+    outer = Part.makeBox(outer_L, outer_W, height)
+    cavity = Part.makeBox(functional_L, functional_W, height - bottom, App.Vector(wall, wall, bottom))
     shape = outer.cut(cavity)
 
-    ledge_outer = Part.makeBox(L - 2 * WALL, W - 2 * WALL, LEDGE_T, App.Vector(WALL, WALL, PLATE_Z - LEDGE_T))
-    ledge_inner = Part.makeBox(L - 2 * WALL - 2 * LEDGE_WIDTH, W - 2 * WALL - 2 * LEDGE_WIDTH,
-                               LEDGE_T + 0.2, App.Vector(WALL + LEDGE_WIDTH, WALL + LEDGE_WIDTH,
-                                                        PLATE_Z - LEDGE_T - 0.1))
+    ledge_outer = Part.makeBox(functional_L, functional_W, ledge_t, App.Vector(wall, wall, plate_z - ledge_t))
+    ledge_inner = Part.makeBox(max(0.01, functional_L - 2 * ledge_width), max(0.01, functional_W - 2 * ledge_width), ledge_t + 0.2,
+                               App.Vector(wall + ledge_width, wall + ledge_width, plate_z - ledge_t - 0.1))
     shape = shape.fuse(ledge_outer.cut(ledge_inner))
 
     obj = doc.addObject("Part::Feature", "MedicineBody")
-    obj.Label = "Medicine Box Body - PRINT UPRIGHT"
+    obj.Label = f"Medicine Box Body - functional {functional_L:.0f}x{functional_W:.0f} - PRINT UPRIGHT"
     obj.Shape = shape
+    for name, value in (("FunctionalLength", functional_L), ("FunctionalWidth", functional_W), ("OuterLength", outer_L),
+                        ("OuterWidth", outer_W), ("Height", height), ("WallThickness", wall), ("BottomThickness", bottom),
+                        ("PlateSupportZ", plate_z), ("PlateSupportThickness", ledge_t), ("PlateSupportWidth", ledge_width)):
+        obj.addProperty("App::PropertyLength", name, "Dimensions")
+        setattr(obj, name, value)
     obj.addProperty("App::PropertyString", "PrintOrientation", "Printing")
     obj.PrintOrientation = "Bottom DOWN on build plate; opening UP"
     obj.addProperty("App::PropertyString", "PlateSupport", "Design")
-    obj.PlateSupport = "Continuous 1 mm thick x 3 mm wide ledge on all four inner sides at Z=70 mm"
-    obj.addProperty("App::PropertyString", "PlateFit", "Design")
-    obj.PlateFit = "Plate 117.6 x 82.6 mm; 0.2 mm clearance per side"
+    obj.PlateSupport = "Continuous ledge on all four inner sides"
+    obj.addProperty("App::PropertyString", "DimensionContract", "Design")
+    obj.DimensionContract = "120 x 85 mm functional/internal footprint; 3 mm wall added outward"
 
-    output = command.get("output_path", "cad/output/medicine-box-body-v1.FCStd")
+    output = command.get("output_path", "cad/output/medicine-box-body-v3-smoke.FCStd")
     return {"ok": True, "action": "create_medicine_body", "output_path": _save(doc, output),
-            "dimensions": {"length": L, "width": W, "height": H, "wall": WALL},
-            "plate_support": {"z": PLATE_Z, "thickness": LEDGE_T, "width": LEDGE_WIDTH},
+            "dimensions": {"functional_length": functional_L, "functional_width": functional_W,
+                           "outer_length": outer_L, "outer_width": outer_W, "height": height,
+                           "wall": wall, "bottom": bottom},
+            "plate_support": {"z": plate_z, "thickness": ledge_t, "width": ledge_width},
             "printability": {"orientation": "upright", "support_required": False}}
