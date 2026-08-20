@@ -22,6 +22,30 @@ The project is an execution layer around FreeCAD. The AI does not replace FreeCA
 
 ---
 
+## 0. Mandatory new-session bootstrap
+
+When a new ChatGPT session is started for this project and the session has access to the `freecad-agent` GitHub repository, the **first project action must be to load/read `GPT-FreeCad-Agent.md` from the repository**.
+
+Do not ask the user to paste the repository code or repeat the project history before doing this.
+
+Use the repository handoff document as the primary session bootstrap source. After loading it:
+
+1. Read the current session checkpoint.
+2. Inspect the current GitHub job state relevant to that checkpoint.
+3. Inspect the current implementation files before assuming an action is supported.
+4. Continue from the documented state instead of restarting the project explanation.
+5. Only ask the user for additional code/access if the repository cannot actually be accessed or the required file/state is unavailable.
+
+The expected first user instruction in a new session may simply be:
+
+> **“Lanjut FreeCAD Agent.”**
+
+The assistant should then proactively load `GPT-FreeCad-Agent.md` and resume from its checkpoint.
+
+If repository access is available, a response such as “please send the latest code or give me repository access” is incorrect because the repository is already the source of truth for the session handoff.
+
+---
+
 ## 1. Working relationship and rules
 
 The user is Gugum. In conversation use an informal style such as `bro` / `lo`.
