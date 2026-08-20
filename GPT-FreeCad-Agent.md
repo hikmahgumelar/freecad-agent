@@ -550,7 +550,96 @@ The objective is to demonstrate:
 
 ---
 
-## 13. Final assistant behavior
+## 13. Current Session Checkpoint — 2026-08-20
+
+This section is the primary handoff checkpoint for the next ChatGPT session. **Read this section before continuing any CAD work.**
+
+### Medicine Box V3 — agreed design contract
+
+Medicine Box is a 3-part printable design:
+
+1. **Body**
+2. **Plate**
+3. **Cover**
+
+Current agreed requirements:
+
+- Original nominal footprint: **120 mm length × 85 mm width**.
+- Full Medicine Box body height: **130 mm** unless a future variant explicitly changes height.
+- Body, plate, and cover structural thickness: **3 mm**.
+- The 3 mm wall/thickness is added **outward**, so the functional/internal space is not reduced just because wall thickness changes from 1 mm to 3 mm.
+- Plate: **6 holes, Ø35 mm, 3 columns × 2 rows**, horizontal and facing TOP.
+- Plate is a separate printable part.
+- Body has a continuous internal supporting ledge on all four sides for the plate.
+- Plate must enter the Body from the top and descend until it rests on the internal Body ledge.
+- Body must enter the Cover; **Body goes inside Cover, never the reverse**.
+- For the full Medicine Box, the Cover insertion/depth requirement is **60 mm**.
+- Mating interfaces must be snug/functional: **not too tight and not too loose**.
+- Initial FDM fit-test clearance target is approximately **0.3 mm per side**. This is a starting design parameter, not a guarantee for every printer.
+- Printability must be checked before calling the design ready: orientation, overhangs, floating geometry, support, part separation, clearance, assembly, and actual print validation.
+
+### Smoke-Test Box — current reference design
+
+The Smoke-Test Box is a smaller-height reference used to validate the mating geometry before generating the full Medicine Box V3.
+
+The agreed Smoke-Test dimensions/intent are:
+
+- Body height: **50 mm**.
+- Cover height: **40 mm**.
+- Body wall: **3 mm**, added outward.
+- Cover wall: **3 mm**, added outward.
+- Plate thickness: **3 mm**.
+- Cover top thickness: **3 mm**.
+- Plate remains the same functional reference plate: **117.6 × 82.6 mm, 6 × Ø35 mm, 3×2**.
+- Initial plate/body clearance target: **0.3 mm per side**.
+- Initial body/cover clearance target: **0.3 mm per side**.
+- Plate must fit into Body and rest on the internal ledge.
+- Body must fit into Cover.
+- The Smoke-Test Box is the reference for future Medicine Box variants; future variants should keep the same footprint/fit logic and primarily change height unless explicitly specified otherwise.
+- Cover height is 40 mm total. With a 3 mm cover top, the effective cavity/insertion depth is **37 mm** if the 40 mm value is interpreted as total cover height. Do not silently reinterpret this; if the user changes the cover-depth requirement, update the spec explicitly.
+
+### Current CAD job state
+
+**CAD-050** was created for `create_smoke_test_box` with the Smoke-Test requirements above, but the execution **failed** because the currently running watchdog/listener reported:
+
+```text
+Unsupported action: create_smoke_test_box
+```
+
+Therefore **Smoke-Test Box has NOT been successfully generated yet**. Do not tell the user it passed or that an `.FCStd` result exists.
+
+The immediate next engineering task is:
+
+1. Inspect the actual deployed watchdog/listener source and make sure `create_smoke_test_box` is supported end-to-end.
+2. Ensure the FreeCAD-side implementation creates the three separate printable parts: Body, Plate, Cover.
+3. Validate the two mating interfaces geometrically:
+   - Plate → Body → rests on ledge.
+   - Body → Cover.
+4. Validate print orientation and support requirements.
+5. Create a new/revised CAD job rather than pretending CAD-050 succeeded.
+6. After the job completes, inspect the actual `.FCStd` result and report PASS/FAIL with evidence.
+
+Do not reuse CAD-050 as a successful result; it is a failed historical execution.
+
+### Important recent implementation lesson
+
+A previous attempt tried to submit a Smoke-Test Body with outer dimensions 120 × 85 mm and 3 mm walls while keeping the old internal plate size. That was correctly recognized as invalid because increasing the wall inward would shrink the internal space and prevent the plate from fitting.
+
+The correct design principle is:
+
+**Keep the functional/internal dimensions, and add the 3 mm material outward.**
+
+This principle must be preserved in Medicine Box V3 and its Smoke-Test reference.
+
+### Session resume instruction
+
+When a new ChatGPT session starts, do not reconstruct the Medicine Box requirements from memory. Read this checkpoint first, inspect the current GitHub job status/source, and continue from the **CAD-050 failed / action-support-fix** state.
+
+Do not jump directly to Medicine Box V3. The Smoke-Test must pass first.
+
+---
+
+## 14. Final assistant behavior
 
 Before declaring a CAD job successful, ask internally:
 
