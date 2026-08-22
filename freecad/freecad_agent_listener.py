@@ -181,8 +181,6 @@ def _create_slider_cover(command):
     if x1 <= x0 or y1 <= y0:
         raise RuntimeError("Invalid inner case bounds")
 
-    # The manual SMA opening is retained on the side of the case. The slider
-    # deliberately starts 10 mm away from that end instead of moving the hole.
     slider_x0 = x0 + antenna_offset
     slider_x1 = x1 - end_clearance
     if slider_x1 - slider_x0 <= 10:
@@ -193,7 +191,6 @@ def _create_slider_cover(command):
     rail_left_shape = Part.makeBox(x1 - x0, rail_width, rail_height, App.Vector(x0, rail_y_left, floor_z))
     rail_right_shape = Part.makeBox(x1 - x0, rail_width, rail_height, App.Vector(x0, rail_y_right, floor_z))
 
-    # Correct any existing rails in-place so they are seated directly on the case floor.
     for name, rail_shape, label in (
         ("SliderCaseRailLeft", rail_left_shape, "Slider case rail left (floor mounted)"),
         ("SliderCaseRailRight", rail_right_shape, "Slider case rail right (floor mounted)"),
@@ -221,13 +218,11 @@ def _create_slider_cover(command):
     slider_shape = plate.fuse(left_skirt).fuse(right_skirt).removeSplitter()
     old = doc.getObject("SliderCover")
     if old is not None:
-        doc.removeObject("SliderCover")
+        doc.removeObject(old)
     slider = doc.addObject("Part::Feature", "SliderCover")
     slider.Label = "Slider cover - manual case compatible"
     slider.Shape = slider_shape
 
-    # Keep the original Body untouched: the antenna and USB-C openings remain
-    # exactly as modeled manually. The cover is a separate moving component.
     slider.addProperty("App::PropertyLength", "AntennaOffset", "Slider")
     slider.AntennaOffset = antenna_offset
     slider.addProperty("App::PropertyLength", "SideClearance", "Slider")
@@ -242,6 +237,96 @@ def _create_slider_cover(command):
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     doc.saveAs(output_path)
     return {"ok": True, "action": "create_slider_cover", "document": doc.Name, "source_body": body.Name, "source_tip": tip.Name, "output_path": output_path, "case_dimensions": {"x": bb.XLength, "y": bb.YLength, "z": bb.ZLength}, "inner_bounds": {"xmin": inner.XMin, "xmax": inner.XMax, "ymin": inner.YMin, "ymax": inner.YMax, "floor_z": floor_z}, "slider": {"xmin": slider_x0, "xmax": slider_x1, "ymin": plate_y0, "ymax": plate_y1, "z": plate_z, "thickness": thickness, "antenna_offset": antenna_offset, "side_clearance": side_clearance, "top_clearance": top_clearance}, "rails": {"width": rail_width, "height": rail_height, "inset": rail_inset, "floor_mounted": True}, "objects": ["SliderCaseRailLeft", "SliderCaseRailRight", "SliderCover"]}
+
+
+def _create_smoke_test_box(command):
+    """Create a standalone printable smoke-test enclosure with body, plate, and cover."""
+    params = {
+        "body_height": float(command.get("body_height", 50.0)),
+        "cover_height": float(command.get("cover_height", 40.0)),
+        "wall": float(command.get("wall", 3.0)),
+        "bottom_thickness": float(command.get("bottom_thickness", 3.0)),
+        "plate_thickness": float(command.get("plate_thickness", 3.0)),
+        "ledge_thickness": float(command.get("ledge_thickness", 3.0)),
+        "ledge_width": float(command.get("ledge_width", 3.0)),
+        "plate_clearance_per_side": float(command.get("plate_clearance_per_side", 0.3)),
+        "plate_support_z": float(command.get("plate_support_z", 25.0)),
+        "cover_wall": float(command.get("cover_wall", command.get("wall", 3.0))),
+        "cover_clearance_per_side": float(command.get("cover_clearance_per_side", 0.3)),
+        "cover_top_thickness": float(command.get("cover_top_thickness", 3.0)),
+    }
+    if any(value <= 0 for value in params.values()):
+        raise RuntimeError("Smoke-test parameters must be positive")
+    if params["body_height"] <= params["bottom_thickness"] + params["plate_support_z"] + params["plate_thickness"]:
+        raise RuntimeError("Body height is too small for the requested plate support")
+
+    output_path = os.path.abspath(command.get("output_path", "/home/hikmah/projectx/freecad-agent/cad/output/smoke-test-box.FCStd"))
+    doc = App.newDocument(command.get("document", "SmokeTestBox"))
+
+    body_outer_x = 120.0
+    body_outer_y = 85.0
+    body_inner_x = body_outer_x - 2.0 * params["wall"]
+    body_inner_y = body_outer_y - 2.0 * params["wall"]
+    if body_inner_x <= 0 or body_inner_y <= 0:
+        raise RuntimeError("Body wall leaves no usable internal footprint")
+
+    outer = Part.makeBox(body_outer_x, body_outer_y, params["body_height"])
+    inner = Part.makeBox(body_inner_x, body_inner_y, params["body_height"] - params["bottom_thickness"], App.Vector(params["wall"], params["wall"], params["bottom_thickness"]))
+    body_shape = outer.cut(inner)
+    body = doc.addObject("Part::Feature", "Body")
+    body.Label = "Smoke test body"
+    body.Shape = body_shape
+
+    ledge_x = body_inner_x - 2.0 * params["ledge_width"]
+    ledge_y = body_inner_y - 2.0 * params["ledge_width"]
+    if ledge_x <= 0 or ledge_y <= 0:
+        raise RuntimeError("Ledge width is too large for the body")
+    ledge = Part.makeBox(ledge_x, ledge_y, params["ledge_thickness"], App.Vector(params["wall"] + params["ledge_width"], params["wall"] + params["ledge_width"], params["plate_support_z"]))
+    ledge_obj = doc.addObject("Part::Feature", "PlateSupport")
+    ledge_obj.Label = "Internal plate support ledge"
+    ledge_obj.Shape = ledge
+
+    plate_x = body_inner_x - 2.0 * params["plate_clearance_per_side"]
+    plate_y = body_inner_y - 2.0 * params["plate_clearance_per_side"]
+    if plate_x <= 0 or plate_y <= 0:
+        raise RuntimeError("Plate clearance leaves no usable plate")
+    plate = Part.makeBox(plate_x, plate_y, params["plate_thickness"], App.Vector(params["wall"] + params["plate_clearance_per_side"], params["wall"] + params["plate_clearance_per_side"], params["plate_support_z"] + params["ledge_thickness"]))
+    plate_obj = doc.addObject("Part::Feature", "Plate")
+    plate_obj.Label = "Removable smoke test plate"
+    plate_obj.Shape = plate
+    plate_obj.addProperty("App::PropertyLength", "ClearancePerSide", "Printability")
+    plate_obj.ClearancePerSide = params["plate_clearance_per_side"]
+
+    cover_x = body_outer_x + 2.0 * params["cover_clearance_per_side"]
+    cover_y = body_outer_y + 2.0 * params["cover_clearance_per_side"]
+    cover_outer = Part.makeBox(cover_x, cover_y, params["cover_height"], App.Vector(-params["cover_clearance_per_side"], -params["cover_clearance_per_side"], 0))
+    cover_inner_x = cover_x - 2.0 * params["cover_wall"]
+    cover_inner_y = cover_y - 2.0 * params["cover_wall"]
+    cover_inner_depth = params["cover_height"] - params["cover_top_thickness"]
+    if cover_inner_x <= 0 or cover_inner_y <= 0 or cover_inner_depth <= 0:
+        raise RuntimeError("Cover dimensions are invalid")
+    cover_inner = Part.makeBox(cover_inner_x, cover_inner_y, cover_inner_depth, App.Vector(-params["cover_clearance_per_side"] + params["cover_wall"], -params["cover_clearance_per_side"] + params["cover_wall"], 0))
+    cover_shape = cover_outer.cut(cover_inner)
+    cover_obj = doc.addObject("Part::Feature", "Cover")
+    cover_obj.Label = "Separate smoke test cover"
+    cover_obj.Shape = cover_shape
+    cover_obj.addProperty("App::PropertyLength", "ClearancePerSide", "Printability")
+    cover_obj.ClearancePerSide = params["cover_clearance_per_side"]
+
+    doc.recompute()
+    _fit_view(doc)
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    doc.saveAs(output_path)
+
+    return {
+        "ok": True,
+        "action": "create_smoke_test_box",
+        "document": doc.Name,
+        "output_path": output_path,
+        "parts": ["Body", "PlateSupport", "Plate", "Cover"],
+        "dimensions": {"body_x": body_outer_x, "body_y": body_outer_y, "body_z": params["body_height"], "plate_x": plate_x, "plate_y": plate_y, "plate_z": params["plate_thickness"], "cover_x": cover_x, "cover_y": cover_y, "cover_z": params["cover_height"]},
+        "printability": {"plate_clearance_per_side": params["plate_clearance_per_side"], "cover_clearance_per_side": params["cover_clearance_per_side"], "separate_parts": True},
+    }
 
 
 def execute_command(command):
@@ -283,6 +368,8 @@ def execute_command(command):
         return _create_case_rails(command)
     if action == "create_slider_cover":
         return _create_slider_cover(command)
+    if action == "create_smoke_test_box":
+        return _create_smoke_test_box(command)
     return {"ok": False, "error": f"Unsupported action: {action}"}
 
 
