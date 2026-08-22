@@ -1,6 +1,6 @@
 {
   "action": "create_smoke_test_box",
-  "completed_at": null,
+  "completed_at": "2026-08-22T10:25:58.810561+00:00",
   "created_by": "ChatGPT",
   "error": null,
   "id": "CAD-053",
@@ -24,10 +24,48 @@
     "wall": 3.0,
     "xy_reference": "MedicineBoxV3"
   },
+  "result": {
+    "action": "create_smoke_test_box",
+    "body": {
+      "height": 50.0,
+      "internal_length": 120.0,
+      "internal_width": 85.0,
+      "length": 126.0,
+      "wall": 3.0,
+      "width": 91.0
+    },
+    "cover": {
+      "clearance_per_side": 0.3,
+      "fit": "PASS",
+      "height": 40.0,
+      "length": 132.6,
+      "top": 3.0,
+      "wall": 3.0,
+      "width": 97.6
+    },
+    "ok": true,
+    "output_path": "/home/hikmah/projectx/freecad-agent/cad/output/smoke-test-box-v3-r3.FCStd",
+    "plate": {
+      "clearance_per_side": 0.3,
+      "fit": "PASS",
+      "hole_diameter": 35.0,
+      "holes": 6,
+      "length": 119.4,
+      "thickness": 3.0,
+      "width": 84.4
+    },
+    "validation": {
+      "body_to_cover": "PASS",
+      "plate_to_body": "PASS",
+      "separate_solids": true,
+      "support_required": false,
+      "v3_horizontal_contract": true
+    }
+  },
   "revision": 3,
   "revision_note": "Requeue after smoke-test plate hole-center patch. Run with current master generator; only body height is reduced to 50 mm for physical print validation.",
   "started_at": "2026-08-22T10:25:56.664224+00:00",
-  "status": "running",
+  "status": "completed",
   "title": "Medicine Box V3 Smoke Test",
-  "updated_at": "2026-08-22T10:25:56.664240+00:00"
+  "updated_at": "2026-08-22T10:25:58.810586+00:00"
 }
