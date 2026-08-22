@@ -1,6 +1,6 @@
 {
   "action": "create_smoke_test_box",
-  "completed_at": null,
+  "completed_at": "2026-08-22T10:15:35.776722+00:00",
   "created_by": "ChatGPT",
   "error": null,
   "id": "CAD-053",
@@ -24,9 +24,47 @@
     "wall": 3.0,
     "xy_reference": "MedicineBoxV3"
   },
+  "result": {
+    "action": "create_smoke_test_box",
+    "body": {
+      "height": 50.0,
+      "internal_length": 120.0,
+      "internal_width": 85.0,
+      "length": 126.0,
+      "wall": 3.0,
+      "width": 91.0
+    },
+    "cover": {
+      "clearance_per_side": 0.3,
+      "fit": "PASS",
+      "height": 40.0,
+      "length": 132.6,
+      "top": 3.0,
+      "wall": 3.0,
+      "width": 97.6
+    },
+    "ok": true,
+    "output_path": "/home/hikmah/projectx/freecad-agent/cad/output/smoke-test-box-v3-r2.FCStd",
+    "plate": {
+      "clearance_per_side": 0.3,
+      "fit": "PASS",
+      "hole_diameter": 35.0,
+      "holes": 6,
+      "length": 119.4,
+      "thickness": 3.0,
+      "width": 84.4
+    },
+    "validation": {
+      "body_to_cover": "PASS",
+      "plate_to_body": "PASS",
+      "separate_solids": true,
+      "support_required": false,
+      "v3_horizontal_contract": true
+    }
+  },
   "revision": 2,
   "revision_note": "Geometry fix: X/Y must be identical to Medicine Box V3. Only body height changes to 50 mm. Six \u00d835 mm holes must remain fully inside the 119.4 x 84.4 mm plate with symmetric margins.",
   "started_at": "2026-08-22T10:15:33.802085+00:00",
-  "status": "running",
-  "updated_at": "2026-08-22T10:15:33.802102+00:00"
+  "status": "completed",
+  "updated_at": "2026-08-22T10:15:35.776756+00:00"
 }
