@@ -1,0 +1,27 @@
+{
+  "id": "CAD-052",
+  "title": "Medicine Box V3 Smoke Test",
+  "action": "create_smoke_test_box",
+  "status": "pending",
+  "created_by": "ChatGPT",
+  "revision": 1,
+  "revision_note": "V3 smoke test: same horizontal contract as Medicine Box V3; only body height is reduced to 50 mm for physical print validation.",
+  "parameters": {
+    "plate_length": 119.4,
+    "plate_width": 84.4,
+    "plate_thickness": 3.0,
+    "plate_clearance_per_side": 0.3,
+    "hole_diameter": 35.0,
+    "wall": 3.0,
+    "body_height": 50.0,
+    "bottom_thickness": 3.0,
+    "plate_support_z": 25.0,
+    "ledge_thickness": 3.0,
+    "ledge_width": 3.0,
+    "cover_height": 40.0,
+    "cover_wall": 3.0,
+    "cover_clearance_per_side": 0.3,
+    "cover_top_thickness": 3.0,
+    "output_path": "/Users/gugum/projectx/freecad-agent/cad/output/smoke-test-box-v3.FCStd"
+  }
+}
