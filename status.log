@@ -31,3 +31,4 @@
 2026-08-19T05:29:04.138838+00:00 | job=CAD-050 | action=create_smoke_test_box | status=failed | error=Unsupported action: create_smoke_test_box
 2026-08-19T07:46:24.865285+00:00 | job=CAD-051 | action=create_smoke_test_box | status=failed | error=Unsupported action: create_smoke_test_box
 2026-08-20T03:04:56.149031+00:00 | job=CAD-050 | action=create_medicine_body | status=completed
+2026-08-22T06:35:55.382386+00:00 | job=CAD-052 | action=create_smoke_test_box | status=failed | error=[Errno 111] Connection refused
