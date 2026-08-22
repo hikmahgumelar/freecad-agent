@@ -1,8 +1,8 @@
 {
   "action": "create_smoke_test_box",
-  "completed_at": null,
+  "completed_at": "2026-08-22T09:45:40.720265+00:00",
   "created_by": "ChatGPT",
-  "error": null,
+  "error": "Unsupported action: create_smoke_test_box",
   "id": "CAD-052",
   "parameters": {
     "body_height": 50.0,
@@ -25,7 +25,7 @@
   "revision": 1,
   "revision_note": "V3 smoke test: same horizontal contract as Medicine Box V3; only body height is reduced to 50 mm for physical print validation.",
   "started_at": "2026-08-22T09:45:39.328617+00:00",
-  "status": "running",
+  "status": "failed",
   "title": "Medicine Box V3 Smoke Test",
-  "updated_at": "2026-08-22T09:45:39.328639+00:00"
+  "updated_at": "2026-08-22T09:45:40.720285+00:00"
 }
