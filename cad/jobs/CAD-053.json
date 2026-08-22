@@ -1,0 +1,28 @@
+{
+  "id": "CAD-053",
+  "action": "create_smoke_test_box",
+  "created_by": "ChatGPT",
+  "status": "pending",
+  "revision": 2,
+  "revision_note": "Geometry fix: X/Y must be identical to Medicine Box V3. Only body height changes to 50 mm. Six Ø35 mm holes must remain fully inside the 119.4 x 84.4 mm plate with symmetric margins.",
+  "parameters": {
+    "body_height": 50.0,
+    "cover_height": 40.0,
+    "wall": 3.0,
+    "bottom_thickness": 3.0,
+    "plate_thickness": 3.0,
+    "ledge_thickness": 3.0,
+    "ledge_width": 3.0,
+    "plate_length": 119.4,
+    "plate_width": 84.4,
+    "hole_diameter": 35.0,
+    "hole_layout": "3x2",
+    "xy_reference": "MedicineBoxV3",
+    "plate_clearance_per_side": 0.3,
+    "plate_support_z": 25.0,
+    "cover_wall": 3.0,
+    "cover_clearance_per_side": 0.3,
+    "cover_top_thickness": 3.0,
+    "output_path": "/home/hikmah/projectx/freecad-agent/cad/output/smoke-test-box-v3-r2.FCStd"
+  }
+}
