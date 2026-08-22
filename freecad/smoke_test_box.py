@@ -74,13 +74,14 @@ def create_smoke_test_box(command):
     plate_shape = Part.makeBox(plate_L, plate_W, plate_T, App.Vector(plate_x, plate_y, ledge_Z + ledge_T))
     # Six-hole V3 pattern: 3 columns x 2 rows, diameter 35 mm.
     hole_d = float(command.get("hole_diameter", 35.0))
+    hole_r = hole_d / 2.0
     hole_margin_x = (plate_L - 3.0 * hole_d) / 4.0
     hole_margin_y = (plate_W - 2.0 * hole_d) / 3.0
     for row in range(2):
-        y = plate_y + hole_margin_y + row * (hole_d + hole_margin_y)
+        cy = plate_y + hole_margin_y + hole_r + row * (hole_d + hole_margin_y)
         for col in range(3):
-            x = plate_x + hole_margin_x + col * (hole_d + hole_margin_x)
-            plate_shape = plate_shape.cut(Part.makeCylinder(hole_d / 2.0, plate_T + 0.2, App.Vector(x, y, ledge_Z + ledge_T - 0.1)))
+            cx = plate_x + hole_margin_x + hole_r + col * (hole_d + hole_margin_x)
+            plate_shape = plate_shape.cut(Part.makeCylinder(hole_r, plate_T + 0.2, App.Vector(cx, cy, ledge_Z + ledge_T - 0.1)))
 
     plate = doc.addObject("Part::Feature", "SmokeTestPlate")
     plate.Label = "Smoke-Test V3 Plate - 119.4x84.4x3 - 6xØ35"
