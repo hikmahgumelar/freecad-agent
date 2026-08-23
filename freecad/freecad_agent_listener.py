@@ -173,12 +173,11 @@ def _create_snapfit_case(command):
     outer_l = inner_l + 2 * wall
     doc = App.newDocument(command.get("document", "ESP32C3SnapFitCaseV1"))
 
-    # Bottom tray. Board sits on the floor; top is open. USB-C is exposed through a front wall cutout.
     tray = Part.makeBox(outer_w, outer_l, body_h).cut(Part.makeBox(inner_w, inner_l, body_h - bottom, App.Vector(wall, wall, bottom)))
     usb_x = (outer_w - usb_w) / 2.0
     tray = tray.cut(Part.makeBox(usb_w, wall + 0.8, usb_h, App.Vector(usb_x, outer_l - wall - 0.4, usb_bottom)))
 
-    # Local RF relief at the rear/antenna end. It does not create a button hole.
+    # Local RF relief at the rear/antenna end; exact RF keep-out is intentionally parameterized.
     ak_x = (outer_w - antenna_w) / 2.0
     ak_y = outer_l - wall - antenna_l
     tray = tray.cut(Part.makeBox(antenna_w, antenna_l + 0.2, min(1.5, body_h - bottom), App.Vector(ak_x, ak_y, body_h - 1.5)))
@@ -191,13 +190,11 @@ def _create_snapfit_case(command):
     body.addProperty("App::PropertyLength", "BoardLength", "Design"); body.BoardLength = board_l
     body.addProperty("App::PropertyLength", "BoardClearance", "Printability"); body.BoardClearance = board_clear
 
-    # Four rounded snap bosses, two on each side wall.
     snap_centers = (snap_y, outer_l - snap_y)
     for side, x in (("Left", 0.0), ("Right", outer_w)):
         for idx, sy in enumerate(snap_centers, 1):
             cx = x + snap_r * 0.55 if side == "Left" else x - snap_r * 0.55
             sphere = Part.makeSphere(snap_r, App.Vector(cx, sy, snap_z))
-            # Keep only the part attached to the wall so the snap remains printable.
             clip_x = -0.1 if side == "Left" else outer_w - snap_r - 0.1
             clip = Part.makeBox(snap_r + 0.2, 2 * snap_r + 0.4, 2 * snap_r + 0.4, App.Vector(clip_x, sy - snap_r - 0.2, snap_z - snap_r - 0.2))
             boss = sphere.common(clip)
@@ -206,7 +203,6 @@ def _create_snapfit_case(command):
             obj.Label = f"Round snap boss {side} {idx}"
             obj.Shape = boss
 
-    # Top cap with an outside skirt. The skirt receives the round bosses in blind spherical pockets.
     skirt_h = 3.2
     cover_outer_w = outer_w + 2 * (cover_wall + cover_clear)
     cover_outer_l = outer_l + 2 * (cover_wall + cover_clear)
@@ -214,9 +210,14 @@ def _create_snapfit_case(command):
     co = Part.makeBox(cover_outer_w, cover_outer_l, cover_t + skirt_h, App.Vector(ox, oy, body_h - skirt_h))
     ci = Part.makeBox(outer_w + 2 * cover_clear, outer_l + 2 * cover_clear, skirt_h + 0.2, App.Vector(-cover_clear, -cover_clear, body_h - skirt_h - 0.1))
     cover_shape = co.cut(ci)
-    cover_shape = cover_shape.cut(Part.makeBox(usb_w, cover_wall + cover_clear + 0.8, usb_h, App.Vector((cover_outer_w - usb_w) / 2.0, oy - 0.2, body_h - skirt_h + usb_bottom)))
+
+    # USB-C opening is on the same front/end as the bottom case (positive Y end).
+    cover_usb_y = oy + cover_outer_l - cover_wall - cover_clear - 0.6
+    cover_shape = cover_shape.cut(Part.makeBox(usb_w, cover_wall + cover_clear + 0.8, usb_h, App.Vector((cover_outer_w - usb_w) / 2.0, cover_usb_y, body_h - skirt_h + usb_bottom)))
+
+    # Matching round pockets: inner skirt faces are at -cover_clear and outer_w + cover_clear.
     for side in ("Left", "Right"):
-        cx = cover_wall + cover_clear if side == "Left" else cover_outer_w - cover_wall - cover_clear
+        cx = -cover_clear if side == "Left" else outer_w + cover_clear
         for sy in snap_centers:
             cover_shape = cover_shape.cut(Part.makeSphere(snap_r + 0.15, App.Vector(cx, sy, snap_z)))
 
@@ -241,16 +242,10 @@ def _create_snapfit_case(command):
     cover.addProperty("App::PropertyLength", "AntennaKeepoutWidth", "RF"); cover.AntennaKeepoutWidth = antenna_w
 
     doc.recompute(); _fit_view(doc); os.makedirs(os.path.dirname(output), exist_ok=True); doc.saveAs(output)
-    return {
-        "ok": True,
-        "action": "create_snapfit_case",
-        "document": doc.Name,
-        "output_path": output,
-        "parts": ["BottomCase", "TopCover"],
-        "board": {"width": board_w, "length": board_l, "clearance": board_clear},
-        "case": {"outer_width": outer_w, "outer_length": outer_l, "body_height": body_h, "cover_thickness": cover_t},
-        "features": {"round_snap_count": 4, "solid_button_count": 2, "usb_c_opening": {"width": usb_w, "height": usb_h}, "antenna_keepout": {"length": antenna_l, "width": antenna_w}}
-    }
+    return {"ok": True, "action": "create_snapfit_case", "document": doc.Name, "output_path": output,
+            "parts": ["BottomCase", "TopCover"], "board": {"width": board_w, "length": board_l, "clearance": board_clear},
+            "case": {"outer_width": outer_w, "outer_length": outer_l, "body_height": body_h, "cover_thickness": cover_t},
+            "features": {"round_snap_count": 4, "solid_button_count": 2, "usb_c_opening": {"width": usb_w, "height": usb_h}, "antenna_keepout": {"length": antenna_l, "width": antenna_w}}}
 
 
 def execute_command(command):
@@ -259,8 +254,7 @@ def execute_command(command):
         return {"ok": True, "message": "FreeCAD agent is alive"}
     if action == "create_sphere":
         doc = App.ActiveDocument or App.newDocument("AgentTest")
-        sphere = doc.addObject("Part::Sphere", "AgentSphere")
-        sphere.Radius = float(command.get("radius", 10)); doc.recompute(); _fit_view(doc)
+        sphere = doc.addObject("Part::Sphere", "AgentSphere"); sphere.Radius = float(command.get("radius", 10)); doc.recompute(); _fit_view(doc)
         return {"ok": True, "action": action, "object": sphere.Name, "radius": sphere.Radius, "document": doc.Name}
     if action == "open_model":
         path = os.path.abspath(command.get("path", ""))
@@ -275,11 +269,7 @@ def execute_command(command):
         doc = App.ActiveDocument
         if doc is None: raise RuntimeError("No active FreeCAD document")
         names = command.get("objects", [])
-        features = []
-        for name in names:
-            obj = doc.getObject(name)
-            features.append({"name": name, "type": obj.TypeId, "label": obj.Label} if obj else {"name": name, "error": "Object not found"})
-        return {"ok": True, "action": action, "document": doc.Name, "features": features}
+        return {"ok": True, "action": action, "document": doc.Name, "features": [{"name": n, "type": doc.getObject(n).TypeId, "label": doc.getObject(n).Label} if doc.getObject(n) else {"name": n, "error": "Object not found"} for n in names]}
     if action == "inspect_geometry": return _inspect_geometry(command)
     if action == "create_case_rails": return _create_case_rails(command)
     if action == "create_slider_cover": return _create_slider_cover(command)
@@ -294,11 +284,9 @@ def _poll_server():
     while True:
         try: connection, _ = _server_socket.accept()
         except BlockingIOError: break
-        except OSError as exc:
-            print(f"[freecad-agent] accept error: {exc}"); break
+        except OSError as exc: print(f"[freecad-agent] accept error: {exc}"); break
         try:
-            connection.settimeout(0.5)
-            data = connection.recv(65536)
+            connection.settimeout(0.5); data = connection.recv(65536)
             if not data: continue
             result = execute_command(json.loads(data.decode("utf-8")))
             connection.sendall(json.dumps(result).encode("utf-8"))
@@ -310,22 +298,16 @@ def _poll_server():
 
 def start_server():
     global _server_socket, _server_timer
-    if _server_socket is not None:
-        print(f"[freecad-agent] already listening on {HOST}:{PORT}"); return
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind((HOST, PORT)); server.listen(5); server.setblocking(False)
-    _server_socket = server
-    _server_timer = QtCore.QTimer(); _server_timer.timeout.connect(_poll_server); _server_timer.start(50)
+    if _server_socket is not None: print(f"[freecad-agent] already listening on {HOST}:{PORT}"); return
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM); server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1); server.bind((HOST, PORT)); server.listen(5); server.setblocking(False)
+    _server_socket = server; _server_timer = QtCore.QTimer(); _server_timer.timeout.connect(_poll_server); _server_timer.start(50)
     print(f"[freecad-agent] listening on {HOST}:{PORT}")
 
 
 def stop_server():
     global _server_socket, _server_timer
-    if _server_timer is not None:
-        _server_timer.stop(); _server_timer.deleteLater(); _server_timer = None
-    if _server_socket is not None:
-        _server_socket.close(); _server_socket = None
+    if _server_timer is not None: _server_timer.stop(); _server_timer.deleteLater(); _server_timer = None
+    if _server_socket is not None: _server_socket.close(); _server_socket = None
     print("[freecad-agent] stopped")
 
 
