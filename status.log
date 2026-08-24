@@ -38,3 +38,4 @@
 2026-08-22T10:15:37.265176+00:00 | job=CAD-053 | action=create_smoke_test_box | status=completed
 2026-08-22T10:26:00.093491+00:00 | job=CAD-053 | action=create_smoke_test_box | status=completed
 2026-08-24T04:58:32.911576+00:00 | job=CAD-054 | action=create_snapfit_case | status=failed | error=[Errno 61] Connection refused
+2026-08-24T05:17:24.831573+00:00 | job=CAD-054 | action=create_snapfit_case | status=failed | error=Unsupported action: create_snapfit_case
