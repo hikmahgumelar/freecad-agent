@@ -1,8 +1,6 @@
 {
   "action": "create_snapfit_case",
-  "completed_at": "2026-08-24T04:58:31.530763+00:00",
   "created_by": "ChatGPT",
-  "error": "[Errno 61] Connection refused",
   "id": "CAD-054",
   "parameters": {
     "antenna_keepout_length": 5.0,
@@ -20,7 +18,7 @@
     "cover_clearance": 0.2,
     "cover_thickness": 1.2,
     "cover_wall": 1.2,
-    "output_path": "/home/hikmah/projectx/freecad-agent/cad/output/esp32-c3-super-mini-snapfit-v1.FCStd",
+    "output_path": "/Users/hikmah/projectx/freecad-agent/cad/output/esp32-c3-super-mini-snapfit-v1.FCStd",
     "snap_offset_y": 4.0,
     "snap_radius": 1.0,
     "snap_z": 2.8,
@@ -29,9 +27,7 @@
     "usb_opening_width": 10.0,
     "wall": 1.2
   },
-  "revision": 1,
-  "revision_note": "Compact ESP32-C3 Super Mini 2-piece snap-fit enclosure. Board reference 18 x 22.5 mm from user photos. USB-C exposed through front opening. Two solid elongated integral cover buttons for BOOT/RESET; no open button holes. Four round snap bosses with matching spherical pockets; no screws. Local antenna keep-out/relief at rear. FDM-printable V1; inspect actual FCStd geometry before STL/final print.",
-  "started_at": "2026-08-24T04:58:30.151374+00:00",
-  "status": "failed",
-  "updated_at": "2026-08-24T04:58:31.530837+00:00"
+  "revision": 2,
+  "revision_note": "Requeue for macOS FreeCAD execution. Same locked ESP32-C3 Super Mini compact 2-piece snap-fit contract; only execution output path is adapted to macOS. Requires FreeCAD listener active on 127.0.0.1:8765. Inspect actual FCStd geometry before STL/final print.",
+  "status": "pending"
 }
