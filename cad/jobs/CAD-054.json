@@ -1,8 +1,8 @@
 {
   "action": "create_snapfit_case",
-  "completed_at": null,
+  "completed_at": "2026-08-24T04:58:31.530763+00:00",
   "created_by": "ChatGPT",
-  "error": null,
+  "error": "[Errno 61] Connection refused",
   "id": "CAD-054",
   "parameters": {
     "antenna_keepout_length": 5.0,
@@ -32,6 +32,6 @@
   "revision": 1,
   "revision_note": "Compact ESP32-C3 Super Mini 2-piece snap-fit enclosure. Board reference 18 x 22.5 mm from user photos. USB-C exposed through front opening. Two solid elongated integral cover buttons for BOOT/RESET; no open button holes. Four round snap bosses with matching spherical pockets; no screws. Local antenna keep-out/relief at rear. FDM-printable V1; inspect actual FCStd geometry before STL/final print.",
   "started_at": "2026-08-24T04:58:30.151374+00:00",
-  "status": "running",
-  "updated_at": "2026-08-24T04:58:30.151691+00:00"
+  "status": "failed",
+  "updated_at": "2026-08-24T04:58:31.530837+00:00"
 }
