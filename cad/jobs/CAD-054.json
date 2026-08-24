@@ -1,6 +1,8 @@
 {
   "action": "create_snapfit_case",
+  "completed_at": null,
   "created_by": "ChatGPT",
+  "error": null,
   "id": "CAD-054",
   "parameters": {
     "antenna_keepout_length": 5.0,
@@ -29,9 +31,7 @@
   },
   "revision": 3,
   "revision_note": "Requeue after FreeCAD executor sync. Same locked ESP32-C3 Super Mini compact 2-piece snap-fit contract; macOS output path. FreeCAD listener must support create_snapfit_case and listen on 127.0.0.1:8765. Inspect actual FCStd geometry before STL/final print.",
-  "status": "pending",
-  "error": null,
-  "started_at": null,
-  "completed_at": null,
-  "updated_at": "2026-08-24T05:53:00+00:00"
+  "started_at": "2026-08-24T05:58:37.172959+00:00",
+  "status": "running",
+  "updated_at": "2026-08-24T05:58:37.173040+00:00"
 }
