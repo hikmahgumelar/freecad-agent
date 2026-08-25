@@ -46,19 +46,8 @@ def _inspect_geometry(command):
     }
 
 
-def _capsule(length, width, height):
-    if length < width:
-        raise RuntimeError("button_length must be >= button_width")
-    r = width / 2.0
-    straight = length - width
-    s = Part.makeBox(straight, width, height, App.Vector(0, 0, 0))
-    c1 = Part.makeCylinder(r, height, App.Vector(0, r, 0))
-    c2 = Part.makeCylinder(r, height, App.Vector(straight, r, 0))
-    return s.fuse(c1).fuse(c2).removeSplitter()
-
-
 def _create_snapfit_case(command):
-    """ESP32-C3 Super Mini snap-fit enclosure with rear-oriented integral flexure buttons."""
+    """ESP32-C3 Super Mini snap-fit enclosure with rectangular imperfect-U flexure buttons."""
     board_w = float(command.get("board_width", 18.0))
     board_l = float(command.get("board_length", 22.5))
     board_clear = float(command.get("board_clearance", 0.25))
@@ -71,57 +60,52 @@ def _create_snapfit_case(command):
     snap_r = float(command.get("snap_radius", 1.0))
     snap_z = float(command.get("snap_z", 2.8))
     snap_y = float(command.get("snap_offset_y", 4.0))
-
-    button_len = float(command.get("button_length", 8.0))
-    button_w = float(command.get("button_width", 3.0))
-    button_h = float(command.get("button_flexure_thickness", 0.9))
+    button_len = float(command.get("button_length", 7.0))
+    button_w = float(command.get("button_width", 3.2))
     button_slot_width = float(command.get("button_slot_width", 1.0))
     button_front_offset = float(command.get("button_front_offset", 3.2))
     button_x_offset = float(command.get("button_x_offset", 4.6))
-    button_rear_gap = float(command.get("button_rear_gap", 2.0))
-
+    button_rear_bridge = float(command.get("button_rear_bridge", 2.0))
+    actuator_w = float(command.get("actuator_width", 1.8))
+    actuator_l = float(command.get("actuator_length", 1.8))
+    actuator_h = float(command.get("actuator_height", 0.8))
     usb_w = float(command.get("usb_opening_width", 10.0))
     usb_h = float(command.get("usb_opening_height", 4.0))
     usb_bottom = float(command.get("usb_opening_bottom", 1.0))
-
     antenna_l = float(command.get("antenna_keepout_length", 5.0))
     antenna_w = float(command.get("antenna_keepout_width", 12.0))
-    output = os.path.abspath(command.get("output_path", "/home/hikmah/projectx/freecad-agent/cad/output/esp32-c3-super-mini-snapfit-v1.FCStd"))
+    output = os.path.abspath(command.get("output_path", "/home/hikmah/projectx/freecad-agent/cad/output/esp32-c3-super-mini-snapfit-v4.FCStd"))
 
     values = [board_w, board_l, board_clear, wall, bottom, body_h, cover_t, cover_wall, cover_clear,
-              snap_r, snap_z, snap_y, button_len, button_w, button_h, button_slot_width,
-              button_front_offset, button_x_offset, button_rear_gap, usb_w, usb_h, antenna_l, antenna_w]
+              snap_r, snap_z, snap_y, button_len, button_w, button_slot_width,
+              button_front_offset, button_x_offset, button_rear_bridge, actuator_w,
+              actuator_l, actuator_h, usb_w, usb_h, antenna_l, antenna_w]
     if min(values) <= 0:
         raise RuntimeError("All snap-fit dimensions must be positive")
     if usb_w >= board_w + 2 * board_clear:
         raise RuntimeError("USB opening is too wide")
     if body_h <= bottom + 2.0:
         raise RuntimeError("body_height is too small for component clearance")
+    if button_len <= button_w + 2 * button_slot_width:
+        raise RuntimeError("Button dimensions too small for relief slots")
 
     inner_w = board_w + 2 * board_clear
     inner_l = board_l + 2 * board_clear
     outer_w = inner_w + 2 * wall
     outer_l = inner_l + 2 * wall
-
-    doc = App.newDocument(command.get("document", "ESP32C3SnapFitCaseV2"))
+    doc = App.newDocument(command.get("document", "ESP32C3SnapFitCaseV4"))
 
     tray = Part.makeBox(outer_w, outer_l, body_h).cut(
         Part.makeBox(inner_w, inner_l, body_h - bottom, App.Vector(wall, wall, bottom))
     )
-
     usb_x = (outer_w - usb_w) / 2.0
-    tray = tray.cut(
-        Part.makeBox(usb_w, wall + 0.8, usb_h,
-                     App.Vector(usb_x, outer_l - wall - 0.4, usb_bottom))
-    )
-
-    # Rear antenna/RF relief zone.
+    tray = tray.cut(Part.makeBox(usb_w, wall + 0.8, usb_h,
+                                 App.Vector(usb_x, outer_l - wall - 0.4, usb_bottom)))
     ak_x = (outer_w - antenna_w) / 2.0
     ak_y = outer_l - wall - antenna_l
-    tray = tray.cut(
-        Part.makeBox(antenna_w, antenna_l + 0.2, min(1.5, body_h - bottom),
-                     App.Vector(ak_x, ak_y, body_h - 1.5))
-    )
+    tray = tray.cut(Part.makeBox(antenna_w, antenna_l + 0.2,
+                                 min(1.5, body_h - bottom),
+                                 App.Vector(ak_x, ak_y, body_h - 1.5)))
 
     body = doc.addObject("Part::Feature", "BottomCase")
     body.Label = "ESP32-C3 bottom case"
@@ -132,7 +116,6 @@ def _create_snapfit_case(command):
     body.addProperty("App::PropertyLength", "BoardLength", "Design"); body.BoardLength = board_l
     body.addProperty("App::PropertyLength", "BoardClearance", "Printability"); body.BoardClearance = board_clear
 
-    # Four round snap bosses.
     snap_centers = (snap_y, outer_l - snap_y)
     for side, x in (("Left", 0.0), ("Right", outer_w)):
         for idx, sy in enumerate(snap_centers, 1):
@@ -147,7 +130,6 @@ def _create_snapfit_case(command):
             obj.Label = f"Round snap boss {side} {idx}"
             obj.Shape = boss
 
-    # Cover shell.
     skirt_h = 3.2
     cover_outer_w = outer_w + 2 * (cover_wall + cover_clear)
     cover_outer_l = outer_l + 2 * (cover_wall + cover_clear)
@@ -155,66 +137,58 @@ def _create_snapfit_case(command):
     oy = -(cover_wall + cover_clear)
     co = Part.makeBox(cover_outer_w, cover_outer_l, cover_t + skirt_h,
                       App.Vector(ox, oy, body_h - skirt_h))
-    ci = Part.makeBox(outer_w + 2 * cover_clear, outer_l + 2 * cover_clear, skirt_h + 0.2,
+    ci = Part.makeBox(outer_w + 2 * cover_clear, outer_l + 2 * cover_clear,
+                      skirt_h + 0.2,
                       App.Vector(-cover_clear, -cover_clear, body_h - skirt_h - 0.1))
     cover_shape = co.cut(ci)
-
     cover_usb_y = oy + cover_outer_l - cover_wall - cover_clear - 0.6
     cover_shape = cover_shape.cut(
         Part.makeBox(usb_w, cover_wall + cover_clear + 0.8, usb_h,
                      App.Vector((cover_outer_w - usb_w) / 2.0, cover_usb_y,
                                 body_h - skirt_h + usb_bottom))
     )
-
-    # Matching round snap pockets.
     for side in ("Left", "Right"):
         cx = -cover_clear if side == "Left" else outer_w + cover_clear
         for sy in snap_centers:
             cover_shape = cover_shape.cut(Part.makeSphere(snap_r + 0.15,
                                                            App.Vector(cx, sy, snap_z)))
 
-    # Two integral flexure buttons directly behind the USB-C opening.
-    # Long axis runs front-to-back, matching the reference geometry.
+    # Simple rectangular imperfect-U flexures. The top/front bridge stays solid.
+    # The two side cuts and rear cut are the ONLY button openings; no button head is added.
     button_front_y = outer_l - wall - board_clear - button_front_offset
     button_rear_y = button_front_y - button_len
     center_xs = (wall + board_clear + button_x_offset,
                  outer_w - wall - board_clear - button_x_offset)
-
+    top_z = body_h + cover_t
     for name, cx in (("BootButton", center_xs[0]), ("ResetButton", center_xs[1])):
-        head = _capsule(button_len, button_w, button_h)
-        head.translate(App.Vector(cx - button_w / 2.0, button_rear_y,
-                                  body_h + cover_t - button_h))
+        left_x = cx - button_w / 2.0 - button_slot_width
+        right_x = cx + button_w / 2.0
+        slot_z = body_h - 0.1
+        slot_h = cover_t + 0.25
+        left_slot = Part.makeBox(button_slot_width, button_len - button_rear_bridge,
+                                 slot_h, App.Vector(left_x, button_rear_y, slot_z))
+        right_slot = Part.makeBox(button_slot_width, button_len - button_rear_bridge,
+                                  slot_h, App.Vector(right_x, button_rear_y, slot_z))
+        rear_slot = Part.makeBox(button_w + 2 * button_slot_width,
+                                 button_slot_width, slot_h,
+                                 App.Vector(left_x, button_front_y - button_rear_bridge,
+                                            slot_z))
+        cover_shape = cover_shape.cut(left_slot).cut(right_slot).cut(rear_slot).removeSplitter()
 
-        # Longitudinal relief slots. They do not cut the rear bridge, so the button
-        # remains part of the lid rather than becoming a floating insert.
-        slot_x_positions = (cx - button_w / 2.0 - button_slot_width,
-                            cx + button_w / 2.0)
-        slot_y = button_rear_y - button_slot_width
-        slot_len = button_len + button_slot_width * 2.0 - button_rear_gap
-        for slot_x in slot_x_positions:
-            slot = Part.makeBox(button_slot_width, slot_len, cover_t + 0.4,
-                                App.Vector(slot_x, slot_y, body_h - 0.2))
-            cover_shape = cover_shape.cut(slot)
-
-        bridge = Part.makeBox(button_w * 0.65, button_rear_gap, button_h,
-                              App.Vector(cx - button_w * 0.325,
-                                         button_rear_y - button_rear_gap,
-                                         body_h + cover_t - button_h))
-        cover_shape = cover_shape.fuse(head).fuse(bridge).removeSplitter()
-
-        # Internal plunger aligned under the button.
-        actuator = Part.makeCylinder(0.75, cover_t + 0.05,
-                                     App.Vector(cx, button_front_y - button_w / 2.0,
-                                                body_h - 0.05))
-        cover_shape = cover_shape.fuse(actuator).removeSplitter()
+        # Small underside actuator pad, centered below each flexure.
+        pad_x = cx - actuator_w / 2.0
+        pad_y = button_front_y - button_l / 2.0 if False else button_front_y - actuator_l / 2.0
+        pad = Part.makeBox(actuator_w, actuator_l, actuator_h,
+                           App.Vector(pad_x, pad_y, body_h - actuator_h + 0.05))
+        cover_shape = cover_shape.fuse(pad).removeSplitter()
 
     cover = doc.addObject("Part::Feature", "TopCover")
-    cover.Label = "ESP32-C3 top cover - rear-oriented flexure buttons"
+    cover.Label = "ESP32-C3 top cover - rectangular imperfect-U flexures"
     cover.Shape = cover_shape
     cover.addProperty("App::PropertyString", "ButtonDesign", "Design")
-    cover.ButtonDesign = "Two integral oval flexure buttons; long axis front-to-back; no floating parts; no through holes."
+    cover.ButtonDesign = "Two solid rectangular imperfect-U flexures; top/front bridge remains integral with lid; no capsule or through-hole outline."
     cover.addProperty("App::PropertyString", "ButtonPlacement", "Design")
-    cover.ButtonPlacement = "Immediately behind USB-C; aligned to BOOT/RESET; long axis toward PCB rear."
+    cover.ButtonPlacement = "Immediately behind USB-C; aligned to BOOT/RESET; long axis front-to-back."
     cover.addProperty("App::PropertyString", "SnapDesign", "Design")
     cover.SnapDesign = "Four round snap bosses with matching spherical pockets."
 
@@ -222,7 +196,6 @@ def _create_snapfit_case(command):
     _fit_view(doc)
     os.makedirs(os.path.dirname(output), exist_ok=True)
     doc.saveAs(output)
-
     return {
         "ok": True,
         "action": "create_snapfit_case",
@@ -234,7 +207,7 @@ def _create_snapfit_case(command):
         "features": {
             "round_snap_count": 4,
             "button_count": 2,
-            "button_style": "flexure_oval",
+            "button_style": "rectangular_imperfect_u_flexure",
             "button_orientation": "front_to_back",
             "button_floating": False,
             "button_placement": "behind_usb_c",
