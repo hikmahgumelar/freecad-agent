@@ -1,0 +1,23 @@
+{
+  "id": "CAD-057",
+  "action": "create_snapfit_case",
+  "status": "pending",
+  "created_by": "ChatGPT",
+  "revision": 2,
+  "revision_note": "Re-generate from the CAD-055/056 enclosure geometry, preserving the previously good overall case geometry and changing ONLY the BOOT/RESET button geometry to the approved integral flexure style. Buttons must be solid top-surface features (not through-holes), with two narrow longitudinal relief slots inside each button perimeter, leaving the surrounding bridge/material intact so the button remains attached to the lid. Keep USB-C opening and overall enclosure geometry from the prior good result. Position the two buttons to align with the actual BOOT and RESET tactile switches immediately behind the USB-C on the ESP32-C3 Super Mini, with the long axis oriented front-to-back. Internal actuator pads must contact the PCB switches. Do not create large through-openings in the lid.",
+  "parameters": {
+    "board_width": 18.0,
+    "board_length": 22.5,
+    "board_clearance": 0.25,
+    "button_style": "integral_flexure_solid",
+    "button_orientation": "front_to_back",
+    "button_floating": false,
+    "button_placement": "behind_usb_c",
+    "button_slot_count_per_button": 2,
+    "button_slot_type": "relief_slot_non_through_perimeter",
+    "preserve_prior_case_geometry": true,
+    "usb_c_opening": {"width": 10.0, "height": 4.0},
+    "snap_fit": {"round_snap_count": 4},
+    "output_path": "cad/output/esp32-c3-super-mini-snapfit-v3.FCStd"
+  }
+}
