@@ -1,85 +1,27 @@
 {
-  "action": "create_snapfit_case",
-  "completed_at": "2026-08-25T08:34:12.080911+00:00",
-  "created_by": "ChatGPT",
-  "error": null,
   "id": "CAD-057",
+  "action": "create_snapfit_case",
+  "status": "pending",
+  "created_by": "ChatGPT",
+  "revision": 4,
+  "revision_note": "Preserve the previously good overall enclosure geometry. Change ONLY BOOT/RESET button geometry to the approved rectangular/incomplete-oval integral flexure style: solid lid surface remains continuous; no through-holes. Each button is formed by a U-shaped/incomplete rectangular perimeter cut, with the opening facing toward PCB rear so the button remains attached to the lid on the rear side. Add a small internal actuator pad under each button aligned to the actual BOOT and RESET tactile switches. Keep USB-C opening, 22.5 x 18 mm PCB fit, 0.25 mm clearance, four round snap points, antenna keepout, two-piece enclosure, and all other prior good geometry unchanged. Long button axis front-to-back behind USB-C.",
   "parameters": {
-    "antenna_keepout": {
-      "length": 5.0,
-      "width": 12.0
-    },
-    "board_clearance": 0.25,
-    "board_length": 22.5,
     "board_width": 18.0,
-    "body_height": 5.2,
-    "bottom_thickness": 1.2,
-    "button_count": 2,
-    "button_flexure_thickness": 0.9,
-    "button_floating": false,
-    "button_length": 7.0,
+    "board_length": 22.5,
+    "board_clearance": 0.25,
+    "button_style": "rectangular_integral_flexure",
+    "button_width": 6.0,
+    "button_length": 10.0,
     "button_orientation": "front_to_back",
+    "button_floating": false,
     "button_placement": "behind_usb_c",
-    "button_rear_gap": 2.0,
-    "button_slot_count_per_button": 2,
-    "button_slot_type": "relief_slot_non_through_perimeter",
-    "button_style": "integral_flexure_solid",
-    "button_width": 3.2,
-    "cover_clearance": 0.2,
-    "cover_thickness": 1.2,
-    "cover_wall": 1.2,
-    "document": "ESP32C3SnapFitCaseV3",
-    "output_path": "cad/output/esp32-c3-super-mini-snapfit-v3.FCStd",
+    "button_perimeter": "u_shape_open_to_rear",
+    "button_slot_type": "non_through_perimeter_cut",
+    "button_actuator": "internal_pad",
     "preserve_prior_case_geometry": true,
-    "snap_fit": {
-      "round_snap_count": 4
-    },
-    "usb_c_opening": {
-      "height": 4.0,
-      "width": 10.0
-    },
-    "wall": 1.2
-  },
-  "result": {
-    "action": "create_snapfit_case",
-    "board": {
-      "clearance": 0.25,
-      "length": 22.5,
-      "width": 18.0
-    },
-    "case": {
-      "body_height": 5.2,
-      "cover_thickness": 1.2,
-      "outer_length": 25.4,
-      "outer_width": 20.9
-    },
-    "document": "ESP32C3SnapFitCaseV3",
-    "features": {
-      "antenna_keepout": {
-        "length": 5.0,
-        "width": 12.0
-      },
-      "button_count": 2,
-      "button_floating": false,
-      "button_orientation": "front_to_back",
-      "button_placement": "behind_usb_c",
-      "button_style": "flexure_oval",
-      "round_snap_count": 4,
-      "usb_c_opening": {
-        "height": 4.0,
-        "width": 10.0
-      }
-    },
-    "ok": true,
-    "output_path": "/home/hikmah/projectx/freecad-agent/cad/output/esp32-c3-super-mini-snapfit-v3.FCStd",
-    "parts": [
-      "BottomCase",
-      "TopCover"
-    ]
-  },
-  "revision": 3,
-  "revision_note": "Re-generate from the CAD-055/056 enclosure geometry, preserving the previously good overall case geometry and changing ONLY the BOOT/RESET button geometry to the approved integral flexure solid style. Buttons must be continuous solid features on the lid surface, not through-holes or ventilation openings. Each button uses two narrow longitudinal relief slots defining the flexure while leaving the rear bridge/material intact. Keep the prior good USB-C opening, case dimensions, snap-fit geometry, antenna keepout, and two-piece enclosure unchanged. Position buttons immediately behind USB-C to align with actual BOOT and RESET tactile switches; long axis front-to-back toward PCB rear. Internal actuator pads must contact the PCB switches. Output new FCStd for visual inspection. Do not introduce large rectangular through-openings.",
-  "started_at": "2026-08-25T08:34:09.363760+00:00",
-  "status": "completed",
-  "updated_at": "2026-08-25T08:34:12.080943+00:00"
+    "usb_c_opening": {"width": 10.0, "height": 4.0},
+    "snap_fit": {"round_snap_count": 4},
+    "antenna_keepout": {"length": 5.0, "width": 12.0},
+    "output_path": "cad/output/esp32-c3-super-mini-snapfit-v4.FCStd"
+  }
 }
