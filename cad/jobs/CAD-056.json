@@ -1,6 +1,6 @@
 {
   "action": "create_snapfit_case",
-  "completed_at": null,
+  "completed_at": "2026-08-25T08:24:21.806568+00:00",
   "created_by": "ChatGPT",
   "error": null,
   "id": "CAD-056",
@@ -37,10 +37,47 @@
     "usb_opening_width": 10.0,
     "wall": 1.2
   },
+  "result": {
+    "action": "create_snapfit_case",
+    "board": {
+      "clearance": 0.25,
+      "length": 22.5,
+      "width": 18.0
+    },
+    "case": {
+      "body_height": 5.2,
+      "cover_thickness": 1.2,
+      "outer_length": 25.4,
+      "outer_width": 20.9
+    },
+    "document": "ESP32C3SnapFitCaseV2",
+    "features": {
+      "antenna_keepout": {
+        "length": 5.0,
+        "width": 12.0
+      },
+      "button_count": 2,
+      "button_floating": false,
+      "button_orientation": "front_to_back",
+      "button_placement": "behind_usb_c",
+      "button_style": "flexure_oval",
+      "round_snap_count": 4,
+      "usb_c_opening": {
+        "height": 4.0,
+        "width": 10.0
+      }
+    },
+    "ok": true,
+    "output_path": "/home/hikmah/projectx/freecad-agent/cad/output/esp32-c3-super-mini-snapfit-v2.FCStd",
+    "parts": [
+      "BottomCase",
+      "TopCover"
+    ]
+  },
   "revision": 2,
   "revision_note": "Regenerate snap-fit enclosure using the revised flexure-button contract: two integral non-floating oval buttons immediately behind USB-C, long axis front-to-back toward PCB rear, longitudinal relief slots with rear bridge, internal actuators aligned to BOOT/RESET. Preserve 22.5 x 18 mm PCB, 0.25 mm board clearance, USB-C front opening, four round snap points, rear antenna/RF keepout, no screws, printable two-piece enclosure.",
   "started_at": "2026-08-25T08:24:19.170837+00:00",
-  "status": "running",
+  "status": "completed",
   "target": "ESP32-C3 Super Mini",
-  "updated_at": "2026-08-25T08:24:19.170853+00:00"
+  "updated_at": "2026-08-25T08:24:21.806594+00:00"
 }
