@@ -1,17 +1,21 @@
 {
-  "job_id": "CAD-055",
-  "status": "pending",
   "action": "create_snapfit_case",
-  "target": "ESP32-C3 Super Mini",
+  "completed_at": null,
+  "error": null,
+  "job_id": "CAD-055",
   "output_path": "cad/output/esp32-c3-super-mini-snapfit-v1.FCStd",
   "platform": "portable",
   "requirements": {
+    "antenna": "preserve RF/antenna clearance",
+    "buttons": "external recessed/low-profile actuators aligned to onboard buttons",
+    "device_must_fit": true,
     "enclosure": "two-piece snap-fit case",
     "fastener": "no screws",
-    "device_must_fit": true,
-    "usb_c": "protrudes through front opening",
-    "buttons": "external recessed/low-profile actuators aligned to onboard buttons",
-    "antenna": "preserve RF/antenna clearance",
-    "printable": true
-  }
+    "printable": true,
+    "usb_c": "protrudes through front opening"
+  },
+  "started_at": "2026-08-25T07:38:03.148552+00:00",
+  "status": "running",
+  "target": "ESP32-C3 Super Mini",
+  "updated_at": "2026-08-25T07:38:03.148568+00:00"
 }
