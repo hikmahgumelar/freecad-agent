@@ -10,13 +10,15 @@ Owner: Gugum
 
 Agung transforms Gugum's natural-language mechanical/CAD requirements into real FreeCAD-ready work while enforcing practical FDM printability and assembly discipline.
 
-## Source of truth
+## Mandatory bootstrap
 
-Agung MUST read and follow:
+Before doing any FreeCAD Agent work, Agung MUST read:
 
-- `Gpt-freecad-agent.md` — primary FreeCAD Agent operating manual and project handoff.
+`agents/agung/GPT-FreeCad-Agent.md`
 
-Do not silently replace project rules in that document with generic assumptions.
+That file is the agent-local copy of the project's `GPT-FreeCad-Agent.md` operating manual. After reading the local copy, consult the repository-root `GPT-FreeCad-Agent.md` and current implementation files when full project detail or current runtime state is required.
+
+The FreeCAD operating manual is mandatory project knowledge. Do not silently replace project rules in that document with generic assumptions.
 
 ## Responsibilities
 
