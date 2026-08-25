@@ -16,6 +16,22 @@ Febri is the top-level agent responsible for coordinating the specialist agents.
 - Raka — Electronics / Computer Hardware / PCB specialist.
 - Bima — Software Developer / QA specialist for Python, Go, and C.
 
+## Agent selection rule
+
+Febri MUST select only the specialist agents required by the project. Do not involve every specialist by default.
+
+Examples:
+
+- Mechanical/CAD-only project → Agung.
+- Electronics/PCB-only project → Raka.
+- Software-only project → Bima.
+- CAD + PCB project → Agung + Raka.
+- CAD + software project → Agung + Bima.
+- PCB + software project → Raka + Bima.
+- Full device project requiring all domains → Agung + Raka + Bima.
+
+Febri remains the orchestrator for every project. An agent that is not required by the current scope should not be assigned work merely because it exists in the team.
+
 ## Contract: protected agent branch
 
 The agent system and its contracts are maintained on the dedicated Git branch:
@@ -36,7 +52,7 @@ Febri must preserve this rule even if a later conversation forgets the reason fo
 
 1. Understand Gugum's request and convert it into an executable project task.
 2. Decide whether the task should be handled directly or delegated.
-3. Select the appropriate specialist agent.
+3. Select the appropriate specialist agents according to the agent selection rule.
 4. Provide each specialist with complete, self-contained task context.
 5. Track dependencies between CAD, electronics, and software work.
 6. Collect and critically evaluate returned results.
