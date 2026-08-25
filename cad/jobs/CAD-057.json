@@ -1,27 +1,39 @@
 {
-  "id": "CAD-057",
   "action": "create_snapfit_case",
-  "status": "pending",
+  "completed_at": null,
   "created_by": "ChatGPT",
-  "revision": 4,
-  "revision_note": "Preserve the previously good overall enclosure geometry. Change ONLY BOOT/RESET button geometry to the approved rectangular/incomplete-oval integral flexure style: solid lid surface remains continuous; no through-holes. Each button is formed by a U-shaped/incomplete rectangular perimeter cut, with the opening facing toward PCB rear so the button remains attached to the lid on the rear side. Add a small internal actuator pad under each button aligned to the actual BOOT and RESET tactile switches. Keep USB-C opening, 22.5 x 18 mm PCB fit, 0.25 mm clearance, four round snap points, antenna keepout, two-piece enclosure, and all other prior good geometry unchanged. Long button axis front-to-back behind USB-C.",
+  "error": null,
+  "id": "CAD-057",
   "parameters": {
-    "board_width": 18.0,
-    "board_length": 22.5,
+    "antenna_keepout": {
+      "length": 5.0,
+      "width": 12.0
+    },
     "board_clearance": 0.25,
-    "button_style": "rectangular_integral_flexure",
-    "button_width": 6.0,
+    "board_length": 22.5,
+    "board_width": 18.0,
+    "button_actuator": "internal_pad",
+    "button_floating": false,
     "button_length": 10.0,
     "button_orientation": "front_to_back",
-    "button_floating": false,
-    "button_placement": "behind_usb_c",
     "button_perimeter": "u_shape_open_to_rear",
+    "button_placement": "behind_usb_c",
     "button_slot_type": "non_through_perimeter_cut",
-    "button_actuator": "internal_pad",
+    "button_style": "rectangular_integral_flexure",
+    "button_width": 6.0,
+    "output_path": "cad/output/esp32-c3-super-mini-snapfit-v4.FCStd",
     "preserve_prior_case_geometry": true,
-    "usb_c_opening": {"width": 10.0, "height": 4.0},
-    "snap_fit": {"round_snap_count": 4},
-    "antenna_keepout": {"length": 5.0, "width": 12.0},
-    "output_path": "cad/output/esp32-c3-super-mini-snapfit-v4.FCStd"
-  }
+    "snap_fit": {
+      "round_snap_count": 4
+    },
+    "usb_c_opening": {
+      "height": 4.0,
+      "width": 10.0
+    }
+  },
+  "revision": 4,
+  "revision_note": "Preserve the previously good overall enclosure geometry. Change ONLY BOOT/RESET button geometry to the approved rectangular/incomplete-oval integral flexure style: solid lid surface remains continuous; no through-holes. Each button is formed by a U-shaped/incomplete rectangular perimeter cut, with the opening facing toward PCB rear so the button remains attached to the lid on the rear side. Add a small internal actuator pad under each button aligned to the actual BOOT and RESET tactile switches. Keep USB-C opening, 22.5 x 18 mm PCB fit, 0.25 mm clearance, four round snap points, antenna keepout, two-piece enclosure, and all other prior good geometry unchanged. Long button axis front-to-back behind USB-C.",
+  "started_at": "2026-08-25T08:48:17.931916+00:00",
+  "status": "running",
+  "updated_at": "2026-08-25T08:48:17.931930+00:00"
 }
