@@ -1,6 +1,8 @@
 {
   "action": "create_snapfit_case",
+  "completed_at": null,
   "created_by": "ChatGPT",
+  "error": null,
   "id": "CAD-058",
   "job_id": "CAD-058",
   "parameters": {
@@ -35,6 +37,8 @@
   },
   "revision": 5,
   "revision_note": "Regenerate V4 using the patched rectangular imperfect-U flexure executor. Preserve the prior good enclosure geometry unchanged. Buttons are defined only by three narrow non-through perimeter cuts (left, right, rear/bottom); the front/top bridge remains solid with the lid. No capsule, no raised button head, no through-hole outline, no ventilation openings. Add a small underside actuator pad aligned with the BOOT/RESET tactile switches. Re-run CAD-058 from pending state.",
-  "status": "pending",
-  "target": "ESP32-C3 Super Mini"
+  "started_at": "2026-08-25T09:31:19.337851+00:00",
+  "status": "running",
+  "target": "ESP32-C3 Super Mini",
+  "updated_at": "2026-08-25T09:31:19.337868+00:00"
 }
