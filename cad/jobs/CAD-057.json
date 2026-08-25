@@ -1,36 +1,48 @@
 {
-  "id": "CAD-057",
   "action": "create_snapfit_case",
-  "status": "pending",
+  "completed_at": null,
   "created_by": "ChatGPT",
-  "revision": 3,
-  "revision_note": "Re-generate from the CAD-055/056 enclosure geometry, preserving the previously good overall case geometry and changing ONLY the BOOT/RESET button geometry to the approved integral flexure solid style. Buttons must be continuous solid features on the lid surface, not through-holes or ventilation openings. Each button uses two narrow longitudinal relief slots defining the flexure while leaving the rear bridge/material intact. Keep the prior good USB-C opening, case dimensions, snap-fit geometry, antenna keepout, and two-piece enclosure unchanged. Position buttons immediately behind USB-C to align with actual BOOT and RESET tactile switches; long axis front-to-back toward PCB rear. Internal actuator pads must contact the PCB switches. Output new FCStd for visual inspection. Do not introduce large rectangular through-openings.",
+  "error": null,
+  "id": "CAD-057",
   "parameters": {
-    "board_width": 18.0,
-    "board_length": 22.5,
+    "antenna_keepout": {
+      "length": 5.0,
+      "width": 12.0
+    },
     "board_clearance": 0.25,
-    "wall": 1.2,
-    "bottom_thickness": 1.2,
+    "board_length": 22.5,
+    "board_width": 18.0,
     "body_height": 5.2,
-    "cover_thickness": 1.2,
-    "cover_wall": 1.2,
-    "cover_clearance": 0.2,
-    "button_style": "integral_flexure_solid",
-    "button_orientation": "front_to_back",
-    "button_floating": false,
-    "button_placement": "behind_usb_c",
+    "bottom_thickness": 1.2,
     "button_count": 2,
+    "button_flexure_thickness": 0.9,
+    "button_floating": false,
+    "button_length": 7.0,
+    "button_orientation": "front_to_back",
+    "button_placement": "behind_usb_c",
+    "button_rear_gap": 2.0,
     "button_slot_count_per_button": 2,
     "button_slot_type": "relief_slot_non_through_perimeter",
-    "button_length": 7.0,
+    "button_style": "integral_flexure_solid",
     "button_width": 3.2,
-    "button_flexure_thickness": 0.9,
-    "button_rear_gap": 2.0,
-    "usb_c_opening": {"width": 10.0, "height": 4.0},
-    "snap_fit": {"round_snap_count": 4},
-    "antenna_keepout": {"length": 5.0, "width": 12.0},
-    "preserve_prior_case_geometry": true,
+    "cover_clearance": 0.2,
+    "cover_thickness": 1.2,
+    "cover_wall": 1.2,
+    "document": "ESP32C3SnapFitCaseV3",
     "output_path": "cad/output/esp32-c3-super-mini-snapfit-v3.FCStd",
-    "document": "ESP32C3SnapFitCaseV3"
-  }
+    "preserve_prior_case_geometry": true,
+    "snap_fit": {
+      "round_snap_count": 4
+    },
+    "usb_c_opening": {
+      "height": 4.0,
+      "width": 10.0
+    },
+    "wall": 1.2
+  },
+  "revision": 3,
+  "revision_note": "Re-generate from the CAD-055/056 enclosure geometry, preserving the previously good overall case geometry and changing ONLY the BOOT/RESET button geometry to the approved integral flexure solid style. Buttons must be continuous solid features on the lid surface, not through-holes or ventilation openings. Each button uses two narrow longitudinal relief slots defining the flexure while leaving the rear bridge/material intact. Keep the prior good USB-C opening, case dimensions, snap-fit geometry, antenna keepout, and two-piece enclosure unchanged. Position buttons immediately behind USB-C to align with actual BOOT and RESET tactile switches; long axis front-to-back toward PCB rear. Internal actuator pads must contact the PCB switches. Output new FCStd for visual inspection. Do not introduce large rectangular through-openings.",
+  "started_at": "2026-08-25T08:34:09.363760+00:00",
+  "status": "running",
+  "updated_at": "2026-08-25T08:34:09.363774+00:00"
 }
