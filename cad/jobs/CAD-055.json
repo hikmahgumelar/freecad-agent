@@ -1,6 +1,6 @@
 {
   "action": "create_snapfit_case",
-  "completed_at": null,
+  "completed_at": "2026-08-25T07:38:05.592200+00:00",
   "error": null,
   "job_id": "CAD-055",
   "output_path": "cad/output/esp32-c3-super-mini-snapfit-v1.FCStd",
@@ -14,8 +14,41 @@
     "printable": true,
     "usb_c": "protrudes through front opening"
   },
+  "result": {
+    "action": "create_snapfit_case",
+    "board": {
+      "clearance": 0.45,
+      "length": 22.5,
+      "width": 18.0
+    },
+    "case": {
+      "body_height": 5.2,
+      "cover_thickness": 1.2,
+      "outer_length": 25.799999999999997,
+      "outer_width": 21.299999999999997
+    },
+    "document": "ESP32C3SnapFitCaseV1",
+    "features": {
+      "antenna_keepout": {
+        "length": 5.0,
+        "width": 12.0
+      },
+      "round_snap_count": 4,
+      "solid_button_count": 2,
+      "usb_c_opening": {
+        "height": 4.0,
+        "width": 10.0
+      }
+    },
+    "ok": true,
+    "output_path": "/home/hikmah/projectx/freecad-agent/cad/output/esp32-c3-super-mini-snapfit-v1.FCStd",
+    "parts": [
+      "BottomCase",
+      "TopCover"
+    ]
+  },
   "started_at": "2026-08-25T07:38:03.148552+00:00",
-  "status": "running",
+  "status": "completed",
   "target": "ESP32-C3 Super Mini",
-  "updated_at": "2026-08-25T07:38:03.148568+00:00"
+  "updated_at": "2026-08-25T07:38:05.592222+00:00"
 }
