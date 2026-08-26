@@ -4,6 +4,7 @@
   "error": null,
   "id": "CAD-059",
   "job_id": "CAD-059",
+  "status": "pending",
   "parameters": {
     "actuator_pad_length": 2.0,
     "actuator_pad_position": "inner_base_of_u",
