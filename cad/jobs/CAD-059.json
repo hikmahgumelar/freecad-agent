@@ -1,5 +1,6 @@
 {
   "action": "create_snapfit_case",
+  "completed_at": null,
   "created_by": "ChatGPT",
   "error": null,
   "id": "CAD-059",
@@ -32,7 +33,9 @@
     "cover_wall": 1.2,
     "output_path": "cad/output/esp32-c3-super-mini-snapfit-v4.FCStd",
     "preserve_prior_case_geometry": true,
-    "snap_fit": {"round_snap_count": 4},
+    "snap_fit": {
+      "round_snap_count": 4
+    },
     "usb_centered": true,
     "usb_opening_bottom": 1.0,
     "usb_opening_height": 4.0,
@@ -42,5 +45,7 @@
   "result": null,
   "revision": 10,
   "revision_note": "Run V4 with the latest executor. Preserve prior enclosure geometry. Keep USB-C centered on the enclosure centerline. Keep BOOT/RESET symmetric about the same centerline. Keep rectangular imperfect-U flexure with 0.5 mm cut-line width. Keep actuator pads exactly 2.0 x 2.0 mm and centered at the inner/base end of each U, directly over the tactile switches. No capsule, no raised head, no large through-opening. Preserve snap-fit, PCB clearance, antenna keepout, wall thickness, and overall enclosure geometry.",
-  "status": "pending"
+  "started_at": "2026-08-26T11:56:02.677194+00:00",
+  "status": "running",
+  "updated_at": "2026-08-26T11:56:02.677769+00:00"
 }
