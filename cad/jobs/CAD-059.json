@@ -1,6 +1,5 @@
 {
   "action": "create_snapfit_case",
-  "completed_at": "2026-08-26T11:07:58.294557+00:00",
   "created_by": "ChatGPT",
   "error": null,
   "id": "CAD-059",
@@ -33,57 +32,15 @@
     "cover_wall": 1.2,
     "output_path": "cad/output/esp32-c3-super-mini-snapfit-v4.FCStd",
     "preserve_prior_case_geometry": true,
-    "snap_fit": {
-      "round_snap_count": 4
-    },
+    "snap_fit": {"round_snap_count": 4},
     "usb_centered": true,
     "usb_opening_bottom": 1.0,
     "usb_opening_height": 4.0,
     "usb_opening_width": 10.0,
     "wall": 1.2
   },
-  "result": {
-    "action": "create_snapfit_case",
-    "board": {
-      "clearance": 0.25,
-      "length": 22.5,
-      "width": 18.0
-    },
-    "case": {
-      "body_height": 5.2,
-      "cover_thickness": 1.2,
-      "outer_length": 25.4,
-      "outer_width": 20.9
-    },
-    "document": "ESP32C3SnapFitCaseV4",
-    "features": {
-      "antenna_keepout": {
-        "length": 5.0,
-        "width": 12.0
-      },
-      "button_center_spacing": 8.8,
-      "button_count": 2,
-      "button_cut_width": 0.5,
-      "button_floating": false,
-      "button_orientation": "front_to_back",
-      "button_placement": "behind_usb_c",
-      "button_style": "rectangular_imperfect_u_flexure",
-      "round_snap_count": 4,
-      "usb_c_opening": {
-        "height": 4.0,
-        "width": 10.0
-      }
-    },
-    "ok": true,
-    "output_path": "/Users/gugum/projectx/freecad-agent/cad/output/esp32-c3-super-mini-snapfit-v4.FCStd",
-    "parts": [
-      "BottomCase",
-      "TopCover"
-    ]
-  },
-  "revision": 9,
-  "revision_note": "Re-queue V4 using the latest executor. Preserve the prior good enclosure geometry. Keep USB-C exactly centered on the enclosure centerline. Keep BOOT/RESET symmetric about the same centerline. Use the same rectangular imperfect-U flexure geometry; only the narrow U-cut thickness is 0.5 mm so the flexure can move up/down. Keep actuator pads exactly 2.0 x 2.0 mm and place them at the inner base of each U, not under the outer bridge. Do not change pad shape or move it laterally. No capsule, no raised button head, no large through-opening. Preserve snap-fit, PCB clearance, antenna keepout, wall thickness, and overall enclosure geometry.",
-  "started_at": "2026-08-26T11:07:54.459267+00:00",
-  "status": "completed",
-  "updated_at": "2026-08-26T11:07:58.294592+00:00"
+  "result": null,
+  "revision": 10,
+  "revision_note": "Run V4 with the latest executor. Preserve prior enclosure geometry. Keep USB-C centered on the enclosure centerline. Keep BOOT/RESET symmetric about the same centerline. Keep rectangular imperfect-U flexure with 0.5 mm cut-line width. Keep actuator pads exactly 2.0 x 2.0 mm and centered at the inner/base end of each U, directly over the tactile switches. No capsule, no raised head, no large through-opening. Preserve snap-fit, PCB clearance, antenna keepout, wall thickness, and overall enclosure geometry.",
+  "status": "pending"
 }
