@@ -180,7 +180,7 @@ def _create_snapfit_case(command):
                 Part.makeSphere(snap_r + 0.15, App.Vector(cx, sy, snap_z))
             )
 
-    # Button centers are explicitly symmetric about the same centerline as USB-C.
+    # Button centers are symmetric about the enclosure/USB-C centerline.
     center_x = outer_w / 2.0
     center_xs = (
         center_x - button_center_spacing / 2.0,
@@ -217,9 +217,9 @@ def _create_snapfit_case(command):
         )
         cover_shape = cover_shape.cut(left_slot).cut(right_slot).cut(rear_slot).removeSplitter()
 
-        # Actuator pad sits at the inner base of the U so it presses the PCB tactile switch.
+        # Actuator pad sits at the inner/base end of the U so it presses the PCB tactile switch.
         pad_x = cx - actuator_w / 2.0
-        pad_y = button_front_y - actuator_l / 2.0
+        pad_y = button_rear_y + (button_rear_bridge - actuator_l) / 2.0
         pad = Part.makeBox(
             actuator_w,
             actuator_l,
@@ -236,7 +236,7 @@ def _create_snapfit_case(command):
     cover.addProperty("App::PropertyString", "ButtonPlacement", "Design")
     cover.ButtonPlacement = "Symmetric about enclosure centerline and USB-C center; behind USB-C; aligned to BOOT/RESET."
     cover.addProperty("App::PropertyString", "ActuatorDesign", "Design")
-    cover.ActuatorDesign = "2.0 x 2.0 mm pad at inner base of each U; not under outer bridge."
+    cover.ActuatorDesign = "2.0 x 2.0 mm pad at inner/base end of each U; not under outer bridge."
     cover.addProperty("App::PropertyString", "SnapDesign", "Design")
     cover.SnapDesign = "Four round snap bosses with matching spherical pockets."
 
