@@ -102,14 +102,16 @@ def _create_snapfit_case(command):
         Part.makeBox(inner_w, inner_l, body_h - bottom, App.Vector(wall, wall, bottom))
     )
 
-    # USB-C opening centered on the actual enclosure centerline.
-    usb_x = (outer_w - usb_w) / 2.0
+    center_x = outer_w / 2.0
+
+    # USB-C opening is centered on the actual enclosure centerline.
+    usb_x = center_x - usb_w / 2.0
     tray = tray.cut(
         Part.makeBox(usb_w, wall + 0.8, usb_h,
                      App.Vector(usb_x, outer_l - wall - 0.4, usb_bottom))
     )
 
-    ak_x = (outer_w - antenna_w) / 2.0
+    ak_x = center_x - antenna_w / 2.0
     ak_y = outer_l - wall - antenna_l
     tray = tray.cut(
         Part.makeBox(antenna_w, antenna_l + 0.2,
@@ -161,6 +163,7 @@ def _create_snapfit_case(command):
     )
     cover_shape = co.cut(ci)
 
+    # USB-C opening is centered on the same enclosure centerline as BottomCase.
     cover_usb_y = oy + cover_outer_l - cover_wall - cover_clear - 0.6
     cover_shape = cover_shape.cut(
         Part.makeBox(
@@ -181,14 +184,12 @@ def _create_snapfit_case(command):
             )
 
     # Button centers are symmetric about the enclosure/USB-C centerline.
-    center_x = outer_w / 2.0
     center_xs = (
         center_x - button_center_spacing / 2.0,
         center_x + button_center_spacing / 2.0,
     )
     button_front_y = outer_l - wall - board_clear - button_front_offset
     button_rear_y = button_front_y - button_len
-    top_z = body_h + cover_t
 
     for name, cx in (("BootButton", center_xs[0]), ("ResetButton", center_xs[1])):
         # U-cut: 0.5 mm wide cut lines only; no added button head and no large opening.
@@ -217,9 +218,10 @@ def _create_snapfit_case(command):
         )
         cover_shape = cover_shape.cut(left_slot).cut(right_slot).cut(rear_slot).removeSplitter()
 
-        # Actuator pad sits at the inner/base end of the U so it presses the PCB tactile switch.
+        # Actuator pad: centered on the U opening and located at the inner/base end,
+        # immediately under the flexure bridge that actually moves the PCB switch.
         pad_x = cx - actuator_w / 2.0
-        pad_y = button_rear_y + (button_rear_bridge - actuator_l) / 2.0
+        pad_y = button_front_y - button_rear_bridge - actuator_l / 2.0
         pad = Part.makeBox(
             actuator_w,
             actuator_l,
@@ -236,7 +238,7 @@ def _create_snapfit_case(command):
     cover.addProperty("App::PropertyString", "ButtonPlacement", "Design")
     cover.ButtonPlacement = "Symmetric about enclosure centerline and USB-C center; behind USB-C; aligned to BOOT/RESET."
     cover.addProperty("App::PropertyString", "ActuatorDesign", "Design")
-    cover.ActuatorDesign = "2.0 x 2.0 mm pad at inner/base end of each U; not under outer bridge."
+    cover.ActuatorDesign = "2.0 x 2.0 mm pad centered at the inner/base end of each U; not under outer bridge."
     cover.addProperty("App::PropertyString", "SnapDesign", "Design")
     cover.SnapDesign = "Four round snap bosses with matching spherical pockets."
 
