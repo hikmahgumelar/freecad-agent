@@ -1,6 +1,5 @@
 {
   "action": "create_snapfit_case",
-  "completed_at": "2026-08-25T10:02:08.150232+00:00",
   "created_by": "ChatGPT",
   "error": null,
   "id": "CAD-059",
@@ -18,7 +17,7 @@
     "body_height": 5.2,
     "bottom_thickness": 1.2,
     "button_center_from_left_edge": 11.0,
-    "button_cut_thickness": 1.0,
+    "button_cut_thickness": 0.5,
     "button_cut_width": 2.0,
     "button_floating": false,
     "button_length": 7.0,
@@ -33,56 +32,13 @@
     "cover_wall": 1.2,
     "output_path": "cad/output/esp32-c3-super-mini-snapfit-v4.FCStd",
     "preserve_prior_case_geometry": true,
-    "snap_fit": {
-      "round_snap_count": 4
-    },
+    "snap_fit": {"round_snap_count": 4},
     "usb_centered": true,
     "usb_opening_bottom": 1.0,
     "usb_opening_height": 4.0,
     "usb_opening_width": 10.0,
     "wall": 1.2
   },
-  "result": {
-    "action": "create_snapfit_case",
-    "board": {
-      "clearance": 0.25,
-      "length": 22.5,
-      "width": 18.0
-    },
-    "case": {
-      "body_height": 5.2,
-      "cover_thickness": 1.2,
-      "outer_length": 25.4,
-      "outer_width": 20.9
-    },
-    "document": "ESP32C3SnapFitCaseV4",
-    "features": {
-      "antenna_keepout": {
-        "length": 5.0,
-        "width": 12.0
-      },
-      "button_count": 2,
-      "button_floating": false,
-      "button_orientation": "front_to_back",
-      "button_placement": "behind_usb_c",
-      "button_style": "rectangular_imperfect_u_flexure",
-      "round_snap_count": 4,
-      "usb_c_opening": {
-        "height": 4.0,
-        "width": 10.0
-      }
-    },
-    "ok": true,
-    "output_path": "/home/hikmah/projectx/freecad-agent/cad/output/esp32-c3-super-mini-snapfit-v4.FCStd",
-    "parts": [
-      "BottomCase",
-      "TopCover"
-    ]
-  },
-  "revision": 8,
-  "revision_note": "Regenerate V4 preserving the prior good enclosure geometry. Center USB-C exactly on the enclosure centerline and center the BOOT/RESET button pair symmetrically around the same centerline. Use simple rectangular imperfect-U flexure cuts with only 1.0 mm cut/bridge thickness; no capsule, no raised button head, no large through-opening. Place the actuator pad at the inner base of each U-cut, not under the outer bridge: the pad must sit at the bottom/inside end of the U so it contacts the actual BOOT/RESET tactile switch when the flexure is pressed. Keep pad narrow: 2.0 mm wide x 2.0 mm front-to-back, 0.5-1.0 mm thick. Preserve USB-C, snap-fit, PCB clearance, antenna keepout, wall thickness, and overall enclosure geometry unchanged.",
-  "started_at": "2026-08-25T10:02:05.770922+00:00",
-  "status": "completed",
-  "target": "ESP32-C3 Super Mini",
-  "updated_at": "2026-08-25T10:02:08.150262+00:00"
+  "revision": 9,
+  "revision_note": "Re-queue V4 using the latest executor. Preserve the prior good enclosure geometry. Keep USB-C exactly centered on the enclosure centerline. Keep BOOT/RESET symmetric about the same centerline. Use the same rectangular imperfect-U flexure geometry; only the narrow U-cut thickness is 0.5 mm so the flexure can move up/down. Keep actuator pads exactly 2.0 x 2.0 mm and place them at the inner base of each U, not under the outer bridge. Do not change pad shape or move it laterally. No capsule, no raised button head, no large through-opening. Preserve snap-fit, PCB clearance, antenna keepout, wall thickness, and overall enclosure geometry."
 }
