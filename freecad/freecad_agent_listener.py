@@ -63,14 +63,14 @@ def _create_snapfit_case(command):
 
     button_len = float(command.get("button_length", 7.0))
     button_w = float(command.get("button_width", 3.2))
-    button_slot_width = float(command.get("button_slot_width", 0.5))
+    button_slot_width = float(command.get("button_slot_width", command.get("button_cut_thickness", 0.5)))
     button_front_offset = float(command.get("button_front_offset", 3.2))
-    button_center_spacing = float(command.get("button_center_spacing", 8.8))
+    button_center_spacing = float(command.get("button_center_spacing", command.get("button_pair_center_to_center", 8.8)))
     button_rear_bridge = float(command.get("button_rear_bridge", 2.0))
 
-    actuator_w = float(command.get("actuator_width", 2.0))
-    actuator_l = float(command.get("actuator_length", 2.0))
-    actuator_h = float(command.get("actuator_height", 0.8))
+    actuator_w = float(command.get("actuator_width", command.get("actuator_pad_width", 2.0)))
+    actuator_l = float(command.get("actuator_length", command.get("actuator_pad_length", 2.0)))
+    actuator_h = float(command.get("actuator_height", command.get("actuator_pad_thickness", 0.8)))
 
     usb_w = float(command.get("usb_opening_width", 10.0))
     usb_h = float(command.get("usb_opening_height", 4.0))
@@ -188,8 +188,7 @@ def _create_snapfit_case(command):
                                  slot_h, App.Vector(left_x, button_front_y - button_rear_bridge, slot_z))
         cover_shape = cover_shape.cut(left_slot).cut(right_slot).cut(rear_slot).removeSplitter()
 
-        # Pad is centered across the U and sits at the inner/base end (just inside the U),
-        # not on the outer bridge. Keep pad dimensions exactly 2 x 2 mm.
+        # Actuator pad is centered across the U opening and attached at the inner/base end.
         pad_x = cx - actuator_w / 2.0
         pad_y = button_front_y - actuator_l
         pad = Part.makeBox(actuator_w, actuator_l, actuator_h,
