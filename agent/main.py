@@ -1,4 +1,7 @@
+import os
 import signal
+import subprocess
+import sys
 import time
 from datetime import datetime, timezone
 
@@ -16,6 +19,8 @@ STATUS_LOG_PATH = "status.log"
 DEFAULT_RATE_LIMIT_SLEEP = 300
 DEFAULT_TRANSIENT_SLEEP = 30
 MAX_TRANSIENT_SLEEP = 300
+GIT_CHECK_INTERVAL = 30
+GIT_BRANCH = "master"
 
 
 class Watchdog:
@@ -23,6 +28,7 @@ class Watchdog:
         self.running = True
         self.rate_limit_reset_at = None
         self.transient_sleep = DEFAULT_TRANSIENT_SLEEP
+        self.last_git_check = 0.0
 
         config = load_config()
 
@@ -104,6 +110,66 @@ class Watchdog:
                 flush=True,
             )
             time.sleep(min(5, max(0.1, remaining)))
+
+    def _git_sync_if_needed(self):
+        now = time.monotonic()
+        if now - self.last_git_check < GIT_CHECK_INTERVAL:
+            return False
+
+        self.last_git_check = now
+        print("[GIT] checking origin/master...")
+
+        try:
+            subprocess.run(
+                ["git", "fetch", "origin", GIT_BRANCH],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                timeout=30,
+            )
+
+            local = subprocess.check_output(
+                ["git", "rev-parse", "HEAD"],
+                text=True,
+                timeout=10,
+            ).strip()
+            remote = subprocess.check_output(
+                ["git", "rev-parse", f"origin/{GIT_BRANCH}"],
+                text=True,
+                timeout=10,
+            ).strip()
+
+            if local == remote:
+                return False
+
+            status = subprocess.check_output(
+                ["git", "status", "--porcelain"],
+                text=True,
+                timeout=10,
+            )
+
+            if status.strip():
+                print("[GIT] update detected but working tree is dirty; skipping auto-pull")
+                return False
+
+            print(f"[GIT] update detected: {local[:12]} -> {remote[:12]}")
+            subprocess.run(
+                ["git", "pull", "--ff-only", "origin", GIT_BRANCH],
+                check=True,
+                timeout=60,
+            )
+            print("[GIT] pull successful; restarting watchdog")
+
+            os.execv(sys.executable, [sys.executable, *sys.argv])
+            return True
+
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
+            print(f"[GIT] auto-sync failed: {exc}")
+        except Exception as exc:
+            print(f"[GIT] auto-sync error: {exc}")
+
+        return False
 
     def execute_job(self, job: Job):
         print(
@@ -276,7 +342,7 @@ class Watchdog:
 
     def run(self):
         print("================================")
-        print(" freecad-agent-watchdog v0.5")
+        print(" freecad-agent-watchdog v0.6")
         print("================================")
         print(
             f"Polling interval: "
@@ -290,10 +356,12 @@ class Watchdog:
         print("GitHub rate-limit handling: enabled")
         print("GitHub SHA-conflict recovery: enabled")
         print("GitHub network retry/backoff: enabled")
+        print(f"GitHub auto-sync: enabled ({GIT_BRANCH}, every {GIT_CHECK_INTERVAL}s)")
         print()
 
         while self.running:
             try:
+                self._git_sync_if_needed()
                 jobs = self.queue.list_pending_jobs()
 
                 if jobs:
