@@ -124,6 +124,7 @@ The more people build on top of it, the more useful the ecosystem becomes.
 - Recover from GitHub SHA conflicts.
 - Handle GitHub API rate limits without aggressive polling.
 - Retry transient GitHub network failures with exponential backoff.
+- **Automatically detect updates on `origin/master`, pull them with `git pull --ff-only`, and restart the watchdog.**
 - Provide an extension point for export and manufacturing workflows such as STEP/STL.
 
 ## The core idea
@@ -176,15 +177,62 @@ It receives an action, executes it against the active FreeCAD document, and retu
 
 Runs **outside FreeCAD**. It:
 
-1. Finds pending CAD jobs in GitHub.
-2. Marks the job as running.
-3. Checks the FreeCAD listener with `ping`.
-4. Sends the requested action to FreeCAD.
-5. Waits for the result.
-6. Writes the completed or failed state back to GitHub.
-7. Records the result in `status.log`.
+1. Checks the configured Git repository for upstream changes.
+2. Pulls fast-forward-only changes when `origin/master` is newer.
+3. Restarts itself so the running Python process loads the updated code.
+4. Finds pending CAD jobs in GitHub.
+5. Marks the job as running.
+6. Checks the FreeCAD listener with `ping`.
+7. Sends the requested action to FreeCAD.
+8. Waits for the result.
+9. Writes the completed or failed state back to GitHub.
+10. Records the result in `status.log`.
 
 GitHub is currently used as the lightweight job queue and state store. This keeps the infrastructure simple and makes CAD jobs inspectable as normal repository artifacts.
+
+### Automatic repository synchronization
+
+The watchdog can keep its local checkout synchronized with the configured remote repository without a manual `git pull`.
+
+The synchronization flow is:
+
+```text
+Watchdog loop
+     ↓
+git fetch origin master
+     ↓
+Compare HEAD vs origin/master
+     ↓
+Remote changed?
+   ┌─┴─┐
+  no  yes
+   │    ↓
+   │  git pull --ff-only
+   │    ↓
+   │  restart process with execv()
+   │
+   └──────→ continue polling
+```
+
+The update step is intentionally conservative. The watchdog should only auto-update when the local working tree can be fast-forwarded safely. Local modifications or a non-fast-forward situation should be logged rather than overwritten.
+
+Recommended startup output after the update feature is enabled:
+
+```text
+GitHub auto-sync: enabled
+GitHub sync interval: 30s
+```
+
+When an update is detected:
+
+```text
+[GIT] update detected
+[GIT] pulling origin/master with --ff-only
+[GIT] pull successful
+[WATCHDOG] restarting with updated code
+```
+
+This keeps long-running Linux deployments synchronized with GitHub while preserving the safety of local changes and avoiding manual watchdog restarts after every code push.
 
 ## Repository layout
 
@@ -235,9 +283,14 @@ Set your own values:
 GITHUB_REPO=your-user/your-freecad-agent
 GITHUB_TOKEN=github_pat_*******************
 POLL_INTERVAL=30
+GIT_AUTO_SYNC=true
+GIT_SYNC_INTERVAL=30
+GIT_BRANCH=master
 ```
 
 Never commit a real token. `.env` is ignored by Git.
+
+`GIT_AUTO_SYNC` enables automatic repository synchronization. `GIT_SYNC_INTERVAL` controls how often the watchdog checks `origin/master`. `GIT_BRANCH` selects the branch to synchronize.
 
 ### 3. Install dependencies
 
@@ -328,11 +381,13 @@ Typical startup output:
 
 ```text
 ================================
- freecad-agent-watchdog v0.5
+ freecad-agent-watchdog v0.6
 ================================
 Polling interval: 30s
 FreeCAD endpoint: 127.0.0.1:8765
 Health check: enabled
+GitHub auto-sync: enabled
+GitHub sync interval: 30s
 GitHub rate-limit handling: enabled
 GitHub SHA-conflict recovery: enabled
 GitHub network retry/backoff: enabled
@@ -376,6 +431,8 @@ This separation means you can replace the AI layer without replacing the FreeCAD
 
 The watchdog includes protections for long-running operation.
 
+**Automatic Git synchronization:** the watchdog periodically fetches the configured remote branch and performs a fast-forward-only pull when the remote is newer. After a successful pull, the watchdog replaces its running Python process with the updated code. It does not overwrite a dirty working tree automatically.
+
 **Rate limits:** normal polling uses `POLL_INTERVAL`; `30` seconds is recommended. When GitHub reports a rate limit, the watchdog enters a cooldown and resumes after the limit recovers.
 
 **SHA conflicts:** GitHub Contents API updates use the current blob SHA. If another update changes a job before the watchdog writes the result, the watchdog refreshes the state and retries.
@@ -415,6 +472,8 @@ sudo supervisorctl update
 sudo supervisorctl restart freecad
 sudo supervisorctl status freecad
 ```
+
+With automatic Git synchronization enabled, a routine code push should not require a manual supervisor restart; the watchdog can pull the new commit and restart itself.
 
 ## Extending FreeCAD Agent
 
@@ -463,6 +522,7 @@ The core execution infrastructure is operational:
 - Rate-limit handling
 - SHA-conflict recovery
 - Network retry/backoff
+- **Automatic GitHub repository synchronization**
 - Real CAD example workflow
 
 The project is moving from **infrastructure construction** toward **useful CAD actions, AI integrations, reusable examples, and community contributions**.
