@@ -159,11 +159,11 @@ class Watchdog:
                 check=True,
                 timeout=60,
             )
-            print("[GIT] pull successful; restarting watchdog")
+            print("[GIT] pull successful; exiting for supervisor restart")
+            raise SystemExit(0)
 
-            os.execv(sys.executable, [sys.executable, *sys.argv])
-            return True
-
+        except SystemExit:
+            raise
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
             print(f"[GIT] auto-sync failed: {exc}")
         except Exception as exc:
