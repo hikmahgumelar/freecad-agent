@@ -8,9 +8,36 @@ You describe what you want to build. An AI agent turns the intent into a structu
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-<img width="1096" height="634" alt="image" src="https://github.com/user-attachments/assets/16673dd6-d9a9-457b-9ac1-160f08ecb89a" />
+## Watchdog auto-sync
 
-> **From a prompt to a real CAD result — without manually rebuilding the model from scratch.**
+The watchdog now supports automatic Git synchronization. Every 30 seconds by default it fetches the configured remote branch, compares the local `HEAD` with `origin/master`, and when a newer commit is available it performs a fast-forward-only pull and restarts itself so the updated Python code is loaded.
+
+```text
+watchdog
+   ↓
+git fetch origin master
+   ↓
+HEAD == origin/master ?
+   ├── yes → continue polling
+   └── no
+        ↓
+working tree clean ?
+   ├── no  → log + skip pull
+   └── yes → git pull --ff-only
+                  ↓
+              execv() restart
+```
+
+This removes the need for a manual `git pull` and manual watchdog restart after normal code pushes. Dirty working trees are never overwritten automatically.
+
+Environment options:
+
+```env
+POLL_INTERVAL=30
+GIT_AUTO_SYNC=true
+GIT_SYNC_INTERVAL=30
+GIT_BRANCH=master
+```
 
 ## See it in action
 
@@ -92,26 +119,6 @@ Active FreeCAD document
 
 The goal is not to replace FreeCAD. The goal is to make FreeCAD **programmable by AI through natural language** while keeping FreeCAD itself as the source of truth for geometry and document state.
 
-## Why fork it?
-
-This project is intentionally designed to be **forked, modified, and extended**.
-
-Fork it if you want to build:
-
-- Your own AI-powered CAD assistant.
-- A local LLM → FreeCAD workflow.
-- A prompt-to-3D-print pipeline.
-- A CAD automation agent for electronics enclosures.
-- A robotics or manufacturing CAD pipeline.
-- A custom FreeCAD tool server.
-- An experimental parametric-modeling agent.
-
-The core infrastructure does not care which AI model generates the intent. You can connect your own LLM, agent framework, UI, or workflow on top of the same execution layer.
-
-**Fork the infrastructure. Add your own CAD actions. Bring your own ideas.**
-
-The more people build on top of it, the more useful the ecosystem becomes.
-
 ## What can it do?
 
 - Create CAD geometry from structured AI-generated jobs.
@@ -124,38 +131,8 @@ The more people build on top of it, the more useful the ecosystem becomes.
 - Recover from GitHub SHA conflicts.
 - Handle GitHub API rate limits without aggressive polling.
 - Retry transient GitHub network failures with exponential backoff.
-- **Automatically detect updates on `origin/master`, pull them with `git pull --ff-only`, and restart the watchdog.**
+- Automatically synchronize the watchdog with new commits on the configured Git branch.
 - Provide an extension point for export and manufacturing workflows such as STEP/STL.
-
-## The core idea
-
-You should be able to say:
-
-```text
-Make this enclosure 200 × 100 × 150 mm.
-Use 2 mm walls and a 2 mm bottom.
-Put a 2 mm internal plate in the middle.
-Add six Ø50 mm holes in a 3 × 2 pattern.
-Create a separate lid that fits over the body.
-```
-
-…and let the agent deal with the CAD execution details.
-
-The same workflow can then handle iterative changes:
-
-```text
-Make the lid fit with 0.2 mm clearance.
-Keep everything else unchanged.
-```
-
-Or:
-
-```text
-Move the antenna opening 10 mm from the edge.
-Do not change the USB-C opening.
-```
-
-This is the direction of the project: **natural-language design iteration against real CAD geometry.**
 
 ## Architecture
 
@@ -177,62 +154,16 @@ It receives an action, executes it against the active FreeCAD document, and retu
 
 Runs **outside FreeCAD**. It:
 
-1. Checks the configured Git repository for upstream changes.
-2. Pulls fast-forward-only changes when `origin/master` is newer.
-3. Restarts itself so the running Python process loads the updated code.
-4. Finds pending CAD jobs in GitHub.
-5. Marks the job as running.
-6. Checks the FreeCAD listener with `ping`.
-7. Sends the requested action to FreeCAD.
-8. Waits for the result.
-9. Writes the completed or failed state back to GitHub.
-10. Records the result in `status.log`.
+1. Synchronizes the local checkout with the configured Git remote when safe.
+2. Finds pending CAD jobs in GitHub.
+3. Marks the job as running.
+4. Checks the FreeCAD listener with `ping`.
+5. Sends the requested action to FreeCAD.
+6. Waits for the result.
+7. Writes the completed or failed state back to GitHub.
+8. Records the result in `status.log`.
 
 GitHub is currently used as the lightweight job queue and state store. This keeps the infrastructure simple and makes CAD jobs inspectable as normal repository artifacts.
-
-### Automatic repository synchronization
-
-The watchdog can keep its local checkout synchronized with the configured remote repository without a manual `git pull`.
-
-The synchronization flow is:
-
-```text
-Watchdog loop
-     ↓
-git fetch origin master
-     ↓
-Compare HEAD vs origin/master
-     ↓
-Remote changed?
-   ┌─┴─┐
-  no  yes
-   │    ↓
-   │  git pull --ff-only
-   │    ↓
-   │  restart process with execv()
-   │
-   └──────→ continue polling
-```
-
-The update step is intentionally conservative. The watchdog should only auto-update when the local working tree can be fast-forwarded safely. Local modifications or a non-fast-forward situation should be logged rather than overwritten.
-
-Recommended startup output after the update feature is enabled:
-
-```text
-GitHub auto-sync: enabled
-GitHub sync interval: 30s
-```
-
-When an update is detected:
-
-```text
-[GIT] update detected
-[GIT] pulling origin/master with --ff-only
-[GIT] pull successful
-[WATCHDOG] restarting with updated code
-```
-
-This keeps long-running Linux deployments synchronized with GitHub while preserving the safety of local changes and avoiding manual watchdog restarts after every code push.
 
 ## Repository layout
 
@@ -290,8 +221,6 @@ GIT_BRANCH=master
 
 Never commit a real token. `.env` is ignored by Git.
 
-`GIT_AUTO_SYNC` enables automatic repository synchronization. `GIT_SYNC_INTERVAL` controls how often the watchdog checks `origin/master`. `GIT_BRANCH` selects the branch to synchronize.
-
 ### 3. Install dependencies
 
 ```bash
@@ -307,7 +236,7 @@ FreeCAD Agent can automatically load its listener when FreeCAD starts. The insta
 bash scripts/install-freecad-startup.sh
 ```
 
-On macOS, the installer resolves FreeCAD's versioned user-data directory automatically (for example, `~/Library/Application Support/FreeCAD/v1-1/`). On Linux, it uses the Linux FreeCAD user-data location.
+On macOS, the installer resolves FreeCAD's versioned user-data directory automatically. On Linux, it uses the Linux FreeCAD user-data location.
 
 You can also run the platform-specific installers explicitly:
 
@@ -431,7 +360,7 @@ This separation means you can replace the AI layer without replacing the FreeCAD
 
 The watchdog includes protections for long-running operation.
 
-**Automatic Git synchronization:** the watchdog periodically fetches the configured remote branch and performs a fast-forward-only pull when the remote is newer. After a successful pull, the watchdog replaces its running Python process with the updated code. It does not overwrite a dirty working tree automatically.
+**Automatic Git synchronization:** the watchdog periodically fetches the configured remote branch. If the local checkout is behind and the working tree is clean, it performs `git pull --ff-only` and restarts itself with the updated code. If local changes exist, it skips the pull rather than overwriting them.
 
 **Rate limits:** normal polling uses `POLL_INTERVAL`; `30` seconds is recommended. When GitHub reports a rate limit, the watchdog enters a cooldown and resumes after the limit recovers.
 
@@ -545,8 +474,6 @@ Reusable examples
 Community contributions
 ```
 
-Good contribution areas include new FreeCAD actions, model inspection, CAD examples, AI/local-LLM integrations, job schema improvements, testing, reliability, manufacturing workflows, and documentation.
-
 ## Contributing
 
 Fork the repository, create a branch, make your change, test it against FreeCAD, and open a pull request.
@@ -554,16 +481,6 @@ Fork the repository, create a branch, make your change, test it against FreeCAD,
 Small focused contributions are especially useful: new CAD actions, reproducible examples, integrations, and documentation.
 
 If you build something interesting on top of FreeCAD Agent, share it so others can fork and extend it too.
-
-### Community direction
-
-The long-term goal is bigger than one CAD assistant.
-
-Different people will want different things from the same infrastructure: electronics enclosures, mechanical parts, robotics components, brackets, adapters, manufacturing fixtures, or completely new AI-driven CAD workflows.
-
-**Fork it. Try a different prompt. Add a CAD action. Share the result.**
-
-That is how this project can grow from an automation tool into a community-driven prompt-to-CAD platform.
 
 ## Design principle
 
