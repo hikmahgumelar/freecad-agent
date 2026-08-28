@@ -1,4 +1,3 @@
-import os
 import signal
 import subprocess
 import sys
@@ -342,7 +341,7 @@ class Watchdog:
 
     def run(self):
         print("================================")
-        print(" freecad-agent-watchdog v0.6")
+        print(" freecad-agent-watchdog v0.6.1")
         print("================================")
         print(
             f"Polling interval: "
