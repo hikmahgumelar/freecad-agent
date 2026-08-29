@@ -1,8 +1,8 @@
 {
   "action": "create_snapfit_case",
-  "completed_at": null,
+  "completed_at": "2026-08-29T01:01:52.848266+00:00",
   "created_by": "ChatGPT",
-  "error": null,
+  "error": "[Errno 111] Connection refused",
   "id": "CAD-060",
   "job_id": "CAD-060",
   "parameters": {
@@ -45,6 +45,6 @@
   "revision": 12,
   "revision_note": "S-01 follow-up validation job. Use reusable FlexureButton semantics: local inner-base-of-U origin for each actuator pad. Preserve prior enclosure geometry, centered USB-C, symmetric BOOT/RESET, rectangular imperfect-U flexure, 0.5 mm U-cut, 1.0 mm rear bridge, 2.0 x 2.0 x 0.75 mm actuator pads, and 4-point snap-fit. Do not introduce capsule buttons, raised heads, or large through-openings.",
   "started_at": "2026-08-29T01:01:51.026259+00:00",
-  "status": "running",
-  "updated_at": "2026-08-29T01:01:51.026275+00:00"
+  "status": "failed",
+  "updated_at": "2026-08-29T01:01:52.848284+00:00"
 }
