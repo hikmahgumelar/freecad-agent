@@ -1,5 +1,6 @@
 {
   "action": "create_snapfit_case",
+  "completed_at": null,
   "created_by": "ChatGPT",
   "error": null,
   "id": "CAD-060",
@@ -32,7 +33,9 @@
     "cover_wall": 1.2,
     "output_path": "cad/output/esp32-c3-super-mini-snapfit-v4.FCStd",
     "preserve_prior_case_geometry": true,
-    "snap_fit": {"round_snap_count": 4},
+    "snap_fit": {
+      "round_snap_count": 4
+    },
     "usb_centered": true,
     "usb_opening_bottom": 1.0,
     "usb_opening_height": 4.0,
@@ -41,5 +44,7 @@
   },
   "revision": 12,
   "revision_note": "S-01 follow-up validation job. Use reusable FlexureButton semantics: local inner-base-of-U origin for each actuator pad. Preserve prior enclosure geometry, centered USB-C, symmetric BOOT/RESET, rectangular imperfect-U flexure, 0.5 mm U-cut, 1.0 mm rear bridge, 2.0 x 2.0 x 0.75 mm actuator pads, and 4-point snap-fit. Do not introduce capsule buttons, raised heads, or large through-openings.",
-  "status": "pending"
+  "started_at": "2026-08-29T01:01:51.026259+00:00",
+  "status": "running",
+  "updated_at": "2026-08-29T01:01:51.026275+00:00"
 }
