@@ -1,7 +1,6 @@
 import json
 import os
 import socket
-from dataclasses import replace
 
 import FreeCAD as App
 import FreeCADGui as Gui
@@ -50,22 +49,18 @@ def _inspect_geometry(command):
 
 
 def _build_flexure_cut(button: FlexureButton, slot_z: float, slot_h: float):
-    """Build the exact rectangular imperfect-U cut from a reusable feature."""
+    """Build the canonical imperfect-U cut for a reusable FlexureButton."""
     ox, oy = button.origin
     cut_depth = button.length - button.rear_bridge
     if cut_depth <= 0:
         raise RuntimeError("rear_bridge must be smaller than button length")
 
     left_slot = Part.makeBox(
-        button.slot,
-        cut_depth,
-        slot_h,
+        button.slot, cut_depth, slot_h,
         App.Vector(ox - button.slot, oy, slot_z),
     )
     right_slot = Part.makeBox(
-        button.slot,
-        cut_depth,
-        slot_h,
+        button.slot, cut_depth, slot_h,
         App.Vector(ox + button.width, oy, slot_z),
     )
     rear_slot = Part.makeBox(
@@ -120,10 +115,12 @@ def _create_snapfit_case(command):
     if actuator_h != 0.75:
         raise RuntimeError("Snapfit actuator pad height must be exactly 0.75 mm")
 
-    values = [board_w, board_l, board_clear, wall, bottom, body_h, cover_t, cover_wall, cover_clear,
-              snap_r, snap_z, snap_y, button_len, button_w, button_slot_width,
-              button_center_spacing, button_rear_bridge, actuator_w, actuator_l, actuator_h,
-              usb_w, usb_h, antenna_l, antenna_w]
+    values = [
+        board_w, board_l, board_clear, wall, bottom, body_h, cover_t,
+        cover_wall, cover_clear, snap_r, snap_z, snap_y, button_len,
+        button_w, button_slot_width, button_center_spacing, button_rear_bridge,
+        actuator_w, actuator_l, actuator_h, usb_w, usb_h, antenna_l, antenna_w,
+    ]
     if min(values) <= 0:
         raise RuntimeError("All snap-fit dimensions must be positive")
     if usb_w >= board_w + 2 * board_clear:
@@ -144,16 +141,17 @@ def _create_snapfit_case(command):
     center_x = outer_w / 2.0
     usb_x = center_x - usb_w / 2.0
     tray = tray.cut(
-        Part.makeBox(usb_w, wall + 0.8, usb_h,
-                     App.Vector(usb_x, outer_l - wall - 0.4, usb_bottom))
+        Part.makeBox(usb_w, wall + 0.8, usb_h, App.Vector(usb_x, outer_l - wall - 0.4, usb_bottom))
     )
 
     ak_x = center_x - antenna_w / 2.0
     ak_y = outer_l - wall - antenna_l
     tray = tray.cut(
-        Part.makeBox(antenna_w, antenna_l + 0.2,
-                     min(1.5, body_h - bottom),
-                     App.Vector(ak_x, ak_y, body_h - 1.5))
+        Part.makeBox(
+            antenna_w, antenna_l + 0.2,
+            min(1.5, body_h - bottom),
+            App.Vector(ak_x, ak_y, body_h - 1.5),
+        )
     )
 
     body = doc.addObject("Part::Feature", "BottomCase")
@@ -189,28 +187,38 @@ def _create_snapfit_case(command):
     cover_outer_l = outer_l + 2 * (cover_wall + cover_clear)
     ox = -(cover_wall + cover_clear)
     oy = -(cover_wall + cover_clear)
-    co = Part.makeBox(cover_outer_w, cover_outer_l, cover_t + skirt_h,
-                      App.Vector(ox, oy, body_h - skirt_h))
-    ci = Part.makeBox(outer_w + 2 * cover_clear, outer_l + 2 * cover_clear,
-                      skirt_h + 0.2,
-                      App.Vector(-cover_clear, -cover_clear, body_h - skirt_h - 0.1))
+    co = Part.makeBox(cover_outer_w, cover_outer_l, cover_t + skirt_h, App.Vector(ox, oy, body_h - skirt_h))
+    ci = Part.makeBox(
+        outer_w + 2 * cover_clear,
+        outer_l + 2 * cover_clear,
+        skirt_h + 0.2,
+        App.Vector(-cover_clear, -cover_clear, body_h - skirt_h - 0.1),
+    )
     cover_shape = co.cut(ci)
 
     cover_usb_y = oy + cover_outer_l - cover_wall - cover_clear - 0.6
     cover_shape = cover_shape.cut(
-        Part.makeBox(usb_w, cover_wall + cover_clear + 0.8, usb_h,
-                     App.Vector((cover_outer_w - usb_w) / 2.0, cover_usb_y,
-                                body_h - skirt_h + usb_bottom))
+        Part.makeBox(
+            usb_w, cover_wall + cover_clear + 0.8, usb_h,
+            App.Vector(
+                (cover_outer_w - usb_w) / 2.0,
+                cover_usb_y,
+                body_h - skirt_h + usb_bottom,
+            ),
+        )
     )
 
     for side in ("Left", "Right"):
         cx = -cover_clear if side == "Left" else outer_w + cover_clear
         for sy in snap_centers:
-            cover_shape = cover_shape.cut(Part.makeSphere(snap_r + 0.15,
-                                                           App.Vector(cx, sy, snap_z)))
+            cover_shape = cover_shape.cut(
+                Part.makeSphere(snap_r + 0.15, App.Vector(cx, sy, snap_z))
+            )
 
-    center_xs = (center_x - button_center_spacing / 2.0,
-                 center_x + button_center_spacing / 2.0)
+    center_xs = (
+        center_x - button_center_spacing / 2.0,
+        center_x + button_center_spacing / 2.0,
+    )
     button_front_y = outer_l - wall - board_clear - 3.2
     slot_z = body_h - 0.1
     slot_h = cover_t + 0.25
@@ -264,41 +272,102 @@ def _create_snapfit_case(command):
         "parts": ["BottomCase", "TopCover"],
         "board": {"width": board_w, "length": board_l, "clearance": board_clear},
         "case": {"outer_width": outer_w, "outer_length": outer_l, "body_height": body_h, "cover_thickness": cover_t},
-        "features": {"round_snap_count": 4, "button_count": 2,
-                     "button_style": "rectangular_imperfect_u_flexure",
-                     "button_orientation": "front_to_back", "button_floating": False,
-                     "button_placement": "behind_usb_c", "button_cut_width": button_slot_width,
-                     "button_center_spacing": button_center_spacing,
-                     "usb_c_opening": {"width": usb_w, "height": usb_h},
-                     "antenna_keepout": {"length": antenna_l, "width": antenna_w}}
+        "features": {
+            "round_snap_count": 4,
+            "button_count": 2,
+            "button_style": "rectangular_imperfect_u_flexure",
+            "button_orientation": "front_to_back",
+            "button_floating": False,
+            "button_placement": "behind_usb_c",
+            "button_cut_width": button_slot_width,
+            "button_center_spacing": button_center_spacing,
+            "usb_c_opening": {"width": usb_w, "height": usb_h},
+            "antenna_keepout": {"length": antenna_l, "width": antenna_w},
+        },
     }
 
 
 def execute_command(command):
     action = command.get("action")
-    if action == "ping": return {"ok": True, "message": "FreeCAD agent is alive"}
+    if action == "ping":
+        return {"ok": True, "message": "FreeCAD agent is alive"}
     if action == "create_sphere":
         doc = App.ActiveDocument or App.newDocument("AgentTest")
         sphere = doc.addObject("Part::Sphere", "AgentSphere")
-        sphere.Radius = float(command.get("radius", 10)); doc.recompute(); _fit_view(doc)
+        sphere.Radius = float(command.get("radius", 10))
+        doc.recompute()
+        _fit_view(doc)
         return {"ok": True, "action": action, "object": sphere.Name, "radius": sphere.Radius, "document": doc.Name}
     if action == "open_model":
         path = os.path.abspath(command.get("path", ""))
-        if not os.path.isfile(path): raise RuntimeError(f"CAD file not found: {path}")
-        doc = App.openDocument(path); _fit_view(doc)
+        if not os.path.isfile(path):
+            raise RuntimeError(f"CAD file not found: {path}")
+        doc = App.openDocument(path)
+        _fit_view(doc)
         return {"ok": True, "action": action, "path": path, "document": doc.Name, "label": doc.Label}
     if action == "inspect_model":
         doc = App.ActiveDocument
-        if doc is None: raise RuntimeError("No active FreeCAD document")
+        if doc is None:
+            raise RuntimeError("No active FreeCAD document")
         return {"ok": True, "action": action, "document": doc.Name,
                 "objects": [{"name": o.Name, "label": o.Label, "type": o.TypeId} for o in doc.Objects]}
-    if action == "inspect_geometry": return _inspect_geometry(command)
-    if action == "create_snapfit_case": return _create_snapfit_case(command)
+    if action == "inspect_geometry":
+        return _inspect_geometry(command)
+    if action == "create_snapfit_case":
+        return _create_snapfit_case(command)
     return {"ok": False, "error": f"Unsupported action: {action}"}
 
 
 def _poll_server():
     global _server_socket
-    if _server_socket is None: return
+    if _server_socket is None:
+        return
     while True:
-        try: connection, _ = _server_socket.accept()
+        try:
+            connection, _ = _server_socket.accept()
+            data = connection.recv(65536)
+            if not data:
+                connection.close()
+                continue
+            try:
+                command = json.loads(data.decode("utf-8"))
+                result = execute_command(command)
+            except Exception as exc:
+                result = {"ok": False, "error": str(exc)}
+            connection.sendall(json.dumps(result).encode("utf-8"))
+            connection.close()
+        except Exception as exc:
+            print(f"[freecad-agent] listener error: {exc}")
+            break
+
+
+def start_server():
+    global _server_socket, _server_timer
+    if _server_socket is not None:
+        print(f"[freecad-agent] listening on {HOST}:{PORT}")
+        return
+
+    _server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    _server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    _server_socket.bind((HOST, PORT))
+    _server_socket.listen(8)
+    _server_socket.setblocking(False)
+
+    print(f"[freecad-agent] listening on {HOST}:{PORT}")
+    _server_timer = QtCore.QTimer()
+    _server_timer.timeout.connect(_poll_server)
+    _server_timer.start(100)
+
+
+def stop_server():
+    global _server_socket, _server_timer
+    if _server_timer is not None:
+        _server_timer.stop()
+        _server_timer.deleteLater()
+        _server_timer = None
+    if _server_socket is not None:
+        try:
+            _server_socket.close()
+        finally:
+            _server_socket = None
+    print("[freecad-agent] stopped")
