@@ -1,11 +1,14 @@
 import json
 import os
 import socket
+from dataclasses import replace
 
 import FreeCAD as App
 import FreeCADGui as Gui
 import Part
 from PySide import QtCore
+
+from agent.features import FlexureButton
 
 HOST = "127.0.0.1"
 PORT = 8765
@@ -46,8 +49,36 @@ def _inspect_geometry(command):
     }
 
 
+def _build_flexure_cut(button: FlexureButton, slot_z: float, slot_h: float):
+    """Build the exact rectangular imperfect-U cut from a reusable feature."""
+    ox, oy = button.origin
+    cut_depth = button.length - button.rear_bridge
+    if cut_depth <= 0:
+        raise RuntimeError("rear_bridge must be smaller than button length")
+
+    left_slot = Part.makeBox(
+        button.slot,
+        cut_depth,
+        slot_h,
+        App.Vector(ox - button.slot, oy, slot_z),
+    )
+    right_slot = Part.makeBox(
+        button.slot,
+        cut_depth,
+        slot_h,
+        App.Vector(ox + button.width, oy, slot_z),
+    )
+    rear_slot = Part.makeBox(
+        button.width + 2.0 * button.slot,
+        button.slot,
+        slot_h,
+        App.Vector(ox - button.slot, oy + button.length - button.slot, slot_z),
+    )
+    return left_slot.fuse(right_slot).fuse(rear_slot)
+
+
 def _create_snapfit_case(command):
-    """ESP32-C3 Super Mini snap-fit enclosure with centered narrow U-cut flexure buttons."""
+    """ESP32-C3 Super Mini snap-fit enclosure using reusable flexure semantics."""
     board_w = float(command.get("board_width", 18.0))
     board_l = float(command.get("board_length", 22.5))
     board_clear = float(command.get("board_clearance", 0.25))
@@ -62,15 +93,14 @@ def _create_snapfit_case(command):
     snap_y = float(command.get("snap_offset_y", 4.0))
 
     button_len = float(command.get("button_length", 7.0))
-    button_w = float(command.get("button_width", 3.2))
+    button_w = float(command.get("button_width", 2.0))
     button_slot_width = float(command.get("button_slot_width", command.get("button_cut_thickness", 0.5)))
-    button_front_offset = float(command.get("button_front_offset", 3.2))
     button_center_spacing = float(command.get("button_center_spacing", command.get("button_pair_center_to_center", 8.8)))
-    button_rear_bridge = float(command.get("button_rear_bridge", 2.0))
+    button_rear_bridge = float(command.get("button_rear_bridge", 1.0))
 
     actuator_w = float(command.get("actuator_width", command.get("actuator_pad_width", 2.0)))
     actuator_l = float(command.get("actuator_length", command.get("actuator_pad_length", 2.0)))
-    actuator_h = float(command.get("actuator_height", command.get("actuator_pad_thickness", 0.8)))
+    actuator_h = float(command.get("actuator_height", command.get("actuator_pad_thickness", 0.75)))
 
     usb_w = float(command.get("usb_opening_width", 10.0))
     usb_h = float(command.get("usb_opening_height", 4.0))
@@ -79,18 +109,27 @@ def _create_snapfit_case(command):
     antenna_w = float(command.get("antenna_keepout_width", 12.0))
     output = os.path.abspath(command.get("output_path", "/home/hikmah/projectx/freecad-agent/cad/output/esp32-c3-super-mini-snapfit-v4.FCStd"))
 
+    if button_slot_width != 0.5:
+        raise RuntimeError("Snapfit FlexureButton requires a fixed 0.5 mm slot")
+    if button_w != 2.0:
+        raise RuntimeError("Snapfit FlexureButton requires a fixed 2.0 mm button width")
+    if button_rear_bridge != 1.0:
+        raise RuntimeError("Snapfit FlexureButton requires a fixed 1.0 mm rear bridge")
+    if actuator_w != 2.0 or actuator_l != 2.0:
+        raise RuntimeError("Snapfit actuator pad must be exactly 2.0 x 2.0 mm")
+    if actuator_h != 0.75:
+        raise RuntimeError("Snapfit actuator pad height must be exactly 0.75 mm")
+
     values = [board_w, board_l, board_clear, wall, bottom, body_h, cover_t, cover_wall, cover_clear,
               snap_r, snap_z, snap_y, button_len, button_w, button_slot_width,
-              button_front_offset, button_center_spacing, button_rear_bridge,
-              actuator_w, actuator_l, actuator_h, usb_w, usb_h, antenna_l, antenna_w]
+              button_center_spacing, button_rear_bridge, actuator_w, actuator_l, actuator_h,
+              usb_w, usb_h, antenna_l, antenna_w]
     if min(values) <= 0:
         raise RuntimeError("All snap-fit dimensions must be positive")
     if usb_w >= board_w + 2 * board_clear:
         raise RuntimeError("USB opening is too wide")
     if body_h <= bottom + 2.0:
         raise RuntimeError("body_height is too small for component clearance")
-    if button_slot_width > 1.0:
-        raise RuntimeError("button_slot_width must be <= 1.0 mm")
 
     inner_w = board_w + 2 * board_clear
     inner_l = board_l + 2 * board_clear
@@ -172,38 +211,43 @@ def _create_snapfit_case(command):
 
     center_xs = (center_x - button_center_spacing / 2.0,
                  center_x + button_center_spacing / 2.0)
-    button_front_y = outer_l - wall - board_clear - button_front_offset
-    button_rear_y = button_front_y - button_len
+    button_front_y = outer_l - wall - board_clear - 3.2
+    slot_z = body_h - 0.1
+    slot_h = cover_t + 0.25
 
-    for name, cx in (("BootButton", center_xs[0]), ("ResetButton", center_xs[1])):
-        left_x = cx - button_w / 2.0 - button_slot_width
-        right_x = cx + button_w / 2.0
-        slot_z = body_h - 0.1
-        slot_h = cover_t + 0.25
-        left_slot = Part.makeBox(button_slot_width, button_len - button_rear_bridge,
-                                 slot_h, App.Vector(left_x, button_rear_y, slot_z))
-        right_slot = Part.makeBox(button_slot_width, button_len - button_rear_bridge,
-                                  slot_h, App.Vector(right_x, button_rear_y, slot_z))
-        rear_slot = Part.makeBox(button_w + 2 * button_slot_width, button_slot_width,
-                                 slot_h, App.Vector(left_x, button_front_y - button_rear_bridge, slot_z))
-        cover_shape = cover_shape.cut(left_slot).cut(right_slot).cut(rear_slot).removeSplitter()
+    left_button = FlexureButton(
+        origin=(center_xs[0] - button_w / 2.0, button_front_y - button_len),
+        width=button_w,
+        length=button_len,
+        slot=button_slot_width,
+        rear_bridge=button_rear_bridge,
+        pad_size=(actuator_w, actuator_l),
+        pad_height=actuator_h,
+    )
+    right_button = left_button.mirrored(center_x)
 
-        # Actuator pad is centered across the U opening and attached at the inner/base end.
-        pad_x = cx - actuator_w / 2.0
-        pad_y = button_front_y - actuator_l
-        pad = Part.makeBox(actuator_w, actuator_l, actuator_h,
-                           App.Vector(pad_x, pad_y, body_h - actuator_h + 0.05))
+    for name, button in (("BootButton", left_button), ("ResetButton", right_button)):
+        u_cut = _build_flexure_cut(button, slot_z, slot_h)
+        cover_shape = cover_shape.cut(u_cut).removeSplitter()
+
+        pad_x, pad_y = button.pad_origin
+        pad = Part.makeBox(
+            actuator_w,
+            actuator_l,
+            actuator_h,
+            App.Vector(pad_x, pad_y, body_h - actuator_h + 0.05),
+        )
         cover_shape = cover_shape.fuse(pad).removeSplitter()
 
     cover = doc.addObject("Part::Feature", "TopCover")
     cover.Label = "ESP32-C3 top cover - centered narrow U-cut flexures"
     cover.Shape = cover_shape
     cover.addProperty("App::PropertyString", "ButtonDesign", "Design")
-    cover.ButtonDesign = "Two centered rectangular imperfect-U flexures; cut-line width 0.5 mm; top/front bridge remains integral with lid."
+    cover.ButtonDesign = "Reusable FlexureButton; rectangular imperfect-U; 0.5 mm cut; 1.0 mm rear bridge; local pad origin."
     cover.addProperty("App::PropertyString", "ButtonPlacement", "Design")
     cover.ButtonPlacement = "Symmetric about enclosure centerline and USB-C center; behind USB-C; aligned to BOOT/RESET."
     cover.addProperty("App::PropertyString", "ActuatorDesign", "Design")
-    cover.ActuatorDesign = "2.0 x 2.0 mm pad centered at inner/base end of each U; not under outer bridge."
+    cover.ActuatorDesign = "2.0 x 2.0 x 0.75 mm pad generated from FlexureButton.pad_origin at inner/base of U."
     cover.addProperty("App::PropertyString", "SnapDesign", "Design")
     cover.SnapDesign = "Four round snap bosses with matching spherical pockets."
 
@@ -258,26 +302,3 @@ def _poll_server():
     if _server_socket is None: return
     while True:
         try: connection, _ = _server_socket.accept()
-        except BlockingIOError: return
-        connection.settimeout(10)
-        try:
-            data = connection.recv(65536)
-            if not data: continue
-            result = execute_command(json.loads(data.decode("utf-8")))
-            connection.sendall(json.dumps(result).encode("utf-8"))
-        except Exception as exc:
-            connection.sendall(json.dumps({"ok": False, "error": str(exc)}).encode("utf-8"))
-        finally: connection.close()
-
-
-def start_listener():
-    global _server_socket, _server_timer
-    if _server_socket is not None: return
-    _server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    _server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    _server_socket.bind((HOST, PORT)); _server_socket.listen(8); _server_socket.setblocking(False)
-    _server_timer = QtCore.QTimer(); _server_timer.timeout.connect(_poll_server); _server_timer.start(100)
-    print(f"[freecad-agent] listener ready on {HOST}:{PORT}")
-
-
-start_listener()
