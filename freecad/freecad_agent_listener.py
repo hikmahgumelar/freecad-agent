@@ -316,6 +316,207 @@ def _create_snapfit_case(command):
     }
 
 
+def _rounded_box(length, width, height, radius, origin):
+    """Return a solid box with vertical edges filleted to ``radius``.
+
+    ``origin`` is the lower corner (x, y, z). Falls back to a plain box if the
+    fillet fails or the radius is non-positive.
+    """
+    ox, oy, oz = origin
+    box = Part.makeBox(length, width, height, App.Vector(ox, oy, oz))
+    if radius and radius > 0:
+        try:
+            vertical = [e for e in box.Edges
+                        if abs(e.Vertexes[0].Point.z - e.Vertexes[1].Point.z) > 1e-6]
+            box = box.makeFillet(radius, vertical)
+        except Exception as exc:
+            print(f"[freecad-agent] corner fillet skipped: {exc}")
+    return box
+
+
+def _keyhole_flexure_cut(head_cx, head_cy, z0, cut_h, radius, slot, tail_len):
+    """Build a 'keyhole' flexure cut: a round head at the left plus two parallel
+    straight cut-lines running to the right (tail), leaving a tongue whose hinge
+    is at the far (right) end. Matches referensi3.
+
+    * ``(head_cx, head_cy)`` is the center of the round actuator head.
+    * The tongue extends in +x; the two side cuts are at +/- radius from head_cy.
+    * ``slot`` is the cut-line thickness (kept at 0.5 mm).
+    """
+    head = Part.makeCylinder(radius + slot, cut_h, App.Vector(head_cx, head_cy, z0))
+    head_inner = Part.makeCylinder(radius, cut_h, App.Vector(head_cx, head_cy, z0))
+    ring = head.cut(head_inner)  # annular cut around the actuator head
+
+    # two parallel side cuts forming the tongue sides
+    top_cut = Part.makeBox(
+        tail_len, slot, cut_h,
+        App.Vector(head_cx, head_cy + radius, z0),
+    )
+    bot_cut = Part.makeBox(
+        tail_len, slot, cut_h,
+        App.Vector(head_cx, head_cy - radius - slot, z0),
+    )
+    return ring.fuse(top_cut).fuse(bot_cut)
+
+
+def _create_snapfit_case_v2(command):
+    """Elongated ESP32-C3 snap-fit case with keyhole flexure buttons.
+
+    Matches the physical reference: rounded rectangular case, USB-C on the
+    short side, and two parallel keyhole flexures on the cover (round actuator
+    head + two parallel cut-lines forming a pressable tongue).
+    """
+    board_w = float(command.get("board_width", 18.0))
+    board_l = float(command.get("board_length", 22.5))
+    board_clear = float(command.get("board_clearance", 0.25))
+    wall = float(command.get("wall", 1.2))
+    bottom = float(command.get("bottom_thickness", 1.2))
+    body_h = float(command.get("body_height", 5.2))
+    cover_t = float(command.get("cover_thickness", 1.2))
+    cover_wall = float(command.get("cover_wall", 1.2))
+    cover_clear = float(command.get("cover_clearance", 0.2))
+    cover_lip = float(command.get("cover_lip", 0.8))
+    corner_r = float(command.get("corner_radius", 2.5))
+
+    snap_r = float(command.get("snap_radius", 1.0))
+    snap_z = float(command.get("snap_z", 2.8))
+    snap_y = float(command.get("snap_offset_y", 4.0))
+
+    # keyhole flexure params
+    btn_head_r = float(command.get("button_head_radius", 1.75))
+    btn_tail_len = float(command.get("button_tail_length", 9.0))
+    btn_slot = float(command.get("button_cut_thickness", 0.5))
+    btn_spacing = float(command.get("button_row_spacing", 5.5))
+    btn_head_from_left = float(command.get("button_head_from_left", 8.0))
+    actuator_h = float(command.get("actuator_pad_thickness", 0.75))
+
+    usb_w = float(command.get("usb_opening_width", 10.0))
+    usb_h = float(command.get("usb_opening_height", 4.0))
+    usb_bottom = float(command.get("usb_opening_bottom", 1.0))
+    antenna_l = float(command.get("antenna_keepout_length", 5.0))
+    antenna_w = float(command.get("antenna_keepout_width", 12.0))
+    output = os.path.abspath(command.get(
+        "output_path", "cad/output/esp32-c3-super-mini-snapfit-v6.FCStd"))
+
+    if btn_slot != 0.5:
+        raise RuntimeError("keyhole flexure requires a fixed 0.5 mm cut width")
+    if cover_lip < 0 or cover_lip >= body_h:
+        raise RuntimeError("cover_lip must be >= 0 and smaller than body_height")
+
+    inner_w = board_w + 2 * board_clear
+    inner_l = board_l + 2 * board_clear
+    outer_w = inner_w + 2 * wall
+    outer_l = inner_l + 2 * wall
+    center_x = outer_w / 2.0
+
+    doc = App.newDocument(command.get("document", "ESP32C3SnapFitCaseKeyhole"))
+
+    # --- body: rounded shell, open top ---
+    tray = _rounded_box(outer_w, outer_l, body_h, corner_r, (0, 0, 0)).cut(
+        _rounded_box(inner_w, inner_l, body_h - bottom,
+                     max(corner_r - wall, 0.0), (wall, wall, bottom))
+    )
+    # USB-C on the short (front) side, centered on width
+    usb_x = center_x - usb_w / 2.0
+    tray = tray.cut(
+        Part.makeBox(usb_w, wall + 0.8, usb_h,
+                     App.Vector(usb_x, outer_l - wall - 0.4, usb_bottom))
+    )
+    # antenna relief on the opposite short side
+    ak_x = center_x - antenna_w / 2.0
+    tray = tray.cut(
+        Part.makeBox(antenna_w, antenna_l + 0.2, min(1.5, body_h - bottom),
+                     App.Vector(ak_x, wall - 0.2, body_h - 1.5))
+    )
+
+    body = doc.addObject("Part::Feature", "BottomCase")
+    body.Label = "ESP32-C3 bottom case (keyhole v2)"
+    body.Shape = tray
+
+    # snap bosses
+    snap_centers = (snap_y, outer_l - snap_y)
+    for side, x in (("Left", 0.0), ("Right", outer_w)):
+        for idx, sy in enumerate(snap_centers, 1):
+            cx = x + snap_r * 0.55 if side == "Left" else x - snap_r * 0.55
+            sphere = Part.makeSphere(snap_r, App.Vector(cx, sy, snap_z))
+            clip_x = -0.1 if side == "Left" else outer_w - snap_r - 0.1
+            clip = Part.makeBox(snap_r + 0.2, 2 * snap_r + 0.4, 2 * snap_r + 0.4,
+                                App.Vector(clip_x, sy - snap_r - 0.2, snap_z - snap_r - 0.2))
+            boss = sphere.common(clip)
+            body.Shape = body.Shape.fuse(boss).removeSplitter()
+            o = doc.addObject("Part::Feature", f"SnapBoss{side}{idx}")
+            o.Label = f"Round snap boss {side} {idx}"
+            o.Shape = boss
+
+    # --- cover: rounded lid with skirt derived from body_h ---
+    skirt_h = body_h - cover_lip
+    if skirt_h <= snap_z:
+        raise RuntimeError("cover skirt too short to capture snaps")
+    cover_outer_w = outer_w + 2 * (cover_wall + cover_clear)
+    cover_outer_l = outer_l + 2 * (cover_wall + cover_clear)
+    cox = -(cover_wall + cover_clear)
+    coy = -(cover_wall + cover_clear)
+    co = _rounded_box(cover_outer_w, cover_outer_l, cover_t + skirt_h,
+                      corner_r + cover_wall + cover_clear,
+                      (cox, coy, body_h - skirt_h))
+    ci = _rounded_box(outer_w + 2 * cover_clear, outer_l + 2 * cover_clear,
+                      skirt_h + 0.2, corner_r + cover_clear,
+                      (-cover_clear, -cover_clear, body_h - skirt_h - 0.1))
+    cover_shape = co.cut(ci)
+
+    # snap pockets
+    for side in ("Left", "Right"):
+        cx = -cover_clear if side == "Left" else outer_w + cover_clear
+        for sy in snap_centers:
+            cover_shape = cover_shape.cut(
+                Part.makeSphere(snap_r + 0.15, App.Vector(cx, sy, snap_z)))
+
+    # --- keyhole flexures: two parallel rows, left-aligned ---
+    z0 = body_h - 0.1
+    cut_h = cover_t + 0.3
+    # rows are stacked across the width, centered on the case width
+    row_ys = (center_x - btn_spacing / 2.0, center_x + btn_spacing / 2.0)
+    head_x = btn_head_from_left  # measured from the left short side (x)
+    for name, hy in (("BootFlexure", row_ys[0]), ("ResetFlexure", row_ys[1])):
+        cut = _keyhole_flexure_cut(head_x, hy, z0, cut_h, btn_head_r, btn_slot, btn_tail_len)
+        cover_shape = cover_shape.cut(cut).removeSplitter()
+        # actuator bump under the round head
+        bump = Part.makeCylinder(btn_head_r, actuator_h,
+                                 App.Vector(head_x, hy, body_h - actuator_h + 0.05))
+        cover_shape = cover_shape.fuse(bump).removeSplitter()
+
+    cover = doc.addObject("Part::Feature", "TopCover")
+    cover.Label = "ESP32-C3 top cover (keyhole flexures v2)"
+    cover.Shape = cover_shape.removeSplitter()
+
+    doc.recompute()
+    _fit_view(doc)
+    os.makedirs(os.path.dirname(output), exist_ok=True)
+    doc.saveAs(output)
+
+    return {
+        "ok": True,
+        "action": "create_snapfit_case_v2",
+        "document": doc.Name,
+        "output_path": output,
+        "parts": ["BottomCase", "TopCover"],
+        "case": {"outer_width": outer_w, "outer_length": outer_l,
+                 "body_height": body_h, "cover_thickness": cover_t,
+                 "corner_radius": corner_r},
+        "features": {
+            "round_snap_count": 4,
+            "button_count": 2,
+            "button_style": "keyhole_flexure",
+            "button_head_radius": btn_head_r,
+            "button_tail_length": btn_tail_len,
+            "button_row_spacing": btn_spacing,
+            "button_cut_width": btn_slot,
+            "usb_c_opening": {"width": usb_w, "height": usb_h},
+            "antenna_keepout": {"length": antenna_l, "width": antenna_w},
+        },
+    }
+
+
 def execute_command(command):
     action = command.get("action")
     if action == "ping":
@@ -344,6 +545,8 @@ def execute_command(command):
         return _inspect_geometry(command)
     if action == "create_snapfit_case":
         return _create_snapfit_case(command)
+    if action == "create_snapfit_case_v2":
+        return _create_snapfit_case_v2(command)
     return {"ok": False, "error": f"Unsupported action: {action}"}
 
 
