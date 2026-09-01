@@ -537,6 +537,32 @@ def execute_command(command):
     action = command.get("action")
     if action == "ping":
         return {"ok": True, "message": "FreeCAD agent is alive"}
+    if action == "version":
+        return {"ok": True, "action": "version",
+                "actions": ["ping", "version", "reload", "create_sphere",
+                            "open_model", "inspect_model", "inspect_geometry",
+                            "create_snapfit_case", "create_snapfit_case_v2"]}
+    if action == "reload":
+        # Refresh this module's code in place from the latest source on disk,
+        # keeping the live socket/timer bound. The running QTimer still calls
+        # _poll_server -> execute_command from this same module namespace, so
+        # updating globals() swaps in the new code without a FreeCAD restart.
+        path = command.get("path", os.path.abspath(__file__))
+        try:
+            with open(path, "r", encoding="utf-8") as fh:
+                source = fh.read()
+            new_globals = {}
+            exec(compile(source, path, "exec"), new_globals)
+            preserve = {"_server_socket", "_server_timer"}
+            g = globals()
+            for k, v in new_globals.items():
+                if k in preserve or k.startswith("__"):
+                    continue
+                g[k] = v
+        except Exception as exc:
+            return {"ok": False, "error": f"reload failed: {exc}"}
+        return {"ok": True, "action": "reload", "path": path,
+                "has_v2": "_create_snapfit_case_v2" in globals()}
     if action == "create_sphere":
         doc = App.ActiveDocument or App.newDocument("AgentTest")
         sphere = doc.addObject("Part::Sphere", "AgentSphere")
@@ -589,15 +615,43 @@ def _poll_server():
             break
 
 
-def start_server():
+def start_server(force=True):
+    """Start (or restart) the TCP listener.
+
+    Reload-safe: by default it tears down any existing socket/timer first so
+    that re-importing a fresh copy of this module always takes over the port
+    with the newest code, instead of leaving a stale listener bound.
+    """
     global _server_socket, _server_timer
     if _server_socket is not None:
-        print(f"[freecad-agent] listening on {HOST}:{PORT}")
-        return
+        if not force:
+            print(f"[freecad-agent] already listening on {HOST}:{PORT}")
+            return
+        # tear down the previous listener before rebinding
+        try:
+            stop_server()
+        except Exception as exc:
+            print(f"[freecad-agent] stop before restart failed: {exc}")
 
-    _server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    _server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    _server_socket.bind((HOST, PORT))
+    last_exc = None
+    for _ in range(20):
+        try:
+            _server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            _server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            _server_socket.bind((HOST, PORT))
+            break
+        except OSError as exc:
+            last_exc = exc
+            try:
+                _server_socket.close()
+            except Exception:
+                pass
+            _server_socket = None
+            import time as _t
+            _t.sleep(0.1)
+    if _server_socket is None:
+        raise RuntimeError(f"could not bind {HOST}:{PORT}: {last_exc}")
+
     _server_socket.listen(8)
     _server_socket.setblocking(False)
 
