@@ -24,7 +24,7 @@
     "cover_lip": 0.8,
     "cover_thickness": 1.2,
     "cover_wall": 1.2,
-    "output_path": "cad/output/esp32-c3-super-mini-snapfit-v6.FCStd",
+    "output_path": "/Users/gugum/projectx/freecad-agent/cad/output/esp32-c3-super-mini-snapfit-v6.FCStd",
     "snap_offset_y": 4.0,
     "snap_radius": 1.0,
     "snap_z": 2.8,
@@ -33,10 +33,24 @@
     "usb_opening_width": 10.0,
     "wall": 1.2
   },
-  "result": null,
+  "result": {
+    "ok": true,
+    "action": "create_snapfit_case_v2",
+    "document": "ESP32C3SnapFitCaseKeyhole",
+    "output_path": "/Users/gugum/projectx/freecad-agent/cad/output/esp32-c3-super-mini-snapfit-v6.FCStd",
+    "parts": [
+      "BottomCase",
+      "TopCover"
+    ],
+    "features": {
+      "button_style": "keyhole_flexure",
+      "button_count": 2,
+      "round_snap_count": 4
+    }
+  },
   "revision": 1,
   "revision_note": "Keyhole-flexure snap-fit case matching referensi3.png. Two parallel keyhole flexures on the cover: a round actuator head (\u00d83.5 mm) at the left plus two parallel 0.5 mm cut-lines forming a pressable tongue whose hinge is at the far end. Rounded case corners (r=2.5), USB-C centered on the short side, 4-point snap-fit, cover skirt derived from body_height with a 0.8 mm lip. New output file (v6) so prior builds are preserved. After completion, open the .FCStd and compare the button layout against referensi3.",
   "started_at": "2026-09-01T08:27:50.819546+00:00",
-  "status": "failed",
+  "status": "completed",
   "updated_at": "2026-09-01T08:27:52.309088+00:00"
 }
