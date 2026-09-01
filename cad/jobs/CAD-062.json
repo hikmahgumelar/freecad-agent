@@ -1,5 +1,6 @@
 {
   "action": "create_snapfit_case",
+  "completed_at": null,
   "created_by": "Kiro",
   "error": null,
   "id": "CAD-062",
@@ -45,5 +46,7 @@
   "result": null,
   "revision": 1,
   "revision_note": "Fresh visual-review build of the CAD-059 golden reference with the corrected geometry (spacing 8.8 mm, cover_lip 0.8 mm). Output goes to a new file (v5) so the prior v4 is preserved. Expected in FreeCAD: cover fully seats over the body (lip 0.8 mm), USB-C symmetric left/right, two actuator pads inside the case behind USB (BOOT/RESET at x=6.05/14.85), 4 round snaps. Open the .FCStd and confirm visually.",
-  "status": "pending"
+  "started_at": "2026-09-01T08:13:56.491926+00:00",
+  "status": "running",
+  "updated_at": "2026-09-01T08:13:56.491982+00:00"
 }
