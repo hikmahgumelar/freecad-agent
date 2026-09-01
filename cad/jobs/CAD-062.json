@@ -1,6 +1,6 @@
 {
   "action": "create_snapfit_case",
-  "completed_at": null,
+  "completed_at": "2026-09-01T08:13:58.723084+00:00",
   "created_by": "Kiro",
   "error": null,
   "id": "CAD-062",
@@ -43,10 +43,48 @@
     "usb_opening_width": 10.0,
     "wall": 1.2
   },
-  "result": null,
+  "result": {
+    "action": "create_snapfit_case",
+    "board": {
+      "clearance": 0.25,
+      "length": 22.5,
+      "width": 18.0
+    },
+    "case": {
+      "body_height": 5.2,
+      "cover_thickness": 1.2,
+      "outer_length": 25.4,
+      "outer_width": 20.9
+    },
+    "document": "ESP32C3SnapFitCaseV5",
+    "features": {
+      "antenna_keepout": {
+        "length": 5.0,
+        "width": 12.0
+      },
+      "button_center_spacing": 8.8,
+      "button_count": 2,
+      "button_cut_width": 0.5,
+      "button_floating": false,
+      "button_orientation": "front_to_back",
+      "button_placement": "behind_usb_c",
+      "button_style": "rectangular_imperfect_u_flexure",
+      "round_snap_count": 4,
+      "usb_c_opening": {
+        "height": 4.0,
+        "width": 10.0
+      }
+    },
+    "ok": true,
+    "output_path": "/Users/gugum/projectx/freecad-agent/cad/output/esp32-c3-super-mini-snapfit-v5.FCStd",
+    "parts": [
+      "BottomCase",
+      "TopCover"
+    ]
+  },
   "revision": 1,
   "revision_note": "Fresh visual-review build of the CAD-059 golden reference with the corrected geometry (spacing 8.8 mm, cover_lip 0.8 mm). Output goes to a new file (v5) so the prior v4 is preserved. Expected in FreeCAD: cover fully seats over the body (lip 0.8 mm), USB-C symmetric left/right, two actuator pads inside the case behind USB (BOOT/RESET at x=6.05/14.85), 4 round snaps. Open the .FCStd and confirm visually.",
   "started_at": "2026-09-01T08:13:56.491926+00:00",
-  "status": "running",
-  "updated_at": "2026-09-01T08:13:56.491982+00:00"
+  "status": "completed",
+  "updated_at": "2026-09-01T08:13:58.723121+00:00"
 }
