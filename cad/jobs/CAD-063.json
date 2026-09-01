@@ -1,8 +1,8 @@
 {
   "action": "create_snapfit_case_v2",
-  "completed_at": null,
+  "completed_at": "2026-09-01T08:27:52.309045+00:00",
   "created_by": "Kiro",
-  "error": null,
+  "error": "Unsupported action: create_snapfit_case_v2",
   "id": "CAD-063",
   "job_id": "CAD-063",
   "parameters": {
@@ -37,6 +37,6 @@
   "revision": 1,
   "revision_note": "Keyhole-flexure snap-fit case matching referensi3.png. Two parallel keyhole flexures on the cover: a round actuator head (\u00d83.5 mm) at the left plus two parallel 0.5 mm cut-lines forming a pressable tongue whose hinge is at the far end. Rounded case corners (r=2.5), USB-C centered on the short side, 4-point snap-fit, cover skirt derived from body_height with a 0.8 mm lip. New output file (v6) so prior builds are preserved. After completion, open the .FCStd and compare the button layout against referensi3.",
   "started_at": "2026-09-01T08:27:50.819546+00:00",
-  "status": "running",
-  "updated_at": "2026-09-01T08:27:50.819632+00:00"
+  "status": "failed",
+  "updated_at": "2026-09-01T08:27:52.309088+00:00"
 }
