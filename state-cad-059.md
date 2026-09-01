@@ -146,3 +146,28 @@ CAD-059 is complete only if all conditions below are true:
 **Next checkpoint:** Run **V-01** (CAD-061 validation) against a live FreeCAD
 listener, then inspect the resulting `.FCStd` and record PASS/FAIL with evidence.
 
+## V-01 live-run log (2026-09-01)
+
+* `9bae770` pushed to `origin/master` (state sync + CAD-061 queued).
+  `.gitignore` is `*` (repo lives inside a venv), so tracked files must be
+  added with `git add -f`. Only `state-cad-059.md` and `cad/jobs/CAD-061.json`
+  were staged — no venv/log/token.
+* Supervisor watchdog is expected to `git fetch` → `pull --ff-only` → `execv()`
+  restart within `GIT_SYNC_INTERVAL` (30s) and then pick up **CAD-061**.
+* **Blocker:** FreeCAD process is running (PID observed) but the listener is
+  **not bound on `127.0.0.1:8765`** (`lsof`/`netstat` show no listener; external
+  `ping` → `[Errno 61] Connection refused`). `start_server()` did not actually
+  bind. Most likely cause: `from agent.features import FlexureButton` fails in
+  the FreeCAD interpreter (`No module named 'agent'`) because the repo root is
+  not on `sys.path`.
+* **Fix to apply in FreeCAD Python console before starting the listener:**
+  ```python
+  import sys
+  sys.path.insert(0, "/Users/gugum/projectx/freecad-agent")
+  ```
+  then re-run the listener bootstrap and confirm `listening on 127.0.0.1:8765`.
+* Until the listener is bound, CAD-061 will fail the same way CAD-060 did
+  (`Connection refused`), which is an environment failure, **not** a geometry
+  result. Do not record V-01 PASS until a real `.FCStd` is generated and
+  inspected.
+

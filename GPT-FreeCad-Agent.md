@@ -574,7 +574,65 @@ The objective is to demonstrate:
 
 ---
 
-## 13. Current Session Checkpoint — 2026-08-20
+## 13. Current Session Checkpoint — 2026-09-01
+
+This is the newest handoff checkpoint. **Read this before the older 2026-08-20
+checkpoint below.** The active work is now **CAD-059 Golden Reference Snap-In**
+(ESP32-C3 Super Mini), not the Medicine Box.
+
+### CAD-059 status
+
+Snap/button/cover tasks are **code-complete and locked** in
+`freecad/freecad_agent_listener.py` (committed to `master`: `808a1ab`,
+`71de339`) via the reusable `agent/features/flexure_button.py` module:
+
+* S-02 U-cut = **0.50 mm** — listener guards `button_slot_width != 0.5`.
+* S-03 rear bridge = **1.00 mm** — listener guards `button_rear_bridge != 1.0`.
+* S-04 actuator pad at **inner base of U** via `FlexureButton.pad_origin`;
+  size locked `2.0 x 2.0 x 0.75`.
+* S-05 island preserved **2 x 7 mm**, no capsule / no raised head.
+* B-01 USB-C centered: `center_x = outer_w / 2.0`; BOOT/RESET mirrored about
+  the same center via `FlexureButton.mirrored(center_x)`.
+* C-01 cover overlaps body with `skirt_h`, preserving `cover_clear = 0.20 mm`.
+
+Pure-logic tests on `flexure_button.py` pass (slot/bridge/island values, pad
+centering at base of U, symmetric mirroring, invalid-input guards). Real
+`.FCStd` geometry is **not yet verified** — that is V-01.
+
+The full task/geometry contract lives in `state-cad-059.md`. Read it before
+touching CAD-059 geometry.
+
+### Only V-01 remains
+
+Run validation job **CAD-061** (`cad/jobs/CAD-061.json`, status `pending`,
+`create_snapfit_case`) against a live FreeCAD listener, then inspect the real
+`.FCStd` (recompute pass, 2 parts BottomCase+TopCover, U-cut 0.5, pad at base,
+USB centered, BOOT/RESET symmetric, cover seated) and record PASS/FAIL.
+
+### Live blocker: listener not bound
+
+`.gitignore` in this checkout is `*` (repo sits inside a venv), so tracked
+files must be committed with `git add -f`. Push to `master` triggers the
+Supervisor watchdog to `pull --ff-only` + `execv()` restart and then pick up
+pending jobs — this is the normal delivery path for CAD-059 work.
+
+FreeCAD may be running while the listener is still **not** bound on
+`127.0.0.1:8765`. This is usually `from agent.features import FlexureButton`
+failing in the FreeCAD interpreter (`No module named 'agent'`). Before starting
+the listener, run in the FreeCAD Python console:
+
+```python
+import sys
+sys.path.insert(0, "/Users/gugum/projectx/freecad-agent")
+```
+
+then bootstrap the listener and confirm `listening on 127.0.0.1:8765`. A
+`Connection refused` job result is an environment failure, not a geometry
+failure — never record V-01 PASS from it.
+
+---
+
+## 13-legacy. Session Checkpoint — 2026-08-20
 
 This section is the primary handoff checkpoint for the next ChatGPT session. **Read this section before continuing any CAD work.**
 
