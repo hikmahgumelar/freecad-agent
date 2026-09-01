@@ -249,3 +249,58 @@ two actuator pads that are attached but not fully fused into a single solid.
 Geometry/position is correct; for cleaner printability the pad fuse could be
 tightened later. Does not affect the V-01 PASS.
 
+## Design pivot — keyhole flexure (v2), 2026-09-01
+
+After V-01 the physical/reference images (`kesalahan/referensi1..3.png`) showed
+the intended button style is **not** the short U-cut + square pad of
+`create_snapfit_case`. The correct style is a **keyhole flexure**: a round
+actuator head plus two parallel straight cut-lines forming a pressable tongue,
+two of them side by side, on a rounded-corner case with USB-C on the short side.
+
+### New builder: `create_snapfit_case_v2`
+
+Added to `freecad/freecad_agent_listener.py` (the original
+`create_snapfit_case` is left untouched):
+
+* `_rounded_box(...)` — box with filleted vertical edges (rounded corners).
+* `_keyhole_flexure_cut(...)` — round head ring + two parallel side cuts (0.5 mm)
+  running along +y, tongue hinge at the far end.
+* `_create_snapfit_case_v2(...)` — rounded body + cover, USB-C on the short side,
+  4-point snap-fit, cover skirt from `body_h - cover_lip`, two keyhole flexures.
+
+### Iteration log
+
+* **CAD-063** (`create_snapfit_case_v2`, output v6) built successfully; keyhole
+  shape + rounded corners confirmed via live inspect.
+* User feedback vs `salah6.png` / `referensi3.png`: (1) cover was missing the
+  USB-C hole; (2) keyhole orientation/position was wrong (heads stacked the
+  wrong way, tongues not behind USB).
+* **Fixes applied** (committed `3534d17`): cover now cuts a centered USB-C
+  opening on the same short side as the body; keyhole heads placed just behind
+  the USB-C wall with tongues running toward the interior, two heads aligned
+  across x and symmetric about the case center.
+
+### Listener reload mechanism (committed `3e55620`)
+
+The FreeCAD listener does not auto-reload on `git pull`; a manual console reload
+failed because `start_server()` early-returned while the old socket was still
+bound. Fixed:
+
+* `start_server(force=True)` now tears down the old socket/timer before
+  rebinding (retries the bind briefly), so reloads always take over the port.
+* New TCP actions: `reload` (refresh module code in place from disk — no FreeCAD
+  restart needed) and `version` (list supported actions).
+
+### Current blocker / next step
+
+All code is pushed to `master` (HEAD `3e55620`; local == remote, tree clean).
+The **running FreeCAD listener is still the old code** (`version` →
+`Unsupported action`), so the keyhole fixes are not active yet. Activation needs
+**one** FreeCAD restart (close + open) to load the new listener; after that,
+future updates can use `{"action":"reload"}` over TCP without restarting.
+
+After restart: probe `version` → build `create_snapfit_case_v2` → inspect and
+compare to `referensi3.png` (cover USB-C hole present, keyhole heads behind USB,
+tongues toward interior, two buttons parallel). Proportions (case still ~20.9 x
+25.4, nearly square vs the more elongated reference) are a **known open item**
+to tune only after the button style is confirmed correct.
