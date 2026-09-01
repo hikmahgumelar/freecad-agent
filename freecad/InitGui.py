@@ -11,14 +11,23 @@ import sys
 
 import FreeCAD as App
 
-module_dir = os.path.join(App.getUserAppDataDir(), "Mod", "freecad-agent")
+module_dir = os.path.realpath(
+    os.path.join(App.getUserAppDataDir(), "Mod", "freecad-agent")
+)
 
 if not os.path.isdir(module_dir):
     for path in sys.path:
-        candidate = os.path.join(path, "freecad-agent")
+        candidate = os.path.realpath(os.path.join(path, "freecad-agent"))
         if os.path.isdir(candidate):
             module_dir = candidate
             break
+
+# The startup directory points at the repository's ``freecad`` directory.
+# Add the repository root so the listener can import reusable agent modules
+# such as ``agent.features.FlexureButton``.
+repo_root = os.path.dirname(module_dir)
+if repo_root not in sys.path:
+    sys.path.insert(0, repo_root)
 
 listener_path = os.path.join(module_dir, "freecad_agent_listener_large.py")
 
