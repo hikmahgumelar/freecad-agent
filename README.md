@@ -14,7 +14,7 @@ You describe what you want to build. An AI agent turns the intent into a structu
 
 This example shows a FreeCAD Agent enclosure prepared as separate printable parts in a slicer, with the body and cover laid out on the print bed.
 
-<img width="986" height="583" alt="FreeCAD Agent enclosure ready to print in slicer" src="https://github.com/user-attachments/assets/082a7bed-e96e-4e95-ab34-c35795a6c48d.jpg" />
+<img width="986" height="583" alt="FreeCAD Agent enclosure ready to print in slicer" src="docs/images/ready-to-print-slicer.png" />
 
 > This is a verified print-preparation example. The **CAD-059 Snap-In enclosure is intentionally not presented here as ready-to-print yet** while its remaining geometry validation is still in progress.
 
