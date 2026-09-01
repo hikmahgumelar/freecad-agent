@@ -600,10 +600,10 @@ def execute_command(command):
                             "render_view",
                             "create_snapfit_case", "create_snapfit_case_v2"]}
     if action == "reload":
-        # Refresh this module's code in place from the latest source on disk,
-        # keeping the live socket/timer bound. The running QTimer still calls
-        # _poll_server -> execute_command from this same module namespace, so
-        # updating globals() swaps in the new code without a FreeCAD restart.
+        # In-place code refresh. The running QTimer holds a reference to the OLD
+        # _poll_server object, so after exec we must reconnect it to the new one,
+        # otherwise the timer keeps running stale code. We then self-verify by
+        # checking a sentinel and report honestly if the swap did not take.
         path = command.get("path")
         if not path:
             path = globals().get("__file__")
@@ -617,15 +617,25 @@ def execute_command(command):
             g = globals()
             saved_sock = g.get("_server_socket")
             saved_timer = g.get("_server_timer")
-            # Execute the fresh source directly in this module's own namespace so
-            # every redefined function (including execute_command's routing) is
-            # the one the running QTimer will call. Preserve the live socket/timer.
             g["__file__"] = path
             exec(compile(source, path, "exec"), g)
             g["_server_socket"] = saved_sock
             g["_server_timer"] = saved_timer
+            # reconnect the live timer to the freshly-defined poller
+            if saved_timer is not None:
+                try:
+                    saved_timer.timeout.disconnect()
+                except Exception:
+                    pass
+                saved_timer.timeout.connect(g["_poll_server"])
+            swapped = "_render_view" in g  # sentinel from the new code
         except Exception as exc:
             return {"ok": False, "error": f"reload failed: {exc}"}
+        return {"ok": True, "action": "reload", "path": path,
+                "reconnected_timer": saved_timer is not None,
+                "has_render_view": swapped,
+                "note": ("code swapped in place" if swapped else
+                         "exec ran but sentinel missing; a FreeCAD restart may be needed")}
         return {"ok": True, "action": "reload", "path": path,
                 "has_v2": "_create_snapfit_case_v2" in globals()}
     if action == "create_sphere":
