@@ -1,6 +1,6 @@
 {
   "action": "create_snapfit_case",
-  "completed_at": "2026-09-01T07:12:47.608727+00:00",
+  "completed_at": null,
   "created_by": "ChatGPT",
   "error": null,
   "id": "CAD-061",
@@ -46,5 +46,7 @@
   "result": null,
   "revision": 15,
   "revision_note": "V-01 re-run after geometry fixes. Corrected button_pair_center_to_center 20.0 -> 8.8 mm (20.0 pushed the flexure U-slots through the case wall since outer_w is only 20.9 mm; that produced the 'buttons at the edge' defect in salah3.png). Added cover_lip 0.8 mm so the cover skirt is derived from body_height (skirt_h = body_h - cover_lip) and fully seats; previously skirt_h was hard-coded 3.2 < body_h 5.2, so the cover seated only halfway (salah1.png). USB-C stays centered on outer_w/2 for both body and cover (target: salah4/salah5.png). Listener now guards skirt-from-body_h and button spacing so both U-slots stay inside the case walls. Locks unchanged: 0.5 mm U-cut, 1.0 mm rear bridge, 2.0x2.0x0.75 mm pads at inner base of U, 4-point snap-fit. After completion, inspect the .FCStd: cover fully seated, USB symmetric L/R, two actuator pads inside the case behind USB, recompute pass.",
-  "status": "pending"
+  "started_at": "2026-09-01T08:10:06.177880+00:00",
+  "status": "running",
+  "updated_at": "2026-09-01T08:10:06.178034+00:00"
 }
