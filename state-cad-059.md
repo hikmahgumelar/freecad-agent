@@ -304,3 +304,39 @@ compare to `referensi3.png` (cover USB-C hole present, keyhole heads behind USB,
 tongues toward interior, two buttons parallel). Proportions (case still ~20.9 x
 25.4, nearly square vs the more elongated reference) are a **known open item**
 to tune only after the button style is confirmed correct.
+
+## Keyhole v2 — user-approved result (2026-09-01, later)
+
+After the direction/printability fixes, the user reviewed the build in FreeCAD
+and confirmed **"hasilnya bagus"** (looks good). The keyhole flexure now matches
+`referensi3.png`:
+
+* Rounded-corner case, USB-C hole on the cover (short side), centered.
+* Two parallel keyhole flexures, **actuator head near the USB-C side**, tongues
+  hinging toward the interior (`tail_dir=-1`).
+* **Printability fix (user concern "bantalan terputus kalau di-print3D"):** the
+  head ring is no longer a full 360° cut. `_keyhole_flexure_cut` now opens the
+  ring on the tongue side (U/horseshoe), so the actuator head stays fused to the
+  tongue as one continuous flexure instead of a loose disc that would detach
+  during printing.
+
+Live inspect of `ESP32C3SnapFitCaseKeyhole`:
+* BottomCase: 1 solid, z[0.00..5.20].
+* TopCover: 3 solids, z[0.80..6.40] (cover fully seats with 0.8 mm lip). The
+  extra solids are the two actuator bumps under the heads; they are attached at
+  the head but could be tightened to a single fused solid as a later polish.
+
+### Listener workflow lesson
+
+In-process TCP `reload` proved unreliable: the QTimer holds a reference to the
+OLD `_poll_server`, so re-exec'ing the module did not swap the running code
+(version/action list stayed stale even when reload returned ok). Reload was made
+honest (reconnects the timer to the new poller and self-verifies via a
+sentinel), but the **reliable path to activate new listener code remains a
+FreeCAD restart** (or the reload only after that restart loads the fixed
+reload). Added a `render_view` action to capture PNG screenshots over TCP for
+visual review once the new code is active.
+
+Commits: `3534d17` (cover USB + reorient), `9ca8cb1` (head near USB),
+`c6864f6` (open ring / head attached), `1bb9704` (reload __file__ fix),
+`334c7ee` (render_view), `0de4f77` (honest reload). Pushed to `master`.
