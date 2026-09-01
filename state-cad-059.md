@@ -171,3 +171,18 @@ listener, then inspect the resulting `.FCStd` and record PASS/FAIL with evidence
   result. Do not record V-01 PASS until a real `.FCStd` is generated and
   inspected.
 
+### CAD-061 first live run — FAILED (environment)
+
+The watchdog auto-pulled the pushed commit, restarted, and processed CAD-061:
+
+* master history: `356c765 CAD job CAD-061: running` → `a994091 CAD job CAD-061: failed`.
+* `cad/jobs/CAD-061.json`: `status = failed`, `error = "[Errno 61] Connection refused"`, no `result`.
+
+This **confirms the watchdog delivery path works** but the FreeCAD listener was
+still not bound on `127.0.0.1:8765`. This is an environment failure, **not** a
+geometry failure. V-01 remains **pending**.
+
+To retry: apply the `sys.path` fix in the FreeCAD Python console, bootstrap the
+listener until `listening on 127.0.0.1:8765`, confirm an external `ping`
+succeeds, then re-queue CAD-061 (reset status to `pending`) and re-run.
+
