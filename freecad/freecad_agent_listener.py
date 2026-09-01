@@ -614,14 +614,16 @@ def execute_command(command):
         try:
             with open(path, "r", encoding="utf-8") as fh:
                 source = fh.read()
-            new_globals = {}
-            exec(compile(source, path, "exec"), new_globals)
-            preserve = {"_server_socket", "_server_timer"}
             g = globals()
-            for k, v in new_globals.items():
-                if k in preserve or k.startswith("__"):
-                    continue
-                g[k] = v
+            saved_sock = g.get("_server_socket")
+            saved_timer = g.get("_server_timer")
+            # Execute the fresh source directly in this module's own namespace so
+            # every redefined function (including execute_command's routing) is
+            # the one the running QTimer will call. Preserve the live socket/timer.
+            g["__file__"] = path
+            exec(compile(source, path, "exec"), g)
+            g["_server_socket"] = saved_sock
+            g["_server_timer"] = saved_timer
         except Exception as exc:
             return {"ok": False, "error": f"reload failed: {exc}"}
         return {"ok": True, "action": "reload", "path": path,
