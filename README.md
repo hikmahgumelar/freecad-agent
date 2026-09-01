@@ -8,6 +8,16 @@ You describe what you want to build. An AI agent turns the intent into a structu
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+## Ready to Print
+
+### Real FDM slicer preview
+
+This example shows a FreeCAD Agent enclosure prepared as separate printable parts in a slicer, with the body and cover laid out on the print bed.
+
+<img width="986" height="583" alt="FreeCAD Agent enclosure ready to print in slicer" src="https://github.com/user-attachments/assets/082a7bed-e96e-4e95-ab34-c35795a6c48d.jpg" />
+
+> This is a verified print-preparation example. The **CAD-059 Snap-In enclosure is intentionally not presented here as ready-to-print yet** while its remaining geometry validation is still in progress.
+
 ## Watchdog auto-sync
 
 The watchdog now supports automatic Git synchronization. Every 30 seconds by default it fetches the configured remote branch, compares the local `HEAD` with `origin/master`, and when a newer commit is available it performs a fast-forward-only pull and restarts itself so the updated Python code is loaded.
