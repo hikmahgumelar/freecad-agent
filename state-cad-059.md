@@ -186,3 +186,35 @@ To retry: apply the `sys.path` fix in the FreeCAD Python console, bootstrap the
 listener until `listening on 127.0.0.1:8765`, confirm an external `ping`
 succeeds, then re-queue CAD-061 (reset status to `pending`) and re-run.
 
+### CAD-061 second live run — completed but geometry WRONG (2026-09-01 14:12)
+
+The listener came up briefly and CAD-061 completed, but the rendered `.FCStd`
+(see `kesalahan/salah1..3.png`) exposed three real defects:
+
+1. **Cover seats only halfway** (`salah1.png`). Root cause: `skirt_h` was
+   hard-coded `3.2` while `body_h = 5.2`, leaving a 2.0 mm gap.
+2. **Actuator pads / buttons at the case edge, U-slots through the wall**
+   (`salah3.png`). Root cause: `button_pair_center_to_center = 20.0` while
+   `outer_w = 20.9`; buttons landed on/through the side walls.
+3. **USB-C not centered in that render** (`salah2.png`). This came from the old
+   geometry; current code centers USB on `outer_w/2` for body and cover
+   (target look: `salah4.png`, `salah5.png`).
+
+### Geometry fixes applied (2026-09-01)
+
+Listener (`freecad/freecad_agent_listener.py`), verified by pure-logic sim:
+
+* `skirt_h = body_h - cover_lip` (default lip 0.8 mm) → skirt 4.40 mm, covers
+  the snap bosses at `snap_z = 2.8` → cover fully seats. Guards `cover_lip`
+  range and skirt-vs-snap.
+* Button spacing guard: both flexure U-slots must stay inside
+  `[wall, outer_w - wall]`; old spacing 20.0 is now rejected.
+* CAD-061 params corrected: `button_pair_center_to_center 20.0 -> 8.8`,
+  `cover_lip 0.8` added, stale `result` cleared, status back to `pending`
+  (revision 15).
+
+Sim result: skirt 4.40 > snap 2.8 ✅; BOOT=6.05 / RESET=14.85 with slot span
+4.55..16.35 inside allowed 1.20..19.70 ✅; USB symmetric at 10.45 ✅;
+`py_compile` of the listener passes ✅. Real `.FCStd` re-validation is the next
+live run (V-01 still pending until inspected).
+

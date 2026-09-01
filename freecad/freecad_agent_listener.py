@@ -182,7 +182,18 @@ def _create_snapfit_case(command):
             obj.Label = f"Round snap boss {side} {idx}"
             obj.Shape = boss
 
-    skirt_h = 3.2
+    # C-01: cover skirt must descend far enough to fully seat over the body,
+    # leaving a small shoulder/lip so the cover stops on the body wall instead
+    # of only overlapping the top. Derived from body_h, never hard-coded.
+    cover_lip = float(command.get("cover_lip", 0.8))
+    if cover_lip < 0 or cover_lip >= body_h:
+        raise RuntimeError("cover_lip must be >= 0 and smaller than body_height")
+    skirt_h = body_h - cover_lip
+    if skirt_h <= snap_z:
+        raise RuntimeError(
+            "cover skirt is too short to capture the snap bosses; "
+            "reduce cover_lip or raise body_height"
+        )
     cover_outer_w = outer_w + 2 * (cover_wall + cover_clear)
     cover_outer_l = outer_l + 2 * (cover_wall + cover_clear)
     ox = -(cover_wall + cover_clear)
@@ -219,6 +230,24 @@ def _create_snapfit_case(command):
         center_x - button_center_spacing / 2.0,
         center_x + button_center_spacing / 2.0,
     )
+
+    # Guard: both button U-slots must stay fully inside the case walls.
+    # The outermost slot edge is at (button center) +/- (button_w/2 + slot).
+    # A spacing that pushes a slot past [0, outer_w] would place the button in
+    # or through the side wall (root cause of the "buttons at the edge" defect).
+    half_span = button_w / 2.0 + button_slot_width
+    left_slot_min = center_xs[0] - half_span
+    right_slot_max = center_xs[1] + half_span
+    edge_margin = wall  # keep at least one wall thickness from the outer edge
+    if left_slot_min < edge_margin or right_slot_max > outer_w - edge_margin:
+        raise RuntimeError(
+            "button_center_spacing=%.2f places the flexure U-slots into the "
+            "case wall (outer_w=%.2f). Reduce the spacing so both buttons stay "
+            "inside [%.2f, %.2f]." % (
+                button_center_spacing, outer_w, edge_margin, outer_w - edge_margin,
+            )
+        )
+
     button_front_y = outer_l - wall - board_clear - 3.2
     slot_z = body_h - 0.1
     slot_h = cover_t + 0.25
