@@ -1,8 +1,8 @@
 {
   "action": "create_snapfit_case",
-  "completed_at": null,
+  "completed_at": "2026-09-01T06:32:37.600993+00:00",
   "created_by": "Kiro",
-  "error": null,
+  "error": "[Errno 61] Connection refused",
   "id": "CAD-061",
   "job_id": "CAD-061",
   "parameters": {
@@ -45,6 +45,6 @@
   "revision": 13,
   "revision_note": "V-01 validation run for CAD-059 golden reference. Confirms FlexureButton integration end-to-end against a live FreeCAD listener. Locks: 0.5 mm U-cut, 1.0 mm rear bridge, 2.0 x 2.0 x 0.75 mm actuator pads at inner base of U, USB-C centered on outer_w/2, BOOT/RESET mirrored about the same centerline, 4-point snap-fit. No capsule buttons, no raised heads, no large through-openings. After completion, inspect the .FCStd (recompute pass, 2 parts BottomCase+TopCover, geometry checks) and record PASS/FAIL.",
   "started_at": "2026-09-01T06:32:36.069105+00:00",
-  "status": "running",
-  "updated_at": "2026-09-01T06:32:36.069261+00:00"
+  "status": "failed",
+  "updated_at": "2026-09-01T06:32:37.601055+00:00"
 }
