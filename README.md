@@ -16,7 +16,7 @@ This example shows a FreeCAD Agent enclosure prepared as separate printable part
 
 <img width="986" height="583" alt="FreeCAD Agent enclosure ready to print in slicer" src="docs/images/ready-to-print-slicer.png" />
 
-> This is a verified print-preparation example. The **CAD-059 Snap-In enclosure is intentionally not presented here as ready-to-print yet** while its remaining geometry validation is still in progress.
+
 
 ## Watchdog auto-sync
 
