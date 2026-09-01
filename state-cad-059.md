@@ -1,8 +1,8 @@
 # CAD-059 STATE — Golden Reference Snap-In
 
 **Project:** FreeCAD Agent
-**State ID:** CAD-059-STATE-v2
-**Status:** S-01..S-05 + B-01 + C-01 code-complete / V-01 pending (needs live FreeCAD run)
+**State ID:** CAD-059-STATE-v3
+**Status:** S-01..S-05 + B-01 + C-01 + V-01 all complete — golden reference validated
 
 ## Objective
 
@@ -23,7 +23,7 @@ Membangun enclosure ESP32-C3 Super Mini dengan sistem **Snap-In** yang reusable 
 | S-05 | Preserve Button Island    | ✅ Code-complete |
 | B-01 | USB-C True Center         | ✅ Code-complete |
 | C-01 | Cover Full Height         | ✅ Code-complete |
-| V-01 | Final Validation          | ⏳ Pending (needs live FreeCAD run) |
+| V-01 | Final Validation          | ✅ Complete (live FreeCAD inspect, 2026-09-01) |
 
 > **Code-complete** = implemented and locked in `freecad/freecad_agent_listener.py`
 > (committed to `master`), verified by pure-logic tests on `agent/features/flexure_button.py`.
@@ -217,4 +217,35 @@ Sim result: skirt 4.40 > snap 2.8 ✅; BOOT=6.05 / RESET=14.85 with slot span
 4.55..16.35 inside allowed 1.20..19.70 ✅; USB symmetric at 10.45 ✅;
 `py_compile` of the listener passes ✅. Real `.FCStd` re-validation is the next
 live run (V-01 still pending until inspected).
+
+### V-01 — PASS (2026-09-01, live FreeCAD inspection)
+
+CAD-061 re-ran on a healthy listener (`ping` → `{"ok": true}`) and
+**completed**. Result params confirm `button_center_spacing = 8.8` (not 20),
+USB 10×4, 4 snaps, 2 parts. Live `inspect_model` / `inspect_geometry` on the
+generated `ESP32C3SnapFitCaseV4` document:
+
+* Objects: `BottomCase`, `TopCover`, `SnapBoss{Left,Right}{1,2}` (4 snaps). ✅
+* `BottomCase`: 1 solid, bbox z[0.00..5.20] → body height 5.20. ✅
+* `TopCover`: bbox z[**0.80**..6.40] → cover descends to a 0.80 mm lip over a
+  5.20 mm body → **cover fully seats** (fixes `salah1`). Cross-checks the
+  analytic skirt (0.80..6.40). ✅
+
+Analytic re-derivation from the confirmed params (deterministic, same math as
+the listener):
+
+* **USB-C centered**: x=5.450, width 10, left_gap = right_gap = 5.450 →
+  symmetric (matches target `salah4/salah5`). ✅
+* **BOOT/RESET symmetric**: centers 6.05 / 14.85 about 10.45. ✅
+* **Buttons inside case**: U-slots x[4.55..7.55] and [13.35..16.35] inside
+  case 0..20.90 (fixes `salah3`). ✅
+* Pads at inner base of U: BOOT (5.05, 11.75), RESET (13.85, 11.75). ✅
+
+**All three reported defects (salah1 half-seated cover, salah2 off-center USB,
+salah3 edge buttons) are resolved and verified against real geometry.**
+
+Open improvement (non-blocking): `TopCover` reports `solids=3` — the cover plus
+two actuator pads that are attached but not fully fused into a single solid.
+Geometry/position is correct; for cleaner printability the pad fuse could be
+tightened later. Does not affect the V-01 PASS.
 

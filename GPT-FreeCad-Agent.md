@@ -609,6 +609,25 @@ Run validation job **CAD-061** (`cad/jobs/CAD-061.json`, status `pending`,
 `.FCStd` (recompute pass, 2 parts BottomCase+TopCover, U-cut 0.5, pad at base,
 USB centered, BOOT/RESET symmetric, cover seated) and record PASS/FAIL.
 
+### V-01 PASSED (2026-09-01) + geometry fixes
+
+Live-inspected the generated `ESP32C3SnapFitCaseV4`: cover fully seats
+(TopCover z[0.80..6.40] over 5.20 mm body), USB-C symmetric (left_gap =
+right_gap = 5.45 mm), BOOT/RESET inside the case and symmetric about the
+centerline. Three reported defects were fixed:
+
+* Cover half-seated → `skirt_h = body_h - cover_lip` (default lip 0.8 mm),
+  guarded so the skirt always captures the snap bosses.
+* Buttons at the case edge → `button_pair_center_to_center` corrected 20.0 →
+  8.8, plus a listener guard that rejects any spacing pushing the flexure
+  U-slots into the walls.
+* Off-center USB was old geometry; current code centers USB on `outer_w/2`.
+
+Follow-up: **CAD-062** is a fresh visual-review job with the corrected params
+(spacing 8.8, cover_lip 0.8) so the result can be opened and inspected in
+FreeCAD. Open minor item: `TopCover` had `solids=3` (pads attached but not
+fully fused) — cosmetic/printability only, geometry is correct.
+
 ### Live blocker: listener not bound
 
 `.gitignore` in this checkout is `*` (repo sits inside a venv), so tracked
