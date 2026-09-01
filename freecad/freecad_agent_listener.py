@@ -335,28 +335,29 @@ def _rounded_box(length, width, height, radius, origin):
 
 
 def _keyhole_flexure_cut(head_cx, head_cy, z0, cut_h, radius, slot, tail_len):
-    """Build a 'keyhole' flexure cut: a round head at the left plus two parallel
-    straight cut-lines running to the right (tail), leaving a tongue whose hinge
-    is at the far (right) end. Matches referensi3.
+    """Build a 'keyhole' flexure cut oriented along +y (toward the USB side).
 
-    * ``(head_cx, head_cy)`` is the center of the round actuator head.
-    * The tongue extends in +x; the two side cuts are at +/- radius from head_cy.
-    * ``slot`` is the cut-line thickness (kept at 0.5 mm).
+    The round actuator head sits at ``(head_cx, head_cy)`` and the tongue's two
+    parallel side cuts run in +y for ``tail_len``, so the tongue's hinge is at
+    the far (+y) end and the pressable head is at the near end. Two of these
+    stacked along x give the referensi3 layout (heads aligned, tongues parallel).
+
+    ``slot`` is the cut-line thickness (kept at 0.5 mm).
     """
     head = Part.makeCylinder(radius + slot, cut_h, App.Vector(head_cx, head_cy, z0))
     head_inner = Part.makeCylinder(radius, cut_h, App.Vector(head_cx, head_cy, z0))
     ring = head.cut(head_inner)  # annular cut around the actuator head
 
-    # two parallel side cuts forming the tongue sides
-    top_cut = Part.makeBox(
-        tail_len, slot, cut_h,
-        App.Vector(head_cx, head_cy + radius, z0),
+    # two parallel side cuts (left/right of the tongue) running in +y
+    left_cut = Part.makeBox(
+        slot, tail_len, cut_h,
+        App.Vector(head_cx - radius - slot, head_cy, z0),
     )
-    bot_cut = Part.makeBox(
-        tail_len, slot, cut_h,
-        App.Vector(head_cx, head_cy - radius - slot, z0),
+    right_cut = Part.makeBox(
+        slot, tail_len, cut_h,
+        App.Vector(head_cx + radius, head_cy, z0),
     )
-    return ring.fuse(top_cut).fuse(bot_cut)
+    return ring.fuse(left_cut).fuse(right_cut)
 
 
 def _create_snapfit_case_v2(command):
@@ -471,18 +472,33 @@ def _create_snapfit_case_v2(command):
             cover_shape = cover_shape.cut(
                 Part.makeSphere(snap_r + 0.15, App.Vector(cx, sy, snap_z)))
 
-    # --- keyhole flexures: two parallel rows, left-aligned ---
+    # USB-C opening in the cover, on the same short side as the body, centered
+    cover_usb_y = coy + cover_outer_l - cover_wall - cover_clear - 0.6
+    cover_shape = cover_shape.cut(
+        Part.makeBox(
+            usb_w, cover_wall + cover_clear + 0.8, usb_h,
+            App.Vector(center_x - usb_w / 2.0, cover_usb_y,
+                       body_h - skirt_h + usb_bottom),
+        )
+    )
+
+    # --- keyhole flexures: two parallel tongues stacked across x, heads placed
+    # just behind the USB-C side; tongues hinge toward the case interior. ---
     z0 = body_h - 0.1
     cut_h = cover_t + 0.3
-    # rows are stacked across the width, centered on the case width
-    row_ys = (center_x - btn_spacing / 2.0, center_x + btn_spacing / 2.0)
-    head_x = btn_head_from_left  # measured from the left short side (x)
-    for name, hy in (("BootFlexure", row_ys[0]), ("ResetFlexure", row_ys[1])):
-        cut = _keyhole_flexure_cut(head_x, hy, z0, cut_h, btn_head_r, btn_slot, btn_tail_len)
+    usb_side_y = outer_l - wall  # inner face of the USB (front) wall
+    head_y = usb_side_y - btn_head_r - 2.0  # heads sit just behind USB
+    tail_len = btn_tail_len
+    # two heads aligned across x, symmetric about the case center
+    head_xs = (center_x - btn_spacing / 2.0, center_x + btn_spacing / 2.0)
+    # tongues run from the head toward the interior (-y), so tail starts below head
+    for name, hx in (("BootFlexure", head_xs[0]), ("ResetFlexure", head_xs[1])):
+        cut = _keyhole_flexure_cut(hx, head_y - tail_len, z0, cut_h,
+                                   btn_head_r, btn_slot, tail_len)
         cover_shape = cover_shape.cut(cut).removeSplitter()
         # actuator bump under the round head
         bump = Part.makeCylinder(btn_head_r, actuator_h,
-                                 App.Vector(head_x, hy, body_h - actuator_h + 0.05))
+                                 App.Vector(hx, head_y - tail_len, body_h - actuator_h + 0.05))
         cover_shape = cover_shape.fuse(bump).removeSplitter()
 
     cover = doc.addObject("Part::Feature", "TopCover")
