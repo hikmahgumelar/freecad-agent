@@ -4,6 +4,10 @@ import os
 import sys
 
 _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+_REPO_ROOT = os.path.abspath(os.path.join(_BASE_DIR, ".."))
+if _REPO_ROOT not in sys.path:
+    sys.path.insert(0, _REPO_ROOT)
+
 _BASE_PATH = os.path.join(_BASE_DIR, "freecad_agent_listener.py")
 
 _BASE_SPEC = importlib.util.spec_from_file_location(
