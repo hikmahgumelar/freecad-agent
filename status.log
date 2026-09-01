@@ -55,3 +55,4 @@
 2026-09-01T07:12:49.189876+00:00 | job=CAD-061 | action=create_snapfit_case | status=completed
 2026-09-01T08:10:10.803364+00:00 | job=CAD-061 | action=create_snapfit_case | status=completed
 2026-09-01T08:14:00.173643+00:00 | job=CAD-062 | action=create_snapfit_case | status=completed
+2026-09-01T08:27:53.667051+00:00 | job=CAD-063 | action=create_snapfit_case_v2 | status=failed | error=Unsupported action: create_snapfit_case_v2
