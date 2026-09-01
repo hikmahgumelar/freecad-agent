@@ -543,6 +543,52 @@ def _create_snapfit_case_v2(command):
     }
 
 
+def _render_view(command):
+    """Save one or more PNG screenshots of a document's active view.
+
+    command: {document?, path, views?=["top","iso"], width?, height?, background?}
+    Returns the list of written image paths.
+    """
+    doc_name = command.get("document")
+    gdoc = Gui.getDocument(doc_name) if doc_name else Gui.ActiveDocument
+    if gdoc is None:
+        raise RuntimeError("No active GUI document to render")
+    view = gdoc.ActiveView
+    width = int(command.get("width", 1400))
+    height = int(command.get("height", 1000))
+    bg = command.get("background", "White")
+    base = command.get("path")
+    if not base:
+        raise RuntimeError("render_view needs a 'path'")
+    views = command.get("views", ["top", "iso"])
+    view_fns = {
+        "top": getattr(view, "viewTop", None),
+        "front": getattr(view, "viewFront", None),
+        "iso": getattr(view, "viewIsometric", None),
+        "rear": getattr(view, "viewRear", None),
+    }
+    written = []
+    root, ext = os.path.splitext(base)
+    ext = ext or ".png"
+    for v in views:
+        fn = view_fns.get(v)
+        if fn:
+            try:
+                fn()
+            except Exception:
+                pass
+        try:
+            view.fitAll()
+        except Exception:
+            pass
+        out = base if len(views) == 1 else f"{root}_{v}{ext}"
+        os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
+        view.saveImage(out, width, height, bg)
+        written.append(out)
+    return {"ok": True, "action": "render_view", "document": gdoc.Document.Name,
+            "images": written}
+
+
 def execute_command(command):
     action = command.get("action")
     if action == "ping":
@@ -551,6 +597,7 @@ def execute_command(command):
         return {"ok": True, "action": "version",
                 "actions": ["ping", "version", "reload", "create_sphere",
                             "open_model", "inspect_model", "inspect_geometry",
+                            "render_view",
                             "create_snapfit_case", "create_snapfit_case_v2"]}
     if action == "reload":
         # Refresh this module's code in place from the latest source on disk,
@@ -601,6 +648,8 @@ def execute_command(command):
                 "objects": [{"name": o.Name, "label": o.Label, "type": o.TypeId} for o in doc.Objects]}
     if action == "inspect_geometry":
         return _inspect_geometry(command)
+    if action == "render_view":
+        return _render_view(command)
     if action == "create_snapfit_case":
         return _create_snapfit_case(command)
     if action == "create_snapfit_case_v2":
