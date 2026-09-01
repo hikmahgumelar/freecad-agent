@@ -334,13 +334,11 @@ def _rounded_box(length, width, height, radius, origin):
     return box
 
 
-def _keyhole_flexure_cut(head_cx, head_cy, z0, cut_h, radius, slot, tail_len):
-    """Build a 'keyhole' flexure cut oriented along +y (toward the USB side).
-
-    The round actuator head sits at ``(head_cx, head_cy)`` and the tongue's two
-    parallel side cuts run in +y for ``tail_len``, so the tongue's hinge is at
-    the far (+y) end and the pressable head is at the near end. Two of these
-    stacked along x give the referensi3 layout (heads aligned, tongues parallel).
+def _keyhole_flexure_cut(head_cx, head_cy, z0, cut_h, radius, slot, tail_len, tail_dir=1):
+    """Build a 'keyhole' flexure cut. The round actuator head sits at
+    ``(head_cx, head_cy)`` and the tongue's two parallel side cuts run along y
+    for ``tail_len`` in direction ``tail_dir`` (+1 = +y, -1 = -y). The pressable
+    head is at ``head_cy`` and the tongue hinge is at the far end.
 
     ``slot`` is the cut-line thickness (kept at 0.5 mm).
     """
@@ -348,14 +346,15 @@ def _keyhole_flexure_cut(head_cx, head_cy, z0, cut_h, radius, slot, tail_len):
     head_inner = Part.makeCylinder(radius, cut_h, App.Vector(head_cx, head_cy, z0))
     ring = head.cut(head_inner)  # annular cut around the actuator head
 
-    # two parallel side cuts (left/right of the tongue) running in +y
+    # side cuts run from the head toward tail_dir; y0 is the lower y of the box
+    y0 = head_cy if tail_dir >= 0 else head_cy - tail_len
     left_cut = Part.makeBox(
         slot, tail_len, cut_h,
-        App.Vector(head_cx - radius - slot, head_cy, z0),
+        App.Vector(head_cx - radius - slot, y0, z0),
     )
     right_cut = Part.makeBox(
         slot, tail_len, cut_h,
-        App.Vector(head_cx + radius, head_cy, z0),
+        App.Vector(head_cx + radius, y0, z0),
     )
     return ring.fuse(left_cut).fuse(right_cut)
 
@@ -491,14 +490,14 @@ def _create_snapfit_case_v2(command):
     tail_len = btn_tail_len
     # two heads aligned across x, symmetric about the case center
     head_xs = (center_x - btn_spacing / 2.0, center_x + btn_spacing / 2.0)
-    # tongues run from the head toward the interior (-y), so tail starts below head
+    # heads sit near the USB-C side; tongues hinge toward the interior (-y)
     for name, hx in (("BootFlexure", head_xs[0]), ("ResetFlexure", head_xs[1])):
-        cut = _keyhole_flexure_cut(hx, head_y - tail_len, z0, cut_h,
-                                   btn_head_r, btn_slot, tail_len)
+        cut = _keyhole_flexure_cut(hx, head_y, z0, cut_h,
+                                   btn_head_r, btn_slot, tail_len, tail_dir=-1)
         cover_shape = cover_shape.cut(cut).removeSplitter()
-        # actuator bump under the round head
+        # actuator bump under the round head (pad sits near USB-C)
         bump = Part.makeCylinder(btn_head_r, actuator_h,
-                                 App.Vector(hx, head_y - tail_len, body_h - actuator_h + 0.05))
+                                 App.Vector(hx, head_y, body_h - actuator_h + 0.05))
         cover_shape = cover_shape.fuse(bump).removeSplitter()
 
     cover = doc.addObject("Part::Feature", "TopCover")
