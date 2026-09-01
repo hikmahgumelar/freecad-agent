@@ -344,7 +344,18 @@ def _keyhole_flexure_cut(head_cx, head_cy, z0, cut_h, radius, slot, tail_len, ta
     """
     head = Part.makeCylinder(radius + slot, cut_h, App.Vector(head_cx, head_cy, z0))
     head_inner = Part.makeCylinder(radius, cut_h, App.Vector(head_cx, head_cy, z0))
-    ring = head.cut(head_inner)  # annular cut around the actuator head
+    ring = head.cut(head_inner)  # annular gap around the actuator head
+
+    # IMPORTANT (printability): do NOT cut a full ring, or the head detaches
+    # from the tongue and prints as a loose disc. Remove the half of the ring
+    # on the tongue side so the head stays fused to the tongue -> one
+    # continuous flexure (head + tongue + hinge). The opening faces tail_dir.
+    keep_y = head_cy if tail_dir >= 0 else head_cy - (radius + slot)
+    open_box = Part.makeBox(
+        2 * (radius + slot) + 0.2, radius + slot + 0.1, cut_h + 0.2,
+        App.Vector(head_cx - (radius + slot) - 0.1, keep_y, z0 - 0.1),
+    )
+    ring = ring.cut(open_box)  # now a U/horseshoe open toward the tongue
 
     # side cuts run from the head toward tail_dir; y0 is the lower y of the box
     y0 = head_cy if tail_dir >= 0 else head_cy - tail_len
