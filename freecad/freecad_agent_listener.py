@@ -557,7 +557,13 @@ def execute_command(command):
         # keeping the live socket/timer bound. The running QTimer still calls
         # _poll_server -> execute_command from this same module namespace, so
         # updating globals() swaps in the new code without a FreeCAD restart.
-        path = command.get("path", os.path.abspath(__file__))
+        path = command.get("path")
+        if not path:
+            path = globals().get("__file__")
+            if path:
+                path = os.path.abspath(path)
+        if not path or not os.path.isfile(path):
+            return {"ok": False, "error": f"reload needs a valid 'path'; got {path!r}"}
         try:
             with open(path, "r", encoding="utf-8") as fh:
                 source = fh.read()
