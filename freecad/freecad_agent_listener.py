@@ -589,6 +589,153 @@ def _render_view(command):
             "images": written}
 
 
+def _create_mac_mini_case(command):
+    """Protective 3D-printable case for the Mac mini M4 (2024).
+
+    Official device size: 127 x 127 mm footprint, 50 mm tall, rounded cuboid.
+    This builds a two-part sleeve: an open-top tray that the Mac mini sits in,
+    plus a lid. The rear wall has a full port cut-out, the bottom has a vent
+    grille (the M4 intakes from the bottom perimeter), and the corners are
+    rounded to echo the device.
+    """
+    # device dimensions (mm) — default to official Mac mini M4 numbers
+    dev_w = float(command.get("device_width", 127.0))
+    dev_d = float(command.get("device_depth", 127.0))
+    dev_h = float(command.get("device_height", 50.0))
+    clr = float(command.get("clearance", 0.4))          # per-side gap
+    wall = float(command.get("wall", 2.4))
+    bottom = float(command.get("bottom_thickness", 2.4))
+    corner_r = float(command.get("corner_radius", 8.0))  # device has ~ rounded corners
+    lid_t = float(command.get("lid_thickness", 2.4))
+    lid_clear = float(command.get("lid_clearance", 0.3))
+    lid_skirt = float(command.get("lid_skirt", 8.0))
+    foot_h = float(command.get("foot_height", 3.0))
+    rear_port_h = float(command.get("rear_port_height", 34.0))   # port band height
+    rear_port_margin = float(command.get("rear_port_side_margin", 10.0))
+    vent_hole = float(command.get("vent_hole", 5.0))
+    vent_gap = float(command.get("vent_gap", 4.0))
+    output = os.path.abspath(command.get(
+        "output_path", "cad/output/mac-mini-m4-case.FCStd"))
+
+    inner_w = dev_w + 2 * clr
+    inner_d = dev_d + 2 * clr
+    inner_h = dev_h + 2.0            # a little headroom above the device
+    outer_w = inner_w + 2 * wall
+    outer_d = inner_d + 2 * wall
+    tray_h = bottom + inner_h
+
+    for v, n in ((dev_w, "device_width"), (dev_d, "device_depth"),
+                 (dev_h, "device_height"), (wall, "wall"), (bottom, "bottom")):
+        if v <= 0:
+            raise RuntimeError(f"{n} must be positive")
+    if corner_r * 2 >= min(outer_w, outer_d):
+        raise RuntimeError("corner_radius too large for the footprint")
+
+    doc = App.newDocument(command.get("document", "MacMiniM4Case"))
+
+    # --- tray: rounded outer shell minus rounded inner cavity ---
+    tray = _rounded_box(outer_w, outer_d, tray_h, corner_r, (0, 0, 0)).cut(
+        _rounded_box(inner_w, inner_d, inner_h + 0.1,
+                     max(corner_r - wall, 1.0), (wall, wall, bottom))
+    )
+
+    cx = outer_w / 2.0
+
+    # rear port opening: a wide band across the back wall (y = outer_d side)
+    port_w = inner_w - 2 * rear_port_margin
+    if port_w > 0:
+        port_z0 = bottom + 3.0
+        tray = tray.cut(
+            Part.makeBox(port_w, wall + 1.0, min(rear_port_h, inner_h - 3.0),
+                         App.Vector(cx - port_w / 2.0, outer_d - wall - 0.5, port_z0))
+        )
+
+    # bottom vent grille (device intakes air from the bottom)
+    step = vent_hole + vent_gap
+    gx0 = wall + step
+    gy0 = wall + step
+    x = gx0
+    while x < outer_w - wall - step:
+        y = gy0
+        while y < outer_d - wall - step:
+            tray = tray.cut(
+                Part.makeCylinder(vent_hole / 2.0, bottom + 0.2,
+                                  App.Vector(x, y, -0.1))
+            )
+            y += step
+        x += step
+
+    # four small feet under the tray
+    foot_r = 6.0
+    foot_inset = corner_r + 2.0
+    feet_pos = [(foot_inset, foot_inset), (outer_w - foot_inset, foot_inset),
+                (foot_inset, outer_d - foot_inset), (outer_w - foot_inset, outer_d - foot_inset)]
+    for (fx, fy) in feet_pos:
+        foot = Part.makeCylinder(foot_r, foot_h, App.Vector(fx, fy, -foot_h))
+        tray = tray.fuse(foot)
+
+    body = doc.addObject("Part::Feature", "MacMiniTray")
+    body.Label = "Mac mini M4 case tray"
+    body.Shape = tray.removeSplitter()
+
+    # --- lid: rounded cap with a downward skirt that overlaps the tray ---
+    lo_w = outer_w + 2 * (wall + lid_clear)
+    lo_d = outer_d + 2 * (wall + lid_clear)
+    lox = -(wall + lid_clear)
+    loy = -(wall + lid_clear)
+    lid_outer = _rounded_box(lo_w, lo_d, lid_t + lid_skirt,
+                             corner_r + wall + lid_clear,
+                             (lox, loy, tray_h - lid_skirt))
+    lid_inner = _rounded_box(outer_w + 2 * lid_clear, outer_d + 2 * lid_clear,
+                             lid_skirt + 0.2, corner_r + lid_clear,
+                             (-lid_clear, -lid_clear, tray_h - lid_skirt - 0.1))
+    lid_shape = lid_outer.cut(lid_inner)
+
+    # top vent grille on the lid as well
+    x = gx0
+    while x < outer_w - wall - step:
+        y = gy0
+        while y < outer_d - wall - step:
+            lid_shape = lid_shape.cut(
+                Part.makeCylinder(vent_hole / 2.0, lid_t + 0.4,
+                                  App.Vector(x, y, tray_h + lid_t - 0.2))
+            )
+            y += step
+        x += step
+
+    # match the rear port cut on the lid skirt so the back stays open
+    if port_w > 0:
+        lid_shape = lid_shape.cut(
+            Part.makeBox(port_w, wall + lid_clear + 1.0, lid_skirt + 0.2,
+                         App.Vector(cx - port_w / 2.0, outer_d - wall + lid_clear - 0.5,
+                                    tray_h - lid_skirt))
+        )
+
+    lid = doc.addObject("Part::Feature", "MacMiniLid")
+    lid.Label = "Mac mini M4 case lid"
+    lid.Shape = lid_shape.removeSplitter()
+
+    doc.recompute()
+    _fit_view(doc)
+    os.makedirs(os.path.dirname(output), exist_ok=True)
+    doc.saveAs(output)
+
+    return {
+        "ok": True,
+        "action": "create_mac_mini_case",
+        "document": doc.Name,
+        "output_path": output,
+        "parts": ["MacMiniTray", "MacMiniLid"],
+        "device": {"width": dev_w, "depth": dev_d, "height": dev_h,
+                   "source": "Apple Mac mini M4 (2024) official: 127 x 127 x 50 mm"},
+        "case": {"outer_width": outer_w, "outer_depth": outer_d,
+                 "tray_height": tray_h, "wall": wall, "clearance": clr,
+                 "corner_radius": corner_r},
+        "features": {"rear_port_opening": {"width": port_w, "height": rear_port_h},
+                     "bottom_vent": True, "top_vent": True, "feet": 4},
+    }
+
+
 def execute_command(command):
     action = command.get("action")
     if action == "ping":
@@ -598,7 +745,8 @@ def execute_command(command):
                 "actions": ["ping", "version", "reload", "create_sphere",
                             "open_model", "inspect_model", "inspect_geometry",
                             "render_view",
-                            "create_snapfit_case", "create_snapfit_case_v2"]}
+                            "create_snapfit_case", "create_snapfit_case_v2",
+                            "create_mac_mini_case"]}
     if action == "reload":
         # In-place code refresh. The running QTimer holds a reference to the OLD
         # _poll_server object, so after exec we must reconnect it to the new one,
@@ -666,6 +814,8 @@ def execute_command(command):
         return _create_snapfit_case(command)
     if action == "create_snapfit_case_v2":
         return _create_snapfit_case_v2(command)
+    if action == "create_mac_mini_case":
+        return _create_mac_mini_case(command)
     return {"ok": False, "error": f"Unsupported action: {action}"}
 
 
