@@ -1,29 +1,32 @@
 {
   "action": "create_mac_mini_case",
+  "completed_at": null,
   "created_by": "Kiro",
   "error": null,
   "id": "CAD-064",
   "job_id": "CAD-064",
   "parameters": {
-    "device_width": 127.0,
+    "bottom_thickness": 2.4,
+    "clearance": 0.4,
+    "corner_radius": 8.0,
     "device_depth": 127.0,
     "device_height": 50.0,
-    "clearance": 0.4,
-    "wall": 2.4,
-    "bottom_thickness": 2.4,
-    "corner_radius": 8.0,
-    "lid_thickness": 2.4,
+    "device_width": 127.0,
+    "foot_height": 3.0,
     "lid_clearance": 0.3,
     "lid_skirt": 8.0,
-    "foot_height": 3.0,
+    "lid_thickness": 2.4,
+    "output_path": "/Users/gugum/projectx/freecad-agent/cad/output/mac-mini-m4-case.FCStd",
     "rear_port_height": 34.0,
     "rear_port_side_margin": 10.0,
-    "vent_hole": 5.0,
     "vent_gap": 4.0,
-    "output_path": "/Users/gugum/projectx/freecad-agent/cad/output/mac-mini-m4-case.FCStd"
+    "vent_hole": 5.0,
+    "wall": 2.4
   },
   "result": null,
   "revision": 1,
   "revision_note": "Protective two-part case (tray + lid) for the Apple Mac mini M4 (2024). Device size from Apple official spec: 127 x 127 mm footprint, 50 mm tall, rounded aluminum cuboid. Case features: rounded corners echoing the device, per-side 0.4 mm clearance, 2.4 mm walls, full rear port band opening, bottom + top vent grille (M4 intakes air from the bottom perimeter), four feet, and a lid with a skirt overlapping the tray. Sizes are chosen automatically from the official dimensions.",
-  "status": "pending"
+  "started_at": "2026-09-02T07:12:49.929067+00:00",
+  "status": "running",
+  "updated_at": "2026-09-02T07:12:49.929246+00:00"
 }
