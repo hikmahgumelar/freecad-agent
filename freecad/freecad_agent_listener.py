@@ -736,6 +736,164 @@ def _create_mac_mini_case(command):
     }
 
 
+def _create_mac_mini_dock(command):
+    """3D-printable docking base for the Mac mini M4 (a Satechi-style stand/hub
+    replacement). The Mac mini sits on top in a shallow recess; the dock adds
+    internal volume for an M.2 NVMe SSD bay, a front port slot, a rear cable
+    pass-through, a bottom power-button access hole, and bottom vents.
+
+    Two parts: the dock body (open bottom) + a bottom plate to mount the SSD.
+    """
+    dev_w = float(command.get("device_width", 127.0))
+    dev_d = float(command.get("device_depth", 127.0))
+    clr = float(command.get("clearance", 0.4))
+    wall = float(command.get("wall", 2.4))
+    top_t = float(command.get("top_thickness", 3.0))       # deck the mini rests on
+    dock_h = float(command.get("dock_height", 35.0))
+    corner_r = float(command.get("corner_radius", 8.0))
+    recess_depth = float(command.get("recess_depth", 2.0))  # lip that locates the mini
+    recess_wall = float(command.get("recess_wall", 2.0))
+    plate_t = float(command.get("plate_thickness", 2.4))
+    plate_clear = float(command.get("plate_clearance", 0.3))
+
+    ssd_len = float(command.get("ssd_length", 80.0))        # M.2 2280
+    ssd_wid = float(command.get("ssd_width", 22.0))
+    ssd_bay_h = float(command.get("ssd_bay_height", 6.0))
+
+    front_port_w = float(command.get("front_port_width", 70.0))
+    front_port_h = float(command.get("front_port_height", 12.0))
+    rear_cable_w = float(command.get("rear_cable_width", 90.0))
+    rear_cable_h = float(command.get("rear_cable_height", 16.0))
+    power_hole_r = float(command.get("power_button_hole_radius", 6.0))
+    power_hole_inset = float(command.get("power_button_inset", 18.0))
+    vent_hole = float(command.get("vent_hole", 5.0))
+    vent_gap = float(command.get("vent_gap", 5.0))
+    output = os.path.abspath(command.get(
+        "output_path", "cad/output/mac-mini-m4-dock.FCStd"))
+
+    footprint_w = dev_w + 2 * clr + 2 * recess_wall
+    footprint_d = dev_d + 2 * clr + 2 * recess_wall
+    outer_w = footprint_w
+    outer_d = footprint_d
+    deck_z = dock_h - top_t  # top of the internal cavity / underside of the deck
+
+    for v, n in ((dev_w, "device_width"), (dev_d, "device_depth"),
+                 (dock_h, "dock_height"), (wall, "wall"), (top_t, "top_thickness")):
+        if v <= 0:
+            raise RuntimeError(f"{n} must be positive")
+    if deck_z <= plate_t + ssd_bay_h:
+        raise RuntimeError("dock_height too small for the SSD bay + deck")
+
+    doc = App.newDocument(command.get("document", "MacMiniM4Dock"))
+
+    cx = outer_w / 2.0
+    cy = outer_d / 2.0
+
+    # --- dock body: rounded solid, hollowed from the bottom, closed on top ---
+    body = _rounded_box(outer_w, outer_d, dock_h, corner_r, (0, 0, 0))
+    cavity = _rounded_box(outer_w - 2 * wall, outer_d - 2 * wall, deck_z,
+                          max(corner_r - wall, 1.0), (wall, wall, 0.0))
+    body = body.cut(cavity)
+
+    # top recess: shallow pocket where the Mac mini sits (locating lip)
+    recess = _rounded_box(dev_w + 2 * clr, dev_d + 2 * clr, recess_depth + 0.1,
+                          max(corner_r - recess_wall, 1.0),
+                          (recess_wall, recess_wall, dock_h - recess_depth))
+    body = body.cut(recess)
+
+    # power-button access hole through the deck (mini's power button is bottom-rear)
+    body = body.cut(
+        Part.makeCylinder(power_hole_r, top_t + 0.4,
+                          App.Vector(cx, outer_d - power_hole_inset, deck_z - 0.2))
+    )
+
+    # front port slot (front face = y=0 side)
+    body = body.cut(
+        Part.makeBox(front_port_w, wall + 1.0, front_port_h,
+                     App.Vector(cx - front_port_w / 2.0, -0.5, plate_t + 6.0))
+    )
+    # rear cable pass-through (rear face = y=outer_d side)
+    body = body.cut(
+        Part.makeBox(rear_cable_w, wall + 1.0, rear_cable_h,
+                     App.Vector(cx - rear_cable_w / 2.0, outer_d - wall - 0.5,
+                                deck_z - rear_cable_h - 1.0))
+    )
+
+    # SSD M.2 bay guide walls on the internal floor (open channel)
+    bay_x0 = cx - ssd_len / 2.0
+    bay_y0 = cy - ssd_wid / 2.0
+    rail_t = 1.6
+    for gx in (bay_x0 - rail_t, bay_x0 + ssd_len):
+        rail = Part.makeBox(rail_t, ssd_wid + 2 * rail_t, ssd_bay_h,
+                            App.Vector(gx, bay_y0 - rail_t, plate_t))
+        body = body.fuse(rail)
+    for gy in (bay_y0 - rail_t, bay_y0 + ssd_wid):
+        rail = Part.makeBox(ssd_len, rail_t, ssd_bay_h,
+                            App.Vector(bay_x0, gy, plate_t))
+        body = body.fuse(rail)
+
+    # bottom vents around the perimeter of the internal floor region is on the
+    # bottom plate; put a few deck vents above the mini's intake as well
+    step = vent_hole + vent_gap
+    x = wall + step
+    while x < outer_w - wall - step:
+        y = wall + step
+        while y < outer_d - wall - step:
+            # only vent the deck away from the recess-critical center band
+            body = body.cut(
+                Part.makeCylinder(vent_hole / 2.0, top_t + 0.4,
+                                  App.Vector(x, y, deck_z - 0.2))
+            )
+            y += step
+        x += step
+
+    dock = doc.addObject("Part::Feature", "MacMiniDockBody")
+    dock.Label = "Mac mini M4 dock body"
+    dock.Shape = body.removeSplitter()
+
+    # --- bottom plate (snaps/screws under the dock, holds the SSD) ---
+    plate = _rounded_box(outer_w - 2 * (wall + plate_clear),
+                         outer_d - 2 * (wall + plate_clear),
+                         plate_t, max(corner_r - wall - plate_clear, 1.0),
+                         (wall + plate_clear, wall + plate_clear, -plate_t))
+    # bottom vent grille through the plate
+    x = wall + step
+    while x < outer_w - wall - step:
+        y = wall + step
+        while y < outer_d - wall - step:
+            plate = plate.cut(
+                Part.makeCylinder(vent_hole / 2.0, plate_t + 0.4,
+                                  App.Vector(x, y, -plate_t - 0.2)))
+            y += step
+        x += step
+    pl = doc.addObject("Part::Feature", "MacMiniDockPlate")
+    pl.Label = "Mac mini M4 dock bottom plate"
+    pl.Shape = plate.removeSplitter()
+
+    doc.recompute()
+    _fit_view(doc)
+    os.makedirs(os.path.dirname(output), exist_ok=True)
+    doc.saveAs(output)
+
+    return {
+        "ok": True,
+        "action": "create_mac_mini_dock",
+        "document": doc.Name,
+        "output_path": output,
+        "parts": ["MacMiniDockBody", "MacMiniDockPlate"],
+        "device": {"width": dev_w, "depth": dev_d,
+                   "source": "Apple Mac mini M4 (2024) footprint 127 x 127 mm"},
+        "dock": {"outer_width": outer_w, "outer_depth": outer_d,
+                 "height": dock_h, "recess_depth": recess_depth,
+                 "corner_radius": corner_r},
+        "features": {"ssd_bay": {"length": ssd_len, "width": ssd_wid},
+                     "front_port_slot": {"width": front_port_w, "height": front_port_h},
+                     "rear_cable_opening": {"width": rear_cable_w, "height": rear_cable_h},
+                     "power_button_access": True, "bottom_plate": True,
+                     "deck_vent": True, "bottom_vent": True},
+    }
+
+
 def execute_command(command):
     action = command.get("action")
     if action == "ping":
@@ -746,7 +904,7 @@ def execute_command(command):
                             "open_model", "inspect_model", "inspect_geometry",
                             "render_view",
                             "create_snapfit_case", "create_snapfit_case_v2",
-                            "create_mac_mini_case"]}
+                            "create_mac_mini_case", "create_mac_mini_dock"]}
     if action == "reload":
         # In-place code refresh. The running QTimer holds a reference to the OLD
         # _poll_server object, so after exec we must reconnect it to the new one,
@@ -816,6 +974,8 @@ def execute_command(command):
         return _create_snapfit_case_v2(command)
     if action == "create_mac_mini_case":
         return _create_mac_mini_case(command)
+    if action == "create_mac_mini_dock":
+        return _create_mac_mini_dock(command)
     return {"ok": False, "error": f"Unsupported action: {action}"}
 
 
