@@ -14,17 +14,16 @@ The FreeCAD Agent handoff document remains the primary operating manual for the 
 
 ## Current Hardware State
 
-The blue Raspberry Pi Zero protective case is being dismantled/removed as the first hardware-preparation step.
+The blue Raspberry Pi Zero protective case has been removed/dismantled.
 
-The HyperPixel 4.0 is intended to mount directly to the Pi Zero GPIO header. Do not force the boards together while the blue Pi Zero case is still installed.
+The HyperPixel 4.0 is intended to mount directly to the Pi Zero GPIO header. Do not force the boards together if the GPIO alignment is not correct.
 
 Power for the initial HyperPixel test should be supplied through the Pi Zero `PWR IN` micro-USB port; the HyperPixel receives power through the GPIO connection.
 
 ## Immediate Next Actions
 
-1. Take off/dismantle the blue Raspberry Pi Zero case.
-2. Measure the case/hardware dimensions needed for the cyberdeck enclosure.
-3. Measure and document the keyboard dimensions and mechanical requirements for the slide mechanism.
+1. Measure the case/hardware dimensions needed for the cyberdeck enclosure.
+2. Measure and document the keyboard dimensions and mechanical requirements for the slide mechanism.
 
 ## Design Contract Constraint
 
@@ -60,8 +59,8 @@ Before generating the final case, define:
 
 **CAD:** Not started for the final cyberdeck enclosure
 
-**Current checkpoint:** Dismantle/remove the blue Pi Zero case, then collect hardware and keyboard measurements. The contract must be established before CAD geometry is finalized.
+**Current checkpoint:** Blue Pi Zero case removed. Next: establish/approve the contract, then collect precise hardware and keyboard measurements before CAD geometry is finalized.
 
 ## Session Note
 
-Do not restart the cyberdeck design from scratch in the next session. Read this `state.md` and `GPT-FreeCad-Agent.md` first, then continue from the current hardware-preparation checkpoint.
+Do not restart the cyberdeck design from scratch in the next session. Read this `state.md` and `GPT-FreeCad-Agent.md` first, then continue from the current measurement/contract checkpoint.
