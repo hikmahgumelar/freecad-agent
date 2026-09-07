@@ -14,17 +14,25 @@ The FreeCAD Agent handoff document remains the primary operating manual for the 
 
 ## Current Hardware State
 
-The Raspberry Pi Zero is currently inside a blue protective case.
+The blue Raspberry Pi Zero protective case is being dismantled/removed as the first hardware-preparation step.
 
 The HyperPixel 4.0 is intended to mount directly to the Pi Zero GPIO header. Do not force the boards together while the blue Pi Zero case is still installed.
 
 Power for the initial HyperPixel test should be supplied through the Pi Zero `PWR IN` micro-USB port; the HyperPixel receives power through the GPIO connection.
 
-## Next Actions
+## Immediate Next Actions
 
-1. Take off the blue Raspberry Pi Zero case.
+1. Take off/dismantle the blue Raspberry Pi Zero case.
 2. Measure the case/hardware dimensions needed for the cyberdeck enclosure.
 3. Measure and document the keyboard dimensions and mechanical requirements for the slide mechanism.
+
+## Design Contract Constraint
+
+Before CAD design, create and approve the cyberdeck design contract.
+
+The contract must define the maximum allowed overall case thickness. The enclosure design must not exceed that maximum thickness. Thickness is a hard constraint and must not be increased simply to accommodate the hardware; layout and mechanical design must be adapted to remain within the contract.
+
+The contract is the source of truth for the cyberdeck mechanical design.
 
 ## Design Direction
 
@@ -44,6 +52,7 @@ Before generating the final case, define:
 - Wall thickness
 - FDM clearances
 - Assembly and removal direction
+- Maximum overall thickness from the approved contract
 
 ## Current Status
 
@@ -51,8 +60,8 @@ Before generating the final case, define:
 
 **CAD:** Not started for the final cyberdeck enclosure
 
-**Next checkpoint:** Blue Pi Zero case removed, then hardware and keyboard measurements collected.
+**Current checkpoint:** Dismantle/remove the blue Pi Zero case, then collect hardware and keyboard measurements. The contract must be established before CAD geometry is finalized.
 
 ## Session Note
 
-Do not restart the cyberdeck design from scratch in the next session. Read this `state.md` and `GPT-FreeCad-Agent.md` first, then continue from the measurement phase.
+Do not restart the cyberdeck design from scratch in the next session. Read this `state.md` and `GPT-FreeCad-Agent.md` first, then continue from the current hardware-preparation checkpoint.
